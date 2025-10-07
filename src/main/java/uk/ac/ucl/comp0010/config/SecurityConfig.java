@@ -18,11 +18,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
   /**
-   * Security Filter Chain.
-   * 
-   * @param http
-   * @return
-   * @throws Exception
+   * Defines the security filter chain for the application.
+   *
+   * <p>This method disables CSRF protection and enables CORS with default settings.
+   *
+   * @param http the HttpSecurity configuration to customize
+   * @return the configured SecurityFilterChain
+   * @throws Exception if a configuration error occurs
    */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -31,10 +33,12 @@ public class SecurityConfig {
     return http.build();
   }
 
-  /***
+  /**
    * Configure CORS source.
-   * 
-   * @return
+   *
+   * <p>This method configures the CORS source.
+   *
+   * @return Return the source.
    */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
