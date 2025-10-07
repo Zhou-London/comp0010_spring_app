@@ -1,0 +1,8 @@
+# Cache file
+.cache
+
+# Build file
+.build
+
+# Env file
+*.env
