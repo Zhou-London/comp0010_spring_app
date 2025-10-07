@@ -11,9 +11,19 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+/**
+ * Config to enable CORS.
+ */
 @Configuration
 public class SecurityConfig {
 
+  /**
+   * Security Filter Chain.
+   * 
+   * @param http
+   * @return
+   * @throws Exception
+   */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.csrf((csrf) -> csrf.disable()).cors(withDefaults());
@@ -21,6 +31,11 @@ public class SecurityConfig {
     return http.build();
   }
 
+  /***
+   * Configure CORS source.
+   * 
+   * @return
+   */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
