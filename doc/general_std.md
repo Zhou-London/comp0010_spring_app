@@ -6,9 +6,9 @@ Some more useful standards. We better not type mandarin so I will use simple Eng
 
 I could provide a Google Cloud Computing Engine if we are gonna deploy it. And some other infra that I am familiar with:
 
--   Caddy (No Nginx)
--   Docker
--   Some Free Domain
+- Caddy (No Nginx)
+- Docker
+- Some Free Domain
 
 ## Git
 
@@ -16,12 +16,12 @@ Use VSCode built-in Git support to commit/push/solve conflict.
 
 Use Http if you are not familiar with ssh. (However, you are gonna need ssh when deploying it.)
 
--   Don't commit all your code at once. Think about what have you done on each file and commit them separately.
+- Don't commit all your code at once. Think about what have you done on each file and commit them separately.
 
--   Commit message must start with a verb (E.g. Commits, Updates, Creates...)
-  
--   Check your changes before any commit. (E.g. I've once pissed up my mentor through commiting a space.)
-![alt text](image.png)
+- Commit message must start with a verb (E.g. Commits, Updates, Creates...)
+
+- Check your changes before any commit. (E.g. I've once pissed up my mentor through commiting a space.)
+  ![alt text](image.png)
 
 Use Git CLI to control version.
 
@@ -32,7 +32,7 @@ Use Git CLI to control version.
     ...
 
 2.  Create your own branch.
-    
+
     git checkout -b your-branch
 
 3.  Pull updates from other branch.
@@ -41,11 +41,11 @@ Use Git CLI to control version.
     git fetch origin
     git merge origin/target-pull-branch
 
-Manage your .gitignore. Here are some useful rules. 
+Manage your .gitignore. Here are some useful rules.
 
--   .cache
--   build
--   *.env
+- .cache
+- build
+- \*.env
 
 ## Formatter
 
