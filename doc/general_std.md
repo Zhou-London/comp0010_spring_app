@@ -49,10 +49,25 @@ Manage your .gitignore. Here are some useful rules.
 
 ## Formatter
 
-For consistency of code style, we better use a formatter. VSCode supports formatter extension (Press alt+shift+f or Option+shift+f)
+For consistency of code style, we better use a formatter. 
+-   VSCode: Red Hat Java Support provides a default formatter. ".vscode" file includes the configuration so don't you guys using vscode worry about it.
+-   IntelliJ: Built-in Formatter should work well.
 
 ## Editor
 
 For VSCode, press alt+z or option+z to enable "visual new line". This is **super important**. The "real new line" is managed by formatter and we are gonna keep it consistent.
 
 For IntelliJ, this is not default hotkey. But you can right‑click on the blank area to the right of the line numbers, as shown in the figure. Then check Soft‑Wrap, and the script will automatically wrap lines
+
+## JavaDoc
+
+When there is an empty line, do not even type space.
+
+```
+    /**
+    * Type someting...
+    *(Do NOT even type space!)
+    * @param
+    * @return
+    */
+```
