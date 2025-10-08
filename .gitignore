@@ -4,6 +4,9 @@
 # Build file
 .build
 
+# Target file
+target
+
 # Env file
 *.env
 
