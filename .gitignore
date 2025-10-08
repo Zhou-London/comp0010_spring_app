@@ -10,4 +10,6 @@ target
 # Env file
 *.env
 
-/.idea/
+.idea/
+
+/workspace.xml
