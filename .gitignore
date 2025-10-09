@@ -10,6 +10,11 @@ target
 # Env file
 *.env
 
+.idea/
+
+/workspace.xml
+/frontend/node_modules/
+/.editorconfig.ini
 /.idea/
 
 # Node deps file
