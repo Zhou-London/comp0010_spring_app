@@ -64,92 +64,43 @@ public class Student {
    */
   public void registerModule(Module m) {}
 
-  /**
-   * This api is used to get the first name.
-   *
-   * @return {@link String }
-   */
+
   public String getFirstName() {
     return firstName;
   }
 
-  /**
-   * This api is used to set the first name.
-   *
-   * @param firstName student's first name
-   */
   public void setFirstName(String firstName) {
     this.firstName = firstName;
   }
 
-  /**
-   * This api is used to get ID.
-   *
-   * @return {@link Long }
-   */
   public Long getId() {
     return id;
   }
 
-  /**
-   * This api is used to set the ID.
-   *
-   * @param id ID
-   */
   public void setId(Long id) {
     this.id = id;
   }
 
-  /**
-   * This api is used to get the last name.
-   *
-   * @return {@link String }
-   */
   public String getLastName() {
     return lastName;
   }
 
-  /**
-   * This api is used to set the last name.
-   *
-   * @param lastName Last name
-   */
   public void setLastName(String lastName) {
     this.lastName = lastName;
   }
 
-  /**
-   * This api is used to get username.
-   *
-   * @return {@link String }
-   */
   public String getUserName() {
     return userName;
   }
 
-  /**
-   * This api is used to set the username.
-   *
-   * @param userName username
-   */
   public void setUserName(String userName) {
     this.userName = userName;
   }
 
-  /**
-   * This api is used to get the email.
-   *
-   * @return {@link String }
-   */
   public String getEmail() {
     return email;
   }
 
-  /**
-   * This api is used to set the email.
-   *
-   * @param email email
-   */
   public void setEmail(String email) {
     this.email = email;
   }
