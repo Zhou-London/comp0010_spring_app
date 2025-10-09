@@ -14,3 +14,4 @@ target
 
 /workspace.xml
 /frontend/node_modules/
+/.editorconfig.ini
