@@ -11,3 +11,6 @@ target
 *.env
 
 /.idea/
+
+# Node deps file
+**/node_modules

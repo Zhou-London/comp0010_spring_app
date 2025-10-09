@@ -16,3 +16,16 @@
 - Package name with only lower case.
 - Constant variable name with screaming snake case.
 - No checkstyle violation with 'Google Java Style'.
+
+## Run Test
+
+Use the following command to run test. Make sure there is "Build Success" before making any PR.
+
+```bash
+mvn compile test checkstyle:check spotbugs:check verify site
+```
+
+The test results can be found:
+
+-   CheckStyle: /target/site/checkstyle/checkstyle.html
+-   Jacoco: /target/site/jacoco/index.html
