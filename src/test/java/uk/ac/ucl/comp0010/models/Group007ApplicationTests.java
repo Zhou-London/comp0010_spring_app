@@ -1,4 +1,4 @@
-package uk.ac.ucl.comp0010;
+package uk.ac.ucl.comp0010.models;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

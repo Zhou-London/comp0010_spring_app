@@ -1,12 +1,10 @@
-package uk.ac.ucl.comp0010;
+package uk.ac.ucl.comp0010.models;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+
 import org.springframework.boot.test.context.SpringBootTest;
-import uk.ac.ucl.comp0010.models.Student;
 
 
 @SpringBootTest
