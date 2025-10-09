@@ -25,7 +25,7 @@ class StudentTest {
     assertEquals("Mari", student.getFirstName());
     assertEquals("Ohara", student.getLastName());
     assertEquals("oharamari", student.getUserName());
-    assertEquals("awashimaisland", student.getEmail());
+    assertEquals("awashimaisland@qq.com", student.getEmail());
   }
 
   @Test
