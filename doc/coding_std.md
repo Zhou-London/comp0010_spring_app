@@ -16,3 +16,7 @@
 - Package name with only lower case.
 - Constant variable name with screaming snake case.
 - No checkstyle violation with 'Google Java Style'.
+
+## Run Test
+
+mvn compile test checkstyle:check spotbugs:check verify site
