@@ -31,14 +31,13 @@ public class Student {
   /**
    * Constructor.
    *
-   * @param id student's id
+   *
    * @param firstName student's first name
    * @param lastName  Student's last name
    * @param userName  Student's username
    * @param email Studentship
    */
-  public Student(Long id, String firstName, String lastName, String userName, String email) {
-    this.id = id;
+  public Student(String firstName, String lastName, String userName, String email) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.userName = userName;
