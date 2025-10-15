@@ -21,6 +21,7 @@ public class Group007Application implements CommandLineRunner {
    *
    * @param args command-line arguments
    */
+
   public static void main(String[] args) {
     SpringApplication.run(Group007Application.class, args);
   }
