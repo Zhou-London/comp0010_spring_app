@@ -60,6 +60,7 @@ public class Module {
   public void setMnc(Boolean mnc) {
     this.mnc = mnc;
   }
+  
   public Long getId() {
     return id;
   }
