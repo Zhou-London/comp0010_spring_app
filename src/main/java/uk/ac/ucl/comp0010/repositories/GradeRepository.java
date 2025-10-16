@@ -1,12 +1,9 @@
 package uk.ac.ucl.comp0010.repositories;
 
-import org.springframework.data.repository.CrudRepository;
-import uk.ac.ucl.comp0010.models.Grade;
-
 /**
- * Repository for grade.
+ * Repository for Grade.
  *
- * @author xxx
+ * @author YUNQ
  */
 public class GradeRepository {
     
