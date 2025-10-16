@@ -1,4 +1,4 @@
 # COMP0010 GROUP 007
 Our cousework.
 
-![](image1.png)
+![](assets/image2.png)

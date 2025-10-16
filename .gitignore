@@ -3,6 +3,7 @@
 
 # Build file
 .build
+.DS_Store
 
 # Target file
 target

@@ -4,7 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import uk.ac.ucl.comp0010.models.Student;
-import uk.ac.ucl.comp0010.repository.StudentRepository;
+import uk.ac.ucl.comp0010.repositories.StudentRepository;
 
 /**
  * Spring Boot application entry point.
