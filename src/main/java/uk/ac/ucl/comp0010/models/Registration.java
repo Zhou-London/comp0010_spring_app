@@ -1,6 +1,12 @@
 package uk.ac.ucl.comp0010.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 
 /**
@@ -12,17 +18,17 @@ import jakarta.persistence.*;
 public class Registration {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id_;
+  private Long refId;
 
   // --- Attributes ---
   @ManyToOne
-  @JoinColumn(name = "student_id")
+  @JoinColumn(name = "student_refID")
   private Student student;
   @ManyToOne
-  @JoinColumn(name = "Module_id")
+  @JoinColumn(name = "Module_refID")
   private Module module;
   @ManyToOne
-  @JoinColumn(name = "Grade_id")
+  @JoinColumn(name = "Grade_refID")
   private Grade grade;
 
   public void setStudent(Student student) {
@@ -63,12 +69,12 @@ public class Registration {
     this.grade = grade;
   }
 
-  public Long getId() {
-    return id_;
+  public Long getRefId() {
+    return refId;
   }
 
-  public void setId(Long id) {
-    this.id_ = id;
+  public void setRefId(Long refId) {
+    this.refId = refId;
   }
 
   // --- Utility Methods ---
