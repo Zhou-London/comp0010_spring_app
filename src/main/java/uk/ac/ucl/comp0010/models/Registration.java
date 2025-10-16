@@ -1,11 +1,6 @@
 package uk.ac.ucl.comp0010.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 
 /**
@@ -13,6 +8,7 @@ import jakarta.persistence.ManyToOne;
  * optionally have a corresponding grade.
  */
 @Entity
+@Table(name = "registrations")
 public class Registration {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,22 +48,19 @@ public class Registration {
 
   // --- Getters and Setters ---
   public Student getStudent() {
-    // TODO: return student
-    return null;
+    return student;
   }
 
   public Module getModule() {
-    // TODO: return module
-    return null;
+    return module;
   }
 
   public Grade getGrade() {
-    // TODO: return grade
-    return null;
+    return grade;
   }
 
   public void setGrade(Grade grade) {
-    // TODO: set grade
+    this.grade = grade;
   }
 
   public Long getId() {

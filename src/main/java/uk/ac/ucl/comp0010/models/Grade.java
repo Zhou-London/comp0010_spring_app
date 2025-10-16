@@ -1,9 +1,18 @@
 package uk.ac.ucl.comp0010.models;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 /**
  * Grade model.
  */
+@Entity
 public class Grade {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
   private int score;
 
   /**
@@ -37,4 +46,13 @@ public class Grade {
   public void setScore(int score) {
     this.score = score;
   }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
 }
