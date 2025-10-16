@@ -15,7 +15,7 @@ import jakarta.persistence.Table;
 public class Module {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private Long refId;
 
   @Column(nullable = false)
   private String code;
@@ -45,8 +45,8 @@ public class Module {
   public Module() {}
 
   // --- Getters and Setters ---
-  public void setId(Long id) {
-    this.id = id;
+  public void setRefId(Long refId) {
+    this.refId = refId;
   }
 
   public void setCode(String code) {
@@ -60,9 +60,9 @@ public class Module {
   public void setMnc(Boolean mnc) {
     this.mnc = mnc;
   }
-  
+
   public Long getId() {
-    return id;
+    return refId;
   }
 
   public String getCode() {
