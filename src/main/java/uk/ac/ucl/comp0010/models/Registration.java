@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 public class Registration {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long refId;
+  private Long dataId;
 
   // --- Attributes ---
   @ManyToOne
@@ -69,12 +69,12 @@ public class Registration {
     this.grade = grade;
   }
 
-  public Long getRefId() {
-    return refId;
+  public Long getDataId() {
+    return dataId;
   }
 
-  public void setRefId(Long refId) {
-    this.refId = refId;
+  public void setDataId(Long refId) {
+    this.dataId = refId;
   }
 
   // --- Utility Methods ---
