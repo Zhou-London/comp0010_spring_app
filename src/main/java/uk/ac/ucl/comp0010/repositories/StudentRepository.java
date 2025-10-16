@@ -1,4 +1,4 @@
-package uk.ac.ucl.comp0010.repository;
+package uk.ac.ucl.comp0010.repositories;
 
 import org.springframework.data.repository.CrudRepository;
 import uk.ac.ucl.comp0010.models.Student;
