@@ -8,21 +8,36 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class Group007ApplicationTests {
 
-	@Autowired
-	private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-	@Test
-	void contextLoads() {}
+  @Autowired
+  private ModuleRepository moduleRepository;
 
-	@Test
-	void testGetGrade() throws Exception {
-		mockMvc.perform(get("/grade")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.score").value(50));
-	}
+  @Test
+  void contextLoads() {}
+
+  @Test
+  void testGetGrade() throws Exception {
+    mockMvc.perform(get("/grade")).andExpect(status().isOk())
+        .andExpect(jsonPath("$.score").value(50));
+  }
+
+  @Test
+  void testModuleRepository() {
+    Module module = new Module();
+    module.setName("Software Engineering");
+    module.setCode("COMP0010");
+
+    moduleRepository.save(module);
+
+
+  }
 }
 
