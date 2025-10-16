@@ -1,19 +1,53 @@
 package uk.ac.ucl.comp0010.models;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
+
 /**
  * Represents the registration record between a student and a module. Each registration may
  * optionally have a corresponding grade.
  */
+@Entity
 public class Registration {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id_;
 
   // --- Attributes ---
+  @ManyToOne
+  @JoinColumn(name = "student_id")
   private Student student;
+  @ManyToOne
+  @JoinColumn(name = "Module_id")
   private Module module;
+  @ManyToOne
+  @JoinColumn(name = "Grade_id")
   private Grade grade;
 
-  // --- Constructors ---
-  public Registration(Student student, Module module) {
-    // TODO: initialize attributes
+  public void setStudent(Student student) {
+    this.student = student;
+  }
+
+  /**
+   * Constructors.
+   *
+   * @param student student
+   * @param module  module
+   * @param grade grade
+   */
+  public Registration(Student student, Module module, Grade grade) {
+    this.student = student;
+    this.module = module;
+    this.grade = grade;
+  }
+
+  public Registration() {
+
   }
 
   // --- Getters and Setters ---
@@ -34,6 +68,14 @@ public class Registration {
 
   public void setGrade(Grade grade) {
     // TODO: set grade
+  }
+
+  public Long getId() {
+    return id_;
+  }
+
+  public void setId(Long id) {
+    this.id_ = id;
   }
 
   // --- Utility Methods ---
