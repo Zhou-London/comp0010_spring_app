@@ -15,7 +15,7 @@ import jakarta.persistence.Table;
 public class Module {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long dataId;
+  private Long id;
 
   @Column(nullable = false)
   private String code;
@@ -27,42 +27,26 @@ public class Module {
   private Boolean mnc;
 
   /**
+   * Constructor for Class Module without parameters.
+   */
+  public Module() {}
+
+  /**
    * Constructor for Class Module.
    *
    * @param code Module's code
    * @param name Module's name
    * @param mnc Is module mandatory
    */
-
-
   public Module(String code, String name, Boolean mnc) {
     this.code = code;
     this.name = name;
     this.mnc = mnc;
   }
 
-  // JPA requires no parameters constructor.
-  public Module() {}
-
   // --- Getters and Setters ---
-  public void setRefId(Long refId) {
-    this.dataId = refId;
-  }
-
-  public void setCode(String code) {
-    this.code = code;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public void setMnc(Boolean mnc) {
-    this.mnc = mnc;
-  }
-
   public Long getId() {
-    return dataId;
+    return id;
   }
 
   public String getCode() {
@@ -77,6 +61,19 @@ public class Module {
     return mnc;
   }
 
+  public void setId(Long id) {
+    this.id = id;
+  }
 
+  public void setCode(String code) {
+    this.code = code;
+  }
 
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setMnc(Boolean mnc) {
+    this.mnc = mnc;
+  }
 }
