@@ -27,7 +27,7 @@ public class Module {
   private Boolean mnc;
 
   /**
-   * constructor.
+   * Constructor for Class Module.
    *
    * @param code Module's code
    * @param name Module's name
