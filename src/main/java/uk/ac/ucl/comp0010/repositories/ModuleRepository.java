@@ -9,5 +9,4 @@ import uk.ac.ucl.comp0010.models.Module;
  * @author Rain Zhao
  */
 public interface ModuleRepository extends CrudRepository<Module, Long> {
-  // Custom query methods can be defined here
 }
