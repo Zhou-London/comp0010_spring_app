@@ -6,26 +6,39 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.ac.ucl.comp0010.models.Grade;
+import uk.ac.ucl.comp0010.models.Module;
 import uk.ac.ucl.comp0010.repositories.GradeRepository;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class Group007ApplicationTests {
 
-	@Autowired
-	private MockMvc mockMvc;
-	private GradeRepository grade_repo;
-	
-	@Test
-	void contextLoads() {}
+  @Autowired
+  private MockMvc mockMvc;
 
-	@Test
-	void testRepository() {
-		Grade grade = new Grade(10);
-		grade_repo.save(grade);
-	}
+  @Autowired
+  private ModuleRepository moduleRepository;
+
+  @Test
+  void contextLoads() {}
+
+  @Test
+  void testGetGrade() throws Exception {
+    mockMvc.perform(get("/grade")).andExpect(status().isOk())
+        .andExpect(jsonPath("$.score").value(50));
+  }
+
+  @Test
+  void testModuleRepository() {
+    Module module = new Module();
+    module.setName("Software Engineering");
+    module.setCode("COMP0010");
+
+    moduleRepository.save(module);
+  }
 }
 

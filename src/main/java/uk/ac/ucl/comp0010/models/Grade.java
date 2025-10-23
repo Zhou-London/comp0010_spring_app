@@ -1,23 +1,18 @@
 package uk.ac.ucl.comp0010.models;
 
-import org.springframework.data.annotation.Id;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
+import jakarta.persistence.Id;
 
 /**
  * Grade model.
  */
 @Entity
-@Table(name = "grades")
-
 public class Grade {
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private int id_;
-
+  private Long id;
   private int score;
 
   /**
@@ -52,12 +47,12 @@ public class Grade {
     this.score = score;
   }
 
-  /**
-   * Get the internal database id.
-   *
-   * @return Return the internal id in the database.
-   */
-  public int getId_(){
-    return id_;
+  public Long getId() {
+    return id;
   }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
 }
