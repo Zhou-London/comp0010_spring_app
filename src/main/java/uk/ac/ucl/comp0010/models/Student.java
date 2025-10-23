@@ -1,11 +1,16 @@
 package uk.ac.ucl.comp0010.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Student model.
@@ -17,8 +22,10 @@ public class Student {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false)
   private String firstName;
 
+  @Column(nullable = false)
   private String lastName;
 
   @Column(unique = true, nullable = false)
@@ -27,14 +34,26 @@ public class Student {
   @Column(unique = true, nullable = false)
   private String email;
 
+  @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private Set<Registration> registrations = new HashSet<>();
+
+  @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private Set<Grade> grades = new HashSet<>();
+
+  /**
+   * Constructor without parameters.
+   */
+  public Student() {}
+
   /**
    * Constructor.
    *
-   *
    * @param firstName student's first name
-   * @param lastName Student's last name
-   * @param userName Student's username
-   * @param email Studentship
+   * @param lastName student's last name
+   * @param userName student's username
+   * @param email student's email
    */
   public Student(String firstName, String lastName, String userName, String email) {
     this.firstName = firstName;
@@ -42,11 +61,6 @@ public class Student {
     this.userName = userName;
     this.email = email;
   }
-
-  /**
-   * Constructor without parameters.
-   */
-  public Student() {}
 
   // --- Getters and Setters ---
   public Long getId() {
@@ -87,5 +101,21 @@ public class Student {
 
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  public Set<Registration> getRegistrations() {
+    return registrations;
+  }
+
+  public void setRegistrations(Set<Registration> registrations) {
+    this.registrations = registrations;
+  }
+
+  public Set<Grade> getGrades() {
+    return grades;
+  }
+
+  public void setGrades(Set<Grade> grades) {
+    this.grades = grades;
   }
 }

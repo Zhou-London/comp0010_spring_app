@@ -1,11 +1,16 @@
 package uk.ac.ucl.comp0010.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Module model.
@@ -17,7 +22,7 @@ public class Module {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String code;
 
   @Column(nullable = false)
@@ -25,6 +30,14 @@ public class Module {
 
   @Column(nullable = false)
   private Boolean mnc;
+
+  @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private Set<Registration> registrations = new HashSet<>();
+
+  @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private Set<Grade> grades = new HashSet<>();
 
   /**
    * Constructor for Class Module without parameters.
@@ -75,5 +88,21 @@ public class Module {
 
   public void setMnc(Boolean mnc) {
     this.mnc = mnc;
+  }
+
+  public Set<Registration> getRegistrations() {
+    return registrations;
+  }
+
+  public void setRegistrations(Set<Registration> registrations) {
+    this.registrations = registrations;
+  }
+
+  public Set<Grade> getGrades() {
+    return grades;
+  }
+
+  public void setGrades(Set<Grade> grades) {
+    this.grades = grades;
   }
 }

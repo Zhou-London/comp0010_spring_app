@@ -4,11 +4,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Thrown when a student has no grades available for an operation requiring them.
+ * Raised when a requested entity could not be found.
  */
 @ResponseStatus(HttpStatus.NOT_FOUND)
-public class NoGradeAvailableException extends Exception {
-  public NoGradeAvailableException(String message) {
+public class ResourceNotFoundException extends RuntimeException {
+  public ResourceNotFoundException(String message) {
     super(message);
   }
 }
