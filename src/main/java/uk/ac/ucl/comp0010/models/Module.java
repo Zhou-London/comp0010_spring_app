@@ -1,11 +1,16 @@
 package uk.ac.ucl.comp0010.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Module model.
@@ -15,9 +20,9 @@ import jakarta.persistence.Table;
 public class Module {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long dataId;
+  private Long id;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String code;
 
   @Column(nullable = false)
@@ -26,43 +31,35 @@ public class Module {
   @Column(nullable = false)
   private Boolean mnc;
 
+  @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private Set<Registration> registrations = new HashSet<>();
+
+  @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private Set<Grade> grades = new HashSet<>();
+
   /**
-   * constructor.
+   * Constructor for Class Module without parameters.
+   */
+  public Module() {}
+
+  /**
+   * Constructor for Class Module.
    *
    * @param code Module's code
    * @param name Module's name
    * @param mnc Is module mandatory
    */
-
-
   public Module(String code, String name, Boolean mnc) {
     this.code = code;
     this.name = name;
     this.mnc = mnc;
   }
 
-  // JPA requires no parameters constructor.
-  public Module() {}
-
   // --- Getters and Setters ---
-  public void setRefId(Long refId) {
-    this.dataId = refId;
-  }
-
-  public void setCode(String code) {
-    this.code = code;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public void setMnc(Boolean mnc) {
-    this.mnc = mnc;
-  }
-
   public Long getId() {
-    return dataId;
+    return id;
   }
 
   public String getCode() {
@@ -77,6 +74,35 @@ public class Module {
     return mnc;
   }
 
+  public void setId(Long id) {
+    this.id = id;
+  }
 
+  public void setCode(String code) {
+    this.code = code;
+  }
 
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setMnc(Boolean mnc) {
+    this.mnc = mnc;
+  }
+
+  public Set<Registration> getRegistrations() {
+    return registrations;
+  }
+
+  public void setRegistrations(Set<Registration> registrations) {
+    this.registrations = registrations;
+  }
+
+  public Set<Grade> getGrades() {
+    return grades;
+  }
+
+  public void setGrades(Set<Grade> grades) {
+    this.grades = grades;
+  }
 }

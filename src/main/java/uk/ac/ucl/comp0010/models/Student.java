@@ -1,25 +1,31 @@
 package uk.ac.ucl.comp0010.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Student model.
  */
 @Entity
 @Table(name = "students")
-
 public class Student {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false)
   private String firstName;
 
+  @Column(nullable = false)
   private String lastName;
 
   @Column(unique = true, nullable = false)
@@ -28,14 +34,26 @@ public class Student {
   @Column(unique = true, nullable = false)
   private String email;
 
+  @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private Set<Registration> registrations = new HashSet<>();
+
+  @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private Set<Grade> grades = new HashSet<>();
+
+  /**
+   * Constructor without parameters.
+   */
+  public Student() {}
+
   /**
    * Constructor.
    *
-   *
    * @param firstName student's first name
-   * @param lastName  Student's last name
-   * @param userName  Student's username
-   * @param email Studentship
+   * @param lastName student's last name
+   * @param userName student's username
+   * @param email student's email
    */
   public Student(String firstName, String lastName, String userName, String email) {
     this.firstName = firstName;
@@ -44,87 +62,60 @@ public class Student {
     this.email = email;
   }
 
-  // JPA requires no parameters constructor.
-  public Student() {
-
-  }
-
-  /**
-   * This api is used to compute the average grade of every modulus.
-   *
-   * @return float
-   */
-  public float computeAverage() {
-    // TBD
-    return 0.111F;
-  }
-
-  /**
-   * add the grade to student's modulus.
-   *
-   * @param g Student's modulus grade
-   */
-  public void addGrade(Grade g) {
-    // TBD
-  }
-
-  /**
-   * This api is used to get grade.
-   *
-   * @param m module name
-   * @return {@link Grade }
-   */
-  public Grade getGrades(Module m) {
-    Grade g = new Grade();
-    return g;
-  }
-
-  /**
-   * This api is used to register module.
-   *
-   * @param m DataModule
-   */
-  public void registerModule(Module m) {}
-
-
-  public String getFirstName() {
-    return firstName;
-  }
-
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
+  // --- Getters and Setters ---
   public Long getId() {
     return id;
   }
 
-  public void setId(Long id) {
-    this.id = id;
+  public String getFirstName() {
+    return firstName;
   }
 
   public String getLastName() {
     return lastName;
   }
 
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
-  }
-
   public String getUserName() {
     return userName;
-  }
-
-  public void setUserName(String userName) {
-    this.userName = userName;
   }
 
   public String getEmail() {
     return email;
   }
 
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
+
+  public void setUserName(String userName) {
+    this.userName = userName;
+  }
+
   public void setEmail(String email) {
     this.email = email;
   }
 
+  public Set<Registration> getRegistrations() {
+    return registrations;
+  }
+
+  public void setRegistrations(Set<Registration> registrations) {
+    this.registrations = registrations;
+  }
+
+  public Set<Grade> getGrades() {
+    return grades;
+  }
+
+  public void setGrades(Set<Grade> grades) {
+    this.grades = grades;
+  }
 }

@@ -40,6 +40,7 @@ public class SecurityConfig {
           "/v3/api-docs/**").permitAll()
         .anyRequest().authenticated()
       )
+        .httpBasic(withDefaults())
         .headers(headers -> headers
         .frameOptions(options -> options.sameOrigin()));
 
