@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.ucl.comp0010.controllers.requests.RegistrationRequest;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.services.RegistrationService;
@@ -43,11 +44,17 @@ public class RegistrationController {
     return registrationService.register(request.getStudentId(), request.getModuleId());
   }
 
+  /**
+   * API to delete a registration.
+   *
+   * @param studentId student identity
+   * @param moduleId module identity
+   * @throws NoRegistrationException if no registration found
+   */
   @DeleteMapping
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void unregister(
-      @RequestParam Long studentId,
-      @RequestParam Long moduleId) throws NoRegistrationException {
+  public void unregister(@RequestParam Long studentId, @RequestParam Long moduleId)
+      throws NoRegistrationException {
     registrationService.unregister(studentId, moduleId);
   }
 
@@ -59,29 +66,5 @@ public class RegistrationController {
   @GetMapping("/modules/{moduleId}")
   public List<Registration> getRegistrationsForModule(@PathVariable Long moduleId) {
     return registrationService.getRegistrationsForModule(moduleId);
-  }
-
-  /**
-   * Request payload for creating a registration.
-   */
-  public static class RegistrationRequest {
-    private Long studentId;
-    private Long moduleId;
-
-    public Long getStudentId() {
-      return studentId;
-    }
-
-    public void setStudentId(Long studentId) {
-      this.studentId = studentId;
-    }
-
-    public Long getModuleId() {
-      return moduleId;
-    }
-
-    public void setModuleId(Long moduleId) {
-      this.moduleId = moduleId;
-    }
   }
 }
