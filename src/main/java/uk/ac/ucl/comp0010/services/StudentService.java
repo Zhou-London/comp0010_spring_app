@@ -28,6 +28,14 @@ public class StudentService {
   private final RegistrationRepository registrationRepository;
   private final GradeRepository gradeRepository;
 
+  /**
+   * CTR for Student Service.
+   *
+   * @param studentRepository
+   * @param moduleRepository
+   * @param registrationRepository
+   * @param gradeRepository
+   */
   public StudentService(
       StudentRepository studentRepository,
       ModuleRepository moduleRepository,
@@ -53,7 +61,7 @@ public class StudentService {
    * Loads a single student.
    *
    * @param id student id
-   * @return the student if one exists
+   * @return Student
    */
   @Transactional(readOnly = true)
   public Student getStudent(Long id) {
@@ -66,7 +74,7 @@ public class StudentService {
    * Persists a new student.
    *
    * @param student the student to persist
-   * @return the stored entity
+   * @return Student
    */
   public Student createStudent(Student student) {
     validateUniqueness(student);
@@ -78,7 +86,7 @@ public class StudentService {
    *
    * @param id student id to update
    * @param updated updated student data
-   * @return the stored entity
+   * @return Student
    */
   public Student updateStudent(Long id, Student updated) {
     Student existing = getStudent(id);
@@ -115,7 +123,7 @@ public class StudentService {
    *
    * @param studentId identifier of the student
    * @param moduleId identifier of the module
-   * @return the persisted registration
+   * @return Registration
    */
   public Registration registerStudentToModule(Long studentId, Long moduleId) {
     Student student = getStudent(studentId);
@@ -167,7 +175,7 @@ public class StudentService {
    * @param studentId student identifier
    * @param moduleId module identifier
    * @param score grade score
-   * @return persisted grade
+   * @return Grade
    * @throws NoRegistrationException if the student is not registered for the module
    */
   public Grade recordGrade(Long studentId, Long moduleId, int score) throws NoRegistrationException {

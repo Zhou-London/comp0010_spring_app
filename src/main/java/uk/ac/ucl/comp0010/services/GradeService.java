@@ -24,6 +24,14 @@ public class GradeService {
   private final ModuleRepository moduleRepository;
   private final RegistrationRepository registrationRepository;
 
+  /**
+   * CTR for Grade Service.
+   *
+   * @param gradeRepository deps inj
+   * @param studentRepository deps inj
+   * @param moduleRepository deps inj
+   * @param registrationRepository deps inj
+   */
   public GradeService(GradeRepository gradeRepository, StudentRepository studentRepository,
       ModuleRepository moduleRepository, RegistrationRepository registrationRepository) {
     this.gradeRepository = gradeRepository;
@@ -37,12 +45,27 @@ public class GradeService {
     return (List<Grade>) gradeRepository.findAll();
   }
 
+  /**
+   * Retrieves a single grade.
+   *
+   * @param id grade identity
+   * @return grade
+   */
   @Transactional(readOnly = true)
   public Grade getGrade(Long id) {
     return gradeRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Grade not found with id " + id));
   }
 
+  /**
+   * Creates a new grade for an existing student.
+   *
+   * @param studentId student identity
+   * @param moduleId module identity
+   * @param score score identity
+   * @return grade
+   * @throws NoRegistrationException if no registration found
+   */
   public Grade createGrade(Long studentId, Long moduleId, int score)
       throws NoRegistrationException {
 
@@ -63,6 +86,13 @@ public class GradeService {
     return gradeRepository.save(grade);
   }
 
+  /**
+   * Updates the grade of an existing student.
+   *
+   * @param id student identity
+   * @param score score entity
+   * @return grade
+   */
   public Grade updateGrade(Long id, int score) {
     Grade grade = getGrade(id);
     grade.setScore(score);
@@ -74,6 +104,12 @@ public class GradeService {
     gradeRepository.delete(grade);
   }
 
+  /**
+   * Retrieves all grades of an existing student.
+   *
+   * @param studentId student identity
+   * @return grades
+   */
   @Transactional(readOnly = true)
   public List<Grade> getGradesForStudent(Long studentId) {
     Student student = studentRepository.findById(studentId)
@@ -81,6 +117,12 @@ public class GradeService {
     return gradeRepository.findAllByStudent(student);
   }
 
+  /**
+   * Retrieves all grades of an existing module.
+   *
+   * @param moduleId module identity
+   * @return modules
+   */
   @Transactional(readOnly = true)
   public List<Grade> getGradesForModule(Long moduleId) {
     Module module = moduleRepository.findById(moduleId)
@@ -88,8 +130,21 @@ public class GradeService {
     return gradeRepository.findAllByModule(module);
   }
 
+  /**
+   * Upserts a grade of an existing student.
+   *
+   * @param studentId student identity
+   * @param moduleId module identity
+   * @param score score entity
+   * @return Grade
+   * @throws NoRegistrationException if no registration found
+   */
   public Grade upsertGrade(Long studentId, Long moduleId, int score)
       throws NoRegistrationException {
+    if (studentId == null || moduleId == null) {
+      throw new NoRegistrationException("No Student or Module provided");
+    }
+
     Student student = studentRepository.findById(studentId)
         .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + studentId));
     Module module = moduleRepository.findById(moduleId)

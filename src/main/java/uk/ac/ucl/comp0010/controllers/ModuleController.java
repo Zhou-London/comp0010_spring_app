@@ -28,9 +28,14 @@ public class ModuleController {
   private final RegistrationService registrationService;
   private final GradeService gradeService;
 
-  public ModuleController(
-      ModuleService moduleService,
-      RegistrationService registrationService,
+  /**
+   * CTR for Module Controller.
+   *
+   * @param moduleService deps inj
+   * @param registrationService deps inj
+   * @param gradeService deps inj
+   */
+  public ModuleController(ModuleService moduleService, RegistrationService registrationService,
       GradeService gradeService) {
     this.moduleService = moduleService;
     this.registrationService = registrationService;

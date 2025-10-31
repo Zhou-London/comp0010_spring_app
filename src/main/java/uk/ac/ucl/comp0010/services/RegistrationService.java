@@ -23,10 +23,15 @@ public class RegistrationService {
   private final StudentRepository studentRepository;
   private final ModuleRepository moduleRepository;
 
-  public RegistrationService(
-      RegistrationRepository registrationRepository,
-      StudentRepository studentRepository,
-      ModuleRepository moduleRepository) {
+  /**
+   * CTR for Registration Service.
+   *
+   * @param registrationRepository Deps inj
+   * @param studentRepository Deps inj
+   * @param moduleRepository Deps inj
+   */
+  public RegistrationService(RegistrationRepository registrationRepository,
+      StudentRepository studentRepository, ModuleRepository moduleRepository) {
     this.registrationRepository = registrationRepository;
     this.studentRepository = studentRepository;
     this.moduleRepository = moduleRepository;
@@ -37,19 +42,33 @@ public class RegistrationService {
     return (List<Registration>) registrationRepository.findAll();
   }
 
+  /**
+   * Retrieves a single registration.
+   *
+   * @param id identity
+   * @return Registration
+   */
   @Transactional(readOnly = true)
   public Registration getRegistration(Long id) {
-    return registrationRepository
-        .findById(id)
+    return registrationRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Registration not found with id " + id));
   }
 
+  /**
+   * Creates a new registration.
+   *
+   * @param studentId student identity
+   * @param moduleId module identity
+   * @return Registration
+   */
   public Registration register(Long studentId, Long moduleId) {
-    Student student = studentRepository
-        .findById(studentId)
+    if (studentId == null || moduleId == null) {
+      throw new ResourceNotFoundException("No Student or Module provided");
+    }
+
+    Student student = studentRepository.findById(studentId)
         .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + studentId));
-    Module module = moduleRepository
-        .findById(moduleId)
+    Module module = moduleRepository.findById(moduleId)
         .orElseThrow(() -> new ResourceNotFoundException("Module not found with id " + moduleId));
 
     if (registrationRepository.existsByStudentAndModule(student, module)) {
@@ -59,33 +78,47 @@ public class RegistrationService {
     return registrationRepository.save(new Registration(student, module));
   }
 
+  /**
+   * Removes a registration.
+   *
+   * @param studentId student identity
+   * @param moduleId module identity
+   * @throws NoRegistrationException if no registration
+   */
   public void unregister(Long studentId, Long moduleId) throws NoRegistrationException {
-    Student student = studentRepository
-        .findById(studentId)
+    Student student = studentRepository.findById(studentId)
         .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + studentId));
-    Module module = moduleRepository
-        .findById(moduleId)
+    Module module = moduleRepository.findById(moduleId)
         .orElseThrow(() -> new ResourceNotFoundException("Module not found with id " + moduleId));
 
-    Registration registration = registrationRepository
-        .findByStudentAndModule(student, module)
+    Registration registration = registrationRepository.findByStudentAndModule(student, module)
         .orElseThrow(() -> new NoRegistrationException("Student is not registered for module"));
 
     registrationRepository.delete(registration);
   }
 
+  /**
+   * Retrieves all registrations for a student.
+   *
+   * @param studentId student identity
+   * @return Registrations.
+   */
   @Transactional(readOnly = true)
   public List<Registration> getRegistrationsForStudent(Long studentId) {
-    Student student = studentRepository
-        .findById(studentId)
+    Student student = studentRepository.findById(studentId)
         .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + studentId));
     return registrationRepository.findAllByStudent(student);
   }
 
+  /**
+   * Retrieves all registrations for a module.
+   *
+   * @param moduleId module identity
+   * @return Registrations
+   */
   @Transactional(readOnly = true)
   public List<Registration> getRegistrationsForModule(Long moduleId) {
-    Module module = moduleRepository
-        .findById(moduleId)
+    Module module = moduleRepository.findById(moduleId)
         .orElseThrow(() -> new ResourceNotFoundException("Module not found with id " + moduleId));
     return registrationRepository.findAllByModule(module);
   }

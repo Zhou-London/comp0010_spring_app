@@ -39,6 +39,13 @@ public class GradeController {
     return gradeService.getGrade(id);
   }
 
+  /**
+   * API to create a grade for a new student.
+   *
+   * @param request req body
+   * @return Grade
+   * @throws NoRegistrationException if no registration found
+   */
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public Grade createGrade(@RequestBody GradeCreateRequest request) throws NoRegistrationException {
@@ -57,6 +64,13 @@ public class GradeController {
     gradeService.deleteGrade(id);
   }
 
+  /**
+   * API to upsert a grade for an existing student.
+   *
+   * @param request req body
+   * @return Grade
+   * @throws NoRegistrationException if no registration found
+   */
   @PostMapping("/upsert")
   public Grade upsertGrade(@RequestBody GradeCreateRequest request) throws NoRegistrationException {
     return gradeService.upsertGrade(request.getStudentId(), request.getModuleId(),

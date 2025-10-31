@@ -20,7 +20,7 @@ public class SecurityConfig {
   /**
    * Configuration for Filter Chain.
    *
-   * @param http
+   * @param http protoctol
    * @return SecurityFilterChain.
    * @throws Exception JavaException.
    */

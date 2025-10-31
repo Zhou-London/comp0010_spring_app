@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.ucl.comp0010.controllers.requests.StudentGradeRequest;
 import uk.ac.ucl.comp0010.exceptions.NoGradeAvailableException;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.models.Grade;
@@ -64,6 +65,13 @@ public class StudentController {
     return studentService.registerStudentToModule(id, moduleId);
   }
 
+  /**
+   * API to unregister a student from a module.
+   *
+   * @param id student identity
+   * @param moduleId module identity
+   * @throws NoRegistrationException if no registration found
+   */
   @DeleteMapping("/{id}/modules/{moduleId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void unregisterStudent(@PathVariable Long id, @PathVariable Long moduleId)
@@ -82,40 +90,23 @@ public class StudentController {
   }
 
   @PostMapping("/{id}/grades")
-  public Grade recordGrade(@PathVariable Long id, @RequestBody GradeRequest request)
+  public Grade recordGrade(@PathVariable Long id, @RequestBody StudentGradeRequest request)
       throws NoRegistrationException {
     return studentService.recordGrade(id, request.getModuleId(), request.getScore());
   }
 
+  /**
+   * Evaluate the average score of an existing student.
+   *
+   * @param id student identity
+   * @return Average score
+   * @throws NoGradeAvailableException if the student got no grade
+   */
   @GetMapping("/{id}/average")
   public Map<String, Double> getAverage(@PathVariable Long id) throws NoGradeAvailableException {
     double average = studentService.computeAverage(id);
     Map<String, Double> response = new HashMap<>();
     response.put("average", average);
     return response;
-  }
-
-  /**
-   * Request payload for recording a grade.
-   */
-  public static class GradeRequest {
-    private Long moduleId;
-    private int score;
-
-    public Long getModuleId() {
-      return moduleId;
-    }
-
-    public void setModuleId(Long moduleId) {
-      this.moduleId = moduleId;
-    }
-
-    public int getScore() {
-      return score;
-    }
-
-    public void setScore(int score) {
-      this.score = score;
-    }
   }
 }

@@ -25,13 +25,24 @@ public class ModuleService {
     return (List<Module>) moduleRepository.findAll();
   }
 
+  /**
+   * Retrieves a module by id.
+   *
+   * @param id module identity
+   * @return Module
+   */
   @Transactional(readOnly = true)
   public Module getModule(Long id) {
-    return moduleRepository
-        .findById(id)
+    return moduleRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Module not found with id " + id));
   }
 
+  /**
+   * Creates a new module.
+   *
+   * @param module module entity
+   * @return Module
+   */
   public Module createModule(Module module) {
     if (moduleRepository.existsByCode(module.getCode())) {
       throw new ResourceConflictException("Module code already exists: " + module.getCode());
@@ -39,6 +50,13 @@ public class ModuleService {
     return moduleRepository.save(module);
   }
 
+  /**
+   * Updates an existing module by id.
+   *
+   * @param id module identity
+   * @param updated module entity
+   * @return Module
+   */
   public Module updateModule(Long id, Module updated) {
     Module existing = getModule(id);
     if (!existing.getCode().equals(updated.getCode())
