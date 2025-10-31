@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.ucl.comp0010.controllers.requests.GradeCreateRequest;
+import uk.ac.ucl.comp0010.controllers.requests.GradeUpdateRequest;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.models.Grade;
 import uk.ac.ucl.comp0010.services.GradeService;
@@ -39,8 +41,9 @@ public class GradeController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public Grade createGrade(@RequestBody GradeRequest request) throws NoRegistrationException {
-    return gradeService.createGrade(request.getStudentId(), request.getModuleId(), request.getScore());
+  public Grade createGrade(@RequestBody GradeCreateRequest request) throws NoRegistrationException {
+    return gradeService.createGrade(request.getStudentId(), request.getModuleId(),
+        request.getScore());
   }
 
   @PutMapping("/{id}")
@@ -55,55 +58,8 @@ public class GradeController {
   }
 
   @PostMapping("/upsert")
-  public Grade upsertGrade(@RequestBody GradeRequest request) throws NoRegistrationException {
-    return gradeService.upsertGrade(request.getStudentId(), request.getModuleId(), request.getScore());
-  }
-
-  /**
-   * Request payload for creating or upserting a grade.
-   */
-  public static class GradeRequest {
-    private Long studentId;
-    private Long moduleId;
-    private int score;
-
-    public Long getStudentId() {
-      return studentId;
-    }
-
-    public void setStudentId(Long studentId) {
-      this.studentId = studentId;
-    }
-
-    public Long getModuleId() {
-      return moduleId;
-    }
-
-    public void setModuleId(Long moduleId) {
-      this.moduleId = moduleId;
-    }
-
-    public int getScore() {
-      return score;
-    }
-
-    public void setScore(int score) {
-      this.score = score;
-    }
-  }
-
-  /**
-   * Request payload for updating a grade.
-   */
-  public static class GradeUpdateRequest {
-    private int score;
-
-    public int getScore() {
-      return score;
-    }
-
-    public void setScore(int score) {
-      this.score = score;
-    }
+  public Grade upsertGrade(@RequestBody GradeCreateRequest request) throws NoRegistrationException {
+    return gradeService.upsertGrade(request.getStudentId(), request.getModuleId(),
+        request.getScore());
   }
 }

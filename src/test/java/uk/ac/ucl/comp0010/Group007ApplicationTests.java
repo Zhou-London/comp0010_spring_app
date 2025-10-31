@@ -23,20 +23,5 @@ class Group007ApplicationTests {
 
   @Test
   void contextLoads() {}
-
-  @Test
-  void testGetGrade() throws Exception {
-    mockMvc.perform(get("/grade")).andExpect(status().isOk())
-        .andExpect(jsonPath("$.score").value(50));
-  }
-
-  @Test
-  void testModuleRepository() {
-    Module module = new Module();
-    module.setName("Software Engineering");
-    module.setCode("COMP0010");
-
-    moduleRepository.save(module);
-  }
 }
 

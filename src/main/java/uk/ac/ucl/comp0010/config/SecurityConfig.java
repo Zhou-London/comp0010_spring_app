@@ -12,48 +12,29 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * Config to enable CORS.
+ * Security Configuration.
  */
 @Configuration
 public class SecurityConfig {
 
   /**
-   * Defines the primary security configuration and rules for the application's filter chain.
+   * Configuration for Filter Chain.
    *
-   * <p>This configuration customizes the security policy by performing the following actions:
-   * <ul>
-   * <li>Disables CSRF protection, which is common for stateless APIs.</li>
-   * <li>Enables CORS using the application's default settings.</li>
-   * <li>Permits public, unauthenticated access to specific endpoints.</li>
-   * <li>Requires authentication for all other requests to secure the application's endpoints.</li>
-   * </ul>
-   *
-   * @param http the {@link HttpSecurity} object to configure.
-   * @return the configured {@link SecurityFilterChain}.
-   * @throws Exception if an error occurs during the configuration.
+   * @param http
+   * @return SecurityFilterChain.
+   * @throws Exception JavaException.
    */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf((csrf) -> csrf.disable()).cors(withDefaults())
-        .authorizeHttpRequests(auth -> auth
-        .requestMatchers("/h2-console/**", "/swagger-ui.html", "/swagger-ui/**",
-          "/v3/api-docs/**").permitAll()
-        .anyRequest().authenticated()
-      )
-        .httpBasic(withDefaults())
-        .headers(headers -> headers
-        .frameOptions(options -> options.sameOrigin()));
-
+    http.csrf((csrf) -> csrf.disable()).cors(withDefaults());
 
     return http.build();
   }
 
   /**
-   * Configure CORS source.
+   * Configuration for CORS.
    *
-   * <p>This method configures the CORS source.
-   *
-   * @return Return the source.
+   * @return CorsConfigurationSource.
    */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
