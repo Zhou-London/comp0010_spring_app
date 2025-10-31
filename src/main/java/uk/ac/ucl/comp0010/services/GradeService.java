@@ -24,11 +24,8 @@ public class GradeService {
   private final ModuleRepository moduleRepository;
   private final RegistrationRepository registrationRepository;
 
-  public GradeService(
-      GradeRepository gradeRepository,
-      StudentRepository studentRepository,
-      ModuleRepository moduleRepository,
-      RegistrationRepository registrationRepository) {
+  public GradeService(GradeRepository gradeRepository, StudentRepository studentRepository,
+      ModuleRepository moduleRepository, RegistrationRepository registrationRepository) {
     this.gradeRepository = gradeRepository;
     this.studentRepository = studentRepository;
     this.moduleRepository = moduleRepository;
@@ -42,17 +39,20 @@ public class GradeService {
 
   @Transactional(readOnly = true)
   public Grade getGrade(Long id) {
-    return gradeRepository
-        .findById(id)
+    return gradeRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Grade not found with id " + id));
   }
 
-  public Grade createGrade(Long studentId, Long moduleId, int score) throws NoRegistrationException {
-    Student student = studentRepository
-        .findById(studentId)
+  public Grade createGrade(Long studentId, Long moduleId, int score)
+      throws NoRegistrationException {
+
+    if (studentId == null || moduleId == null) {
+      throw new NoRegistrationException("No Student or Module provided");
+    }
+
+    Student student = studentRepository.findById(studentId)
         .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + studentId));
-    Module module = moduleRepository
-        .findById(moduleId)
+    Module module = moduleRepository.findById(moduleId)
         .orElseThrow(() -> new ResourceNotFoundException("Module not found with id " + moduleId));
 
     if (!registrationRepository.existsByStudentAndModule(student, module)) {
@@ -76,34 +76,30 @@ public class GradeService {
 
   @Transactional(readOnly = true)
   public List<Grade> getGradesForStudent(Long studentId) {
-    Student student = studentRepository
-        .findById(studentId)
+    Student student = studentRepository.findById(studentId)
         .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + studentId));
     return gradeRepository.findAllByStudent(student);
   }
 
   @Transactional(readOnly = true)
   public List<Grade> getGradesForModule(Long moduleId) {
-    Module module = moduleRepository
-        .findById(moduleId)
+    Module module = moduleRepository.findById(moduleId)
         .orElseThrow(() -> new ResourceNotFoundException("Module not found with id " + moduleId));
     return gradeRepository.findAllByModule(module);
   }
 
-  public Grade upsertGrade(Long studentId, Long moduleId, int score) throws NoRegistrationException {
-    Student student = studentRepository
-        .findById(studentId)
+  public Grade upsertGrade(Long studentId, Long moduleId, int score)
+      throws NoRegistrationException {
+    Student student = studentRepository.findById(studentId)
         .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + studentId));
-    Module module = moduleRepository
-        .findById(moduleId)
+    Module module = moduleRepository.findById(moduleId)
         .orElseThrow(() -> new ResourceNotFoundException("Module not found with id " + moduleId));
 
     if (!registrationRepository.existsByStudentAndModule(student, module)) {
       throw new NoRegistrationException("Student must be registered before receiving a grade");
     }
 
-    Grade grade = gradeRepository
-        .findByStudentAndModule(student, module)
+    Grade grade = gradeRepository.findByStudentAndModule(student, module)
         .orElse(new Grade(student, module, score));
     grade.setScore(score);
     return gradeRepository.save(grade);
