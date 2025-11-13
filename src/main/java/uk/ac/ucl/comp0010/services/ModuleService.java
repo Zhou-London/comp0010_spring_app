@@ -44,6 +44,10 @@ public class ModuleService {
    * @return Module
    */
   public Module createModule(Module module) {
+    if (module.getId() != null) {
+      throw new ResourceConflictException("Module ID must be null for new module creation");
+    }
+
     if (moduleRepository.existsByCode(module.getCode())) {
       throw new ResourceConflictException("Module code already exists: " + module.getCode());
     }

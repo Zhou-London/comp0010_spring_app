@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import uk.ac.ucl.comp0010.controllers.requests.RegistrationRequest;
+import uk.ac.ucl.comp0010.controllers.requests.RegistrationCreateRequest;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.services.RegistrationService;
@@ -40,7 +40,7 @@ public class RegistrationController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public Registration register(@RequestBody RegistrationRequest request) {
+  public Registration register(@RequestBody RegistrationCreateRequest request) {
     return registrationService.register(request.getStudentId(), request.getModuleId());
   }
 
