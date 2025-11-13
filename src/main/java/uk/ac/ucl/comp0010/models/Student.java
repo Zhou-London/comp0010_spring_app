@@ -1,6 +1,7 @@
 package uk.ac.ucl.comp0010.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,18 +21,24 @@ import java.util.Set;
 public class Student {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Schema(accessMode = Schema.AccessMode.WRITE_ONLY, description = "Auto-generated Student ID",
+      example = "-1", type = "integer", format = "int64")
   private Long id;
 
   @Column(nullable = false)
+  @Schema(description = "Student's first name", example = "John", type = "string")
   private String firstName;
 
   @Column(nullable = false)
+  @Schema(description = "Student's last name", example = "Doe", type = "string")
   private String lastName;
 
   @Column(unique = true, nullable = false)
+  @Schema(description = "Student's login username", example = "johndoe", type = "string")
   private String userName;
 
   @Column(unique = true, nullable = false)
+  @Schema(description = "Student's email", example = "hello@world.com", type = "string")
   private String email;
 
   @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)

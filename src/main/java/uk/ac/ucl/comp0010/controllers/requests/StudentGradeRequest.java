@@ -7,10 +7,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(name = "StudentGradeRequest")
 public class StudentGradeRequest {
-    @Schema(description = "Module ID", example = "456", type = "integer", format = "int64")
+    @Schema(description = "Module ID", example = "1", type = "integer", format = "int64")
     private Long moduleId;
 
-    @Schema(description = "Score", example = "90", type = "integer", format = "int32")
+    @Schema(description = "Score", example = "100", type = "integer", format = "int32")
     private int score;
 
     public Long getModuleId() {
