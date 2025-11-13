@@ -1,6 +1,5 @@
 package uk.ac.ucl.comp0010.config;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import io.swagger.v3.oas.models.OpenAPI;
@@ -12,9 +11,6 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -23,8 +19,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Ensures that the generated OpenAPI documentation reflects the required password field
- * for non-GET requests enforced by {@link ApiPasswordFilter}.
+ * Ensures that the generated OpenAPI documentation reflects the required password field for non-GET
+ * requests enforced by {@link ApiPasswordFilter}.
  */
 @Configuration
 public class OpenApiPasswordConfig {
@@ -48,10 +44,8 @@ public class OpenApiPasswordConfig {
       }
 
       pathItem.readOperationsMap().forEach((method, operation) -> {
-        if (method == null
-            || method == PathItem.HttpMethod.GET
-            || method == PathItem.HttpMethod.OPTIONS
-            || operation == null) {
+        if (method == null || method == PathItem.HttpMethod.GET
+            || method == PathItem.HttpMethod.OPTIONS || operation == null) {
           return;
         }
 
@@ -72,8 +66,8 @@ public class OpenApiPasswordConfig {
             return;
           }
 
-          if (Objects.equals(mediaTypeKey, APPLICATION_JSON_VALUE)
-              || Objects.equals(mediaTypeKey, APPLICATION_JSON_UTF8_VALUE)) {
+          if (Objects.equals(mediaTypeKey, APPLICATION_JSON_VALUE) || Objects.equals(mediaTypeKey,
+              org.springframework.http.MediaType.APPLICATION_JSON_VALUE)) {
             ensurePasswordSchema(mediaTypeValue);
           }
         });
@@ -126,7 +120,7 @@ public class OpenApiPasswordConfig {
       return;
     }
 
-    schema.addProperties(PASSWORD_FIELD, passwordSchema());
+    schema.properties(Map.of(PASSWORD_FIELD, passwordSchema()));
     schema.addRequiredItem(PASSWORD_FIELD);
   }
 
@@ -136,10 +130,9 @@ public class OpenApiPasswordConfig {
 
   private ObjectSchema passwordMixinSchema() {
     ObjectSchema schema = new ObjectSchema();
-    Map<String, Schema> properties = new LinkedHashMap<>();
-    properties.put(PASSWORD_FIELD, passwordSchema());
-    schema.setProperties(properties);
-    schema.setRequired(new ArrayList<>(List.of(PASSWORD_FIELD)));
+
+    schema.setProperties(Map.of(PASSWORD_FIELD, passwordSchema()));
+
     return schema;
   }
 
