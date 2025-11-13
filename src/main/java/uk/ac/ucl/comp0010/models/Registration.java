@@ -25,12 +25,12 @@ public class Registration {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "student_id", nullable = false)
-  @JsonIgnoreProperties({"registrations", "grades"})
+  @JsonIgnoreProperties({"registrations", "grades", "hibernateLazyInitializer", "handler"})
   private Student student;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "module_id", nullable = false)
-  @JsonIgnoreProperties({"registrations", "grades"})
+  @JsonIgnoreProperties({"registrations", "grades", "hibernateLazyInitializer", "handler"})
   private Module module;
 
   /**
