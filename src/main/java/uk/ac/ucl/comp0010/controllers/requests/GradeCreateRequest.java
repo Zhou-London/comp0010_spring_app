@@ -10,15 +10,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class GradeCreateRequest {
 
     @JsonProperty("studentId")
-    @Schema(description = "Student ID", example = "123", type = "integer", format = "int64")
+    @Schema(description = "Student ID", example = "1", type = "integer", format = "int64")
     private Long studentId;
 
     @JsonProperty("moduleId")
-    @Schema(description = "Module ID", example = "456", type = "integer", format = "int64")
+    @Schema(description = "Module ID", example = "1", type = "integer", format = "int64")
     private Long moduleId;
 
     @JsonProperty("score")
-    @Schema(description = "Score", example = "90", type = "integer", format = "int32")
+    @Schema(description = "Score", example = "100", type = "integer", format = "int32")
     private int score;
 
     public Long getStudentId() {

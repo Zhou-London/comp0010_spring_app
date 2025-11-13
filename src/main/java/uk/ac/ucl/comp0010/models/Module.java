@@ -1,6 +1,7 @@
 package uk.ac.ucl.comp0010.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,15 +21,20 @@ import java.util.Set;
 public class Module {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Schema(accessMode = Schema.AccessMode.WRITE_ONLY, description = "Auto-generated Module ID",
+      example = "-1", type = "integer", format = "int64")
   private Long id;
 
   @Column(nullable = false, unique = true)
+  @Schema(description = "Module's code", example = "COMP0010", type = "string")
   private String code;
 
   @Column(nullable = false)
+  @Schema(description = "Module's name", example = "Software Engineering", type = "string")
   private String name;
 
   @Column(nullable = false)
+  @Schema(description = "Is module mandatory", example = "true", type = "boolean")
   private Boolean mnc;
 
   @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)

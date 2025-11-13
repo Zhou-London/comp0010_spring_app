@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class GradeUpdateRequest {
 
     @JsonProperty("score")
-    @Schema(description = "Score", example = "90")
+    @Schema(description = "Score", example = "100", type = "integer", format = "int32")
     private int score;
 
     public int getScore() {
