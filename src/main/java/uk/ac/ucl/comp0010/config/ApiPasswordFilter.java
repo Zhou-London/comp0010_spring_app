@@ -74,6 +74,6 @@ public class ApiPasswordFilter extends OncePerRequestFilter {
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.getWriter().write("{\"error\":\"Invalid password\"}");
+    response.getWriter().write("{\"error\":\"Invalid password or Inputing auto-generated ID\"}");
   }
 }
