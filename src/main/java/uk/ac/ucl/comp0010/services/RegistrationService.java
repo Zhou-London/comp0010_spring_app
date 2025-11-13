@@ -37,6 +37,11 @@ public class RegistrationService {
     this.moduleRepository = moduleRepository;
   }
 
+  /**
+   * Retrieves all registrations.
+   *
+   * @return Registrations
+   */
   @Transactional(readOnly = true)
   public List<Registration> getAllRegistrations() {
     return (List<Registration>) registrationRepository.findAll();

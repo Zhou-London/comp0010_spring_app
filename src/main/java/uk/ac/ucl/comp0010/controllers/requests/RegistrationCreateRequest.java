@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Request payload for creating a registration.
  */
 @Schema(name = "RegistrationRequest")
-public class RegistrationRequest {
+public class RegistrationCreateRequest {
     @Schema(description = "Student ID", example = "1", type = "integer", format = "int64")
     private Long studentId;
 
