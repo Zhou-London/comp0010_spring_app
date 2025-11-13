@@ -68,6 +68,21 @@ class Group007ApplicationTests {
         .andExpect(jsonPath("$.userName").value("johndoeNew"));
   }
 
+  /**
+   * Module Test: Create a module.
+   *
+   * @throws Exception
+   */
+  @Test
+  void testPostModule() throws Exception {
+    Map<String, Object> req =
+        Map.of("code", "COMP0010", "name", "Software Engineering", "mnc", true);
+
+    mockMvc.perform(post("/modules").contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(req))).andExpect(status().isCreated());
+  }
+
+
   /* Grade */
   @Test
   void testGetGrade() throws Exception {
