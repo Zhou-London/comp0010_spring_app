@@ -76,7 +76,7 @@ class Group007ApplicationTests {
   @Test
   void testPostModule() throws Exception {
     Map<String, Object> req =
-        Map.of("code", "COMP0010", "name", "Software Engineering", "mnc", true);
+        Map.of("code", "COMP0010", "name", "Software Engineering", "mnc", true, "password","team007");
 
     mockMvc.perform(post("/modules").contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(req))).andExpect(status().isCreated());
