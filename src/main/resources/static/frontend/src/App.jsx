@@ -253,10 +253,10 @@ function App() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div>
-            <p className="text-sm font-semibold text-blue-600 uppercase">My Local Coursework</p>
-            <h1 className="text-2xl font-bold text-slate-900">API Control Panel</h1>
+            <p className="text-sm font-semibold text-purple-600 uppercase">Awesome University</p>
+            <h1 className="text-2xl font-bold text-blue-900">Student Grades Management System</h1>
             <p className="text-sm text-slate-600 mt-1">
-              A simple frontend generated from openapi.json to manage students, modules, registrations and
+              A simple frontend to manage students, modules, registrations and
               grades.
             </p>
           </div>
