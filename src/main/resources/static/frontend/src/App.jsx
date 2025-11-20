@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-const defaultBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const defaultBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:2800';
 const defaultPassword = import.meta.env.VITE_API_PASSWORD || 'team007';
 
 const emptyMessage = { type: 'idle', text: '' };
