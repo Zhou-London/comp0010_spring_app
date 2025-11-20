@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 /**
  * Grade model.
  */
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "grades")
 public class Grade {

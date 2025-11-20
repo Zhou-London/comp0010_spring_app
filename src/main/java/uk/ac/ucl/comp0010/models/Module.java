@@ -1,6 +1,7 @@
 package uk.ac.ucl.comp0010.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -16,6 +17,7 @@ import java.util.Set;
 /**
  * Module model.
  */
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "modules")
 public class Module {
