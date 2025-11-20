@@ -30,8 +30,8 @@ curl -X GET localhost:2800/grade
 Run the frontend server.
 
 ```bash
-cd src/main/resources/static
-npm run start
+cd src/main/resources/static/frontend
+npm run dev
 ```
 
 For production use, build the static file, which shall be handled by a web server.
