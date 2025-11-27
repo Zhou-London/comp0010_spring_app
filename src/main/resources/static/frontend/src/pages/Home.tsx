@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { apiFetch, unwrapCollection } from '../api';
-import { type Grade, type HalCollection, type Module, type Registration, type Student } from '../types';
+import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { type Grade, type Module, type Registration, type Student } from '../types';
 
 const spotlightCards = [
   {
@@ -39,10 +39,10 @@ const Home = () => {
     const fetchStats = async () => {
       try {
         const [studentRes, moduleRes, gradeRes, registrationRes] = await Promise.all([
-          apiFetch<HalCollection<Student>>('/students'),
-          apiFetch<HalCollection<Module>>('/modules'),
-          apiFetch<HalCollection<Grade>>('/grades'),
-          apiFetch<HalCollection<Registration>>('/registrations'),
+          apiFetch<CollectionResponse<Student>>('/students'),
+          apiFetch<CollectionResponse<Module>>('/modules'),
+          apiFetch<CollectionResponse<Grade>>('/grades'),
+          apiFetch<CollectionResponse<Registration>>('/registrations'),
         ]);
 
         setStats({

@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
-import { apiFetch, unwrapCollection } from '../api';
-import { type Grade, type HalCollection } from '../types';
+import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { type Grade } from '../types';
 
 const emptyForm = {
   studentId: '',
@@ -20,7 +20,7 @@ const Grades = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await apiFetch<HalCollection<Grade>>('/grades');
+      const response = await apiFetch<CollectionResponse<Grade>>('/grades');
       setGrades(unwrapCollection(response, 'grades'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load grades');

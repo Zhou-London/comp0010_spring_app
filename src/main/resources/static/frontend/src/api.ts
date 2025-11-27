@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:2800';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -37,6 +37,12 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
   return response.json() as Promise<T>;
 }
 
-export function unwrapCollection<T>(collection: { _embedded?: Record<string, T[]> }, key: string): T[] {
+export type CollectionResponse<T> = { _embedded?: Record<string, T[]> } | T[];
+
+export function unwrapCollection<T>(collection: CollectionResponse<T>, key: string): T[] {
+  if (Array.isArray(collection)) {
+    return collection;
+  }
+
   return collection?._embedded?.[key] ?? [];
 }

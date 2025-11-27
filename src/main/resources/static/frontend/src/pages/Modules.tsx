@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
-import { apiFetch, unwrapCollection } from '../api';
-import { type HalCollection, type Module } from '../types';
+import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { type Module } from '../types';
 
 const emptyForm: Module = {
   code: '',
@@ -20,7 +20,7 @@ const Modules = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await apiFetch<HalCollection<Module>>('/modules');
+      const response = await apiFetch<CollectionResponse<Module>>('/modules');
       setModules(unwrapCollection(response, 'modules'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load modules');

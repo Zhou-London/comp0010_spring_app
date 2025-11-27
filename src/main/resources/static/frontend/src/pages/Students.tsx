@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
-import { apiFetch, unwrapCollection } from '../api';
-import { type HalCollection, type Student } from '../types';
+import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { type Student } from '../types';
 
 const emptyForm: Student = {
   firstName: '',
@@ -21,7 +21,7 @@ const Students = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await apiFetch<HalCollection<Student>>('/students');
+      const response = await apiFetch<CollectionResponse<Student>>('/students');
       setStudents(unwrapCollection(response, 'students'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load students');

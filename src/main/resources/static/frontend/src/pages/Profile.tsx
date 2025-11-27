@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { apiFetch, unwrapCollection } from '../api';
-import { type Grade, type HalCollection, type Module, type Registration, type Student } from '../types';
+import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { type Grade, type Module, type Registration, type Student } from '../types';
 
 const Profile = () => {
   const [meta, setMeta] = useState({
@@ -15,10 +15,10 @@ const Profile = () => {
     const fetchMeta = async () => {
       try {
         const [students, modules, grades, registrations] = await Promise.all([
-          apiFetch<HalCollection<Student>>('/students'),
-          apiFetch<HalCollection<Module>>('/modules'),
-          apiFetch<HalCollection<Grade>>('/grades'),
-          apiFetch<HalCollection<Registration>>('/registrations'),
+          apiFetch<CollectionResponse<Student>>('/students'),
+          apiFetch<CollectionResponse<Module>>('/modules'),
+          apiFetch<CollectionResponse<Grade>>('/grades'),
+          apiFetch<CollectionResponse<Registration>>('/registrations'),
         ]);
 
         setMeta({
