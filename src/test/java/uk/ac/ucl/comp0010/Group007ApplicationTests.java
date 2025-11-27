@@ -281,6 +281,73 @@ class Group007ApplicationTests {
         .andExpect(jsonPath("$.score").value(65));
   }
 
+  /**
+   * Ensure accessing a non-existent student yields a not found response.
+   *
+   * @throws Exception
+   */
+  @Test
+  void testStudentNotFoundExceptionHandled() throws Exception {
+    long missingId = 999L;
+
+    mockMvc.perform(get("/students/" + missingId)).andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.error").value("Student not found with id " + missingId));
+  }
+
+  /**
+   * Ensure creating a student with a duplicate username results in a conflict response.
+   *
+   * @throws Exception
+   */
+  @Test
+  void testStudentConflictExceptionHandled() throws Exception {
+    Long existingId = createStudent();
+    Student existingStudent =
+        studentRepository.findById(existingId).orElseThrow(() -> new IllegalStateException());
+
+    Map<String, Object> duplicatePayload = withPassword(Map.of("firstName", "Other",
+        "lastName", "User", "userName", existingStudent.getUserName(), "email",
+        "other" + existingId + "@example.com"));
+
+    mockMvc.perform(post("/students").contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(duplicatePayload)))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.error").value(
+            "Username already taken: " + existingStudent.getUserName()));
+  }
+
+  /**
+   * Ensure attempting to unregister a student who is not registered for a module results in a
+   * bad request response.
+   *
+   * @throws Exception
+   */
+  @Test
+  void testNoRegistrationExceptionHandled() throws Exception {
+    Long studentId = createStudent();
+    Long moduleId = createModule();
+
+    mockMvc.perform(delete("/students/" + studentId + "/modules/" + moduleId)
+        .contentType(MediaType.APPLICATION_JSON).content(passwordBody()))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error").value("Student is not registered for module"));
+  }
+
+  /**
+   * Verify that requesting an average for a student with no grades triggers a bad request
+   * response from the exception handler.
+   *
+   * @throws Exception
+   */
+  @Test
+  void testAverageWithoutGradesThrowsBadRequest() throws Exception {
+    Long studentId = createStudent();
+
+    mockMvc.perform(get("/students/" + studentId + "/average"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error").value("Student has no grades recorded"));
+  }
+
   private Long createStudent() throws Exception {
     int suffix = sequence.incrementAndGet();
     Map<String, Object> req = withPassword(Map.of("firstName", "First" + suffix, "lastName",
