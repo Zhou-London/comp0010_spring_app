@@ -9,15 +9,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "GradeUpdateRequest")
 public class GradeUpdateRequest {
 
-    @JsonProperty("score")
-    @Schema(description = "Score", example = "100", type = "integer", format = "int32")
-    private int score;
+  @JsonProperty("score")
+  @Schema(description = "Score", example = "100", type = "integer", format = "int32")
+  private int score;
 
-    public int getScore() {
-        return score;
-    }
+  public int getScore() {
+    return score;
+  }
 
-    public void setScore(int score) {
-        this.score = score;
-    }
+  public void setScore(int score) {
+    this.score = score;
+  }
 }
