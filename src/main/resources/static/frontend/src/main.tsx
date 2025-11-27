@@ -1,24 +1,39 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import React from "react";
+import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import "@fontsource/roboto/300.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
-import Home from "./Home";
-import Modules from "./module/Modules";
-import Students from "./student/Students";
-import Grades from "./grade/Grades";
+import App from "./App";
+import HomePage from "./pages/HomePage";
+import StudentsPage from "./pages/StudentsPage";
+import ModulesPage from "./pages/ModulesPage";
+import GradesPage from "./pages/GradesPage";
+import RegistrationsPage from "./pages/RegistrationsPage";
+import StateNotice from "./components/StateNotice";
+import "./index.css";
 
 const router = createBrowserRouter([
-  { path: "/modules", element: <Modules /> },
-  { path: "/students", element: <Students /> },
-  { path: "/grades", element: <Grades /> },
-  { path: "/", element: <Home /> },
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: "students", element: <StudentsPage /> },
+      { path: "modules", element: <ModulesPage /> },
+      { path: "grades", element: <GradesPage /> },
+      { path: "registrations", element: <RegistrationsPage /> },
+      {
+        path: "*",
+        element: (
+          <div className="pt-10">
+            <StateNotice title="Page not found" message="The requested view does not exist." tone="error" />
+          </div>
+        ),
+      },
+    ],
+  },
 ]);
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>,
+  </React.StrictMode>,
 );
