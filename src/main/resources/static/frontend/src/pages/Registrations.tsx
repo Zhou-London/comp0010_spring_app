@@ -22,6 +22,8 @@ const Registrations = () => {
   const [moduleQuery, setModuleQuery] = useState('');
   const [studentSearchTerm, setStudentSearchTerm] = useState('');
   const [moduleSearchTerm, setModuleSearchTerm] = useState('');
+  const [studentSuggestionsOpen, setStudentSuggestionsOpen] = useState(false);
+  const [moduleSuggestionsOpen, setModuleSuggestionsOpen] = useState(false);
   const [manualEntryVisible, setManualEntryVisible] = useState(false);
 
   const fetchStudents = async () => {
@@ -195,11 +197,15 @@ const Registrations = () => {
                   <input
                     id="studentSearch"
                     value={studentSearchTerm}
-                    onChange={(e) => setStudentSearchTerm(e.target.value)}
+                    onFocus={() => setStudentSuggestionsOpen(true)}
+                    onChange={(e) => {
+                      setStudentSearchTerm(e.target.value);
+                      setStudentSuggestionsOpen(true);
+                    }}
                     className="field"
                     placeholder="Type name, username, or ID"
                   />
-                  {suggestionsStudents.length > 0 && (
+                  {studentSuggestionsOpen && suggestionsStudents.length > 0 && (
                     <div className="absolute z-20 mt-1 max-h-40 w-full overflow-y-auto rounded-2xl border border-white/15 bg-black/60 p-2 shadow-lg backdrop-blur">
                       {suggestionsStudents.map((student) => (
                         <button
@@ -208,6 +214,8 @@ const Registrations = () => {
                           onClick={() => {
                             setForm((current) => ({ ...current, studentId: student.id?.toString() ?? '' }));
                             setStudentSearchTerm(`${student.firstName} ${student.lastName}`);
+                            setStudentQuery(''); // collapse suggestion list
+                            setStudentSuggestionsOpen(false);
                           }}
                           className="flex w-full flex-col items-start gap-0.5 rounded-xl px-3 py-2 text-left hover:bg-white/10"
                         >
@@ -225,11 +233,15 @@ const Registrations = () => {
                   <input
                     id="moduleSearch"
                     value={moduleSearchTerm}
-                    onChange={(e) => setModuleSearchTerm(e.target.value)}
+                    onFocus={() => setModuleSuggestionsOpen(true)}
+                    onChange={(e) => {
+                      setModuleSearchTerm(e.target.value);
+                      setModuleSuggestionsOpen(true);
+                    }}
                     className="field"
                     placeholder="Type code, name, or ID"
                   />
-                  {suggestionsModules.length > 0 && (
+                  {moduleSuggestionsOpen && suggestionsModules.length > 0 && (
                     <div className="absolute z-20 mt-1 max-h-40 w-full overflow-y-auto rounded-2xl border border-white/15 bg-black/60 p-2 shadow-lg backdrop-blur">
                       {suggestionsModules.map((module) => (
                         <button
@@ -238,6 +250,8 @@ const Registrations = () => {
                           onClick={() => {
                             setForm((current) => ({ ...current, moduleId: module.id?.toString() ?? '' }));
                             setModuleSearchTerm(module.code);
+                            setModuleQuery(''); // collapse suggestion list
+                            setModuleSuggestionsOpen(false);
                           }}
                           className="flex w-full flex-col items-start gap-0.5 rounded-xl px-3 py-2 text-left hover:bg-white/10"
                         >
