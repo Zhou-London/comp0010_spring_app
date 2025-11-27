@@ -9,40 +9,40 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "GradeCreateRequest")
 public class GradeCreateRequest {
 
-    @JsonProperty("studentId")
-    @Schema(description = "Student ID", example = "1", type = "integer", format = "int64")
-    private Long studentId;
+  @JsonProperty("studentId")
+  @Schema(description = "Student ID", example = "1", type = "integer", format = "int64")
+  private Long studentId;
 
-    @JsonProperty("moduleId")
-    @Schema(description = "Module ID", example = "1", type = "integer", format = "int64")
-    private Long moduleId;
+  @JsonProperty("moduleId")
+  @Schema(description = "Module ID", example = "1", type = "integer", format = "int64")
+  private Long moduleId;
 
-    @JsonProperty("score")
-    @Schema(description = "Score", example = "100", type = "integer", format = "int32")
-    private int score;
+  @JsonProperty("score")
+  @Schema(description = "Score", example = "100", type = "integer", format = "int32")
+  private int score;
 
-    public Long getStudentId() {
-        return studentId;
-    }
+  public Long getStudentId() {
+    return studentId;
+  }
 
-    public void setStudentId(Long studentId) {
-        this.studentId = studentId;
-    }
+  public void setStudentId(Long studentId) {
+    this.studentId = studentId;
+  }
 
-    public Long getModuleId() {
-        return moduleId;
-    }
+  public Long getModuleId() {
+    return moduleId;
+  }
 
-    public void setModuleId(Long moduleId) {
-        this.moduleId = moduleId;
-    }
+  public void setModuleId(Long moduleId) {
+    this.moduleId = moduleId;
+  }
 
-    public int getScore() {
-        return score;
-    }
+  public int getScore() {
+    return score;
+  }
 
-    public void setScore(int score) {
-        this.score = score;
-    }
+  public void setScore(int score) {
+    this.score = score;
+  }
 
 }

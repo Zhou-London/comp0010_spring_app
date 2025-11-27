@@ -31,10 +31,10 @@ public class StudentService {
   /**
    * CTR for Student Service.
    *
-   * @param studentRepository
-   * @param moduleRepository
-   * @param registrationRepository
-   * @param gradeRepository
+   * @param studentRepository repository for student entities
+   * @param moduleRepository repository for module entities
+   * @param registrationRepository repository for registrations
+   * @param gradeRepository repository for grades
    */
   public StudentService(StudentRepository studentRepository, ModuleRepository moduleRepository,
       RegistrationRepository registrationRepository, GradeRepository gradeRepository) {
