@@ -68,6 +68,12 @@ const Grades = () => {
     setError('');
     setMessage('');
 
+    if (!form.studentId || !form.moduleId) {
+      setError('Select a student and module before saving.');
+      setSubmitting(false);
+      return;
+    }
+
     try {
       await apiFetch('/grades/upsert', {
         method: 'POST',
@@ -213,32 +219,32 @@ const Grades = () => {
             )}
           </div>
 
-          <div className="rounded-3xl border border-white/5 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
-            <h2 className="text-lg font-semibold text-white">Upsert a grade</h2>
-            <p className="text-sm text-slate-300">Provide student and module identifiers with a score (int).</p>
             <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-200" htmlFor="studentId">Student ID</label>
-                <input
-                  id="studentId"
-                  value={form.studentId}
-                  onChange={(e) => setForm({ ...form, studentId: e.target.value })}
-                  required
-                  className="field"
-                  placeholder="1"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-200" htmlFor="moduleId">Module ID</label>
-                <input
-                  id="moduleId"
-                  value={form.moduleId}
-                  onChange={(e) => setForm({ ...form, moduleId: e.target.value })}
-                  required
-                  className="field"
-                  placeholder="1"
-                />
-              </div>
+              {showManualEntry && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm text-slate-200" htmlFor="studentId">Student ID</label>
+                    <input
+                      id="studentId"
+                      value={form.studentId}
+                      onChange={(e) => setForm({ ...form, studentId: e.target.value })}
+                      className="field"
+                      placeholder="1"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-slate-200" htmlFor="moduleId">Module ID</label>
+                    <input
+                      id="moduleId"
+                      value={form.moduleId}
+                      onChange={(e) => setForm({ ...form, moduleId: e.target.value })}
+                      className="field"
+                      placeholder="1"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <label className="text-sm text-slate-200" htmlFor="score">Score</label>
                 <input

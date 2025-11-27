@@ -66,6 +66,12 @@ const Registrations = () => {
     setError('');
     setMessage('');
 
+    if (!form.studentId || !form.moduleId) {
+      setError('Select a student and module before saving.');
+      setSubmitting(false);
+      return;
+    }
+
     try {
       await apiFetch('/registrations', {
         method: 'POST',
@@ -134,7 +140,144 @@ const Registrations = () => {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="rounded-3xl border border-white/5 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+            <h2 className="text-lg font-semibold text-white">Register a student</h2>
+            <p className="text-sm text-slate-300">Choose a student and module from the lists or enter IDs manually.</p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+              <div className="flex-1 space-y-1 text-sm text-slate-200">
+                <p className="font-semibold text-white">Selection</p>
+                <p>Student: {form.studentId ? `#${form.studentId}` : 'None selected'}</p>
+                <p>Module: {form.moduleId ? `#${form.moduleId}` : 'None selected'}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowManualEntry((current) => !current)}
+                className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-slate-100 ring-1 ring-white/20 transition hover:bg-white/20"
+              >
+                {showManualEntry ? 'Hide manual entry' : 'Enter IDs manually'}
+              </button>
+            </div>
+
+            <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
+              {showManualEntry && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm text-slate-200" htmlFor="studentId">Student ID</label>
+                    <input
+                      id="studentId"
+                      value={form.studentId}
+                      onChange={(e) => setForm({ ...form, studentId: e.target.value })}
+                      className="field"
+                      placeholder="1"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-slate-200" htmlFor="moduleId">Module ID</label>
+                    <input
+                      id="moduleId"
+                      value={form.moduleId}
+                      onChange={(e) => setForm({ ...form, moduleId: e.target.value })}
+                      className="field"
+                      placeholder="1"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-2xl bg-white px-4 py-3 text-center text-sm font-semibold text-slate-900 shadow-lg shadow-white/30 transition hover:-translate-y-[1px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {submitting ? 'Saving…' : 'Save registration'}
+              </button>
+              {message && <p className="text-sm text-emerald-300">{message}</p>}
+              {error && <p className="text-sm text-rose-300">{error}</p>}
+            </form>
+
+            <div className="mt-6 space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-200">Students</h3>
+                  <input
+                    value={studentQuery}
+                    onChange={(e) => setStudentQuery(e.target.value)}
+                    placeholder="Search by name or ID"
+                    className="field w-48 sm:w-56"
+                  />
+                </div>
+                <div className="grid max-h-64 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+                  {studentsLoading ? (
+                    <p className="text-slate-300">Loading students…</p>
+                  ) : filteredStudents.length ? (
+                    filteredStudents.map((student) => {
+                      const isSelected = form.studentId === (student.id?.toString() ?? '');
+                      return (
+                        <button
+                          key={`${student.userName}-${student.email}`}
+                          type="button"
+                          onClick={() => handleStudentSelect(student)}
+                          className={`rounded-2xl px-4 py-3 text-left ring-1 shadow-sm transition ${
+                            isSelected
+                              ? 'bg-emerald-500/20 ring-emerald-300 shadow-emerald-500/40'
+                              : 'bg-black/30 ring-white/10 shadow-black/40 hover:ring-white/20'
+                          }`}
+                        >
+                          <p className="text-xs uppercase tracking-[0.2em] text-slate-300/80">ID: {student.id ?? '–'}</p>
+                          <p className="text-sm font-semibold text-white">{student.firstName} {student.lastName}</p>
+                          <p className="text-sm text-slate-300">{student.userName}</p>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <p className="text-slate-300">No students match that search.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-200">Modules</h3>
+                  <input
+                    value={moduleQuery}
+                    onChange={(e) => setModuleQuery(e.target.value)}
+                    placeholder="Search by code or ID"
+                    className="field w-48 sm:w-56"
+                  />
+                </div>
+                <div className="grid max-h-64 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+                  {modulesLoading ? (
+                    <p className="text-slate-300">Loading modules…</p>
+                  ) : filteredModules.length ? (
+                    filteredModules.map((module) => {
+                      const isSelected = form.moduleId === (module.id?.toString() ?? '');
+                      return (
+                        <button
+                          key={`${module.code}-${module.name}`}
+                          type="button"
+                          onClick={() => handleModuleSelect(module)}
+                          className={`rounded-2xl px-4 py-3 text-left ring-1 shadow-sm transition ${
+                            isSelected
+                              ? 'bg-sky-500/20 ring-sky-300 shadow-sky-500/40'
+                              : 'bg-black/30 ring-white/10 shadow-black/40 hover:ring-white/20'
+                          }`}
+                        >
+                          <p className="text-xs uppercase tracking-[0.2em] text-slate-300/80">ID: {module.id ?? '–'}</p>
+                          <p className="text-sm font-semibold text-white">{module.code}</p>
+                          <p className="text-sm text-slate-300">{module.name}</p>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <p className="text-slate-300">No modules match that search.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/40 ring-1 ring-white/10">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold text-white">Existing</h2>
