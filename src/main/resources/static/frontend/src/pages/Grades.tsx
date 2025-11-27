@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
-import { type Grade } from '../types';
+import { type Grade, type Module, type Student } from '../types';
 
 const emptyForm = {
   studentId: '',
@@ -15,6 +15,13 @@ const Grades = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [students, setStudents] = useState<Student[]>([]);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [studentsLoading, setStudentsLoading] = useState(true);
+  const [modulesLoading, setModulesLoading] = useState(true);
+  const [studentQuery, setStudentQuery] = useState('');
+  const [moduleQuery, setModuleQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'scoreDesc' | 'scoreAsc' | 'nameAsc' | 'nameDesc'>('scoreDesc');
 
   const fetchGrades = async () => {
     setLoading(true);
@@ -31,7 +38,29 @@ const Grades = () => {
 
   useEffect(() => {
     fetchGrades();
+    void fetchStudents();
+    void fetchModules();
   }, []);
+
+  const fetchStudents = async () => {
+    setStudentsLoading(true);
+    try {
+      const response = await apiFetch<CollectionResponse<Student>>('/students');
+      setStudents(unwrapCollection(response, 'students'));
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
+  const fetchModules = async () => {
+    setModulesLoading(true);
+    try {
+      const response = await apiFetch<CollectionResponse<Module>>('/modules');
+      setModules(unwrapCollection(response, 'modules'));
+    } finally {
+      setModulesLoading(false);
+    }
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -64,6 +93,64 @@ const Grades = () => {
     return Math.round((total / grades.length) * 10) / 10;
   }, [grades]);
 
+  const filteredStudents = useMemo(() => {
+    const query = studentQuery.trim().toLowerCase();
+    if (!query) return students;
+    return students.filter((student) => {
+      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+      return (
+        fullName.includes(query) ||
+        student.userName.toLowerCase().includes(query) ||
+        student.id?.toString().includes(query)
+      );
+    });
+  }, [studentQuery, students]);
+
+  const filteredModules = useMemo(() => {
+    const query = moduleQuery.trim().toLowerCase();
+    if (!query) return modules;
+    return modules.filter((module) => {
+      return (
+        module.code.toLowerCase().includes(query) ||
+        module.name.toLowerCase().includes(query) ||
+        module.id?.toString().includes(query)
+      );
+    });
+  }, [moduleQuery, modules]);
+
+  const sortedGrades = useMemo(() => {
+    const copy = [...grades];
+    switch (sortBy) {
+      case 'scoreAsc':
+        return copy.sort((a, b) => (a.score ?? 0) - (b.score ?? 0));
+      case 'nameAsc':
+        return copy.sort((a, b) => {
+          const nameA = a.student?.userName ?? '';
+          const nameB = b.student?.userName ?? '';
+          return nameA.localeCompare(nameB);
+        });
+      case 'nameDesc':
+        return copy.sort((a, b) => {
+          const nameA = a.student?.userName ?? '';
+          const nameB = b.student?.userName ?? '';
+          return nameB.localeCompare(nameA);
+        });
+      case 'scoreDesc':
+      default:
+        return copy.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    }
+  }, [grades, sortBy]);
+
+  const handleStudentSelect = (student: Student) => {
+    setForm((current) => ({ ...current, studentId: student.id?.toString() ?? '' }));
+    setMessage(`Selected ${student.userName} for grading.`);
+  };
+
+  const handleModuleSelect = (module: Module) => {
+    setForm((current) => ({ ...current, moduleId: module.id?.toString() ?? '' }));
+    setMessage(`Selected module ${module.code}.`);
+  };
+
   return (
     <div className="glass-panel">
       <div className="flex flex-col gap-8 p-8 sm:p-10">
@@ -79,21 +166,37 @@ const Grades = () => {
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/40 ring-1 ring-white/10">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold text-white">Recorded grades</h2>
-              <button
-                type="button"
-                onClick={fetchGrades}
-                className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/20 transition hover:bg-white/20"
-              >
-                Refresh
-              </button>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="text-sm text-slate-200" htmlFor="sortBy">
+                  Sort by
+                </label>
+                <select
+                  id="sortBy"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="rounded-full bg-black/40 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/20 focus:outline-none focus:ring-white/40"
+                >
+                  <option value="scoreDesc">Score: high to low</option>
+                  <option value="scoreAsc">Score: low to high</option>
+                  <option value="nameAsc">Student: A to Z</option>
+                  <option value="nameDesc">Student: Z to A</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={fetchGrades}
+                  className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/20 transition hover:bg-white/20"
+                >
+                  Refresh
+                </button>
+              </div>
             </div>
             {loading ? (
               <p className="mt-4 text-slate-300">Loading grades…</p>
             ) : (
               <div className="mt-4 grid gap-3 md:grid-cols-2">
-                {grades.map((grade) => (
+                {sortedGrades.map((grade) => (
                   <div
                     key={`${grade.id ?? ''}-${grade.student?.userName ?? grade.student?.id ?? ''}-${grade.module?.code ?? grade.module?.id ?? ''}`}
                     className="rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10 shadow-sm shadow-black/40"
@@ -157,6 +260,86 @@ const Grades = () => {
               {message && <p className="text-sm text-emerald-300">{message}</p>}
               {error && <p className="text-sm text-rose-300">{error}</p>}
             </form>
+
+            <div className="mt-6 space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-200">Students</h3>
+                  <input
+                    value={studentQuery}
+                    onChange={(e) => setStudentQuery(e.target.value)}
+                    placeholder="Search by name or ID"
+                    className="field w-48 sm:w-56"
+                  />
+                </div>
+                <div className="grid max-h-64 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+                  {studentsLoading ? (
+                    <p className="text-slate-300">Loading students…</p>
+                  ) : filteredStudents.length ? (
+                    filteredStudents.map((student) => {
+                      const isSelected = form.studentId === (student.id?.toString() ?? '');
+                      return (
+                        <button
+                          key={`${student.userName}-${student.email}`}
+                          type="button"
+                          onClick={() => handleStudentSelect(student)}
+                          className={`rounded-2xl px-4 py-3 text-left ring-1 shadow-sm transition ${
+                            isSelected
+                              ? 'bg-emerald-500/20 ring-emerald-300 shadow-emerald-500/40'
+                              : 'bg-black/30 ring-white/10 shadow-black/40 hover:ring-white/20'
+                          }`}
+                        >
+                          <p className="text-xs uppercase tracking-[0.2em] text-slate-300/80">ID: {student.id ?? '–'}</p>
+                          <p className="text-sm font-semibold text-white">{student.firstName} {student.lastName}</p>
+                          <p className="text-sm text-slate-300">{student.userName}</p>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <p className="text-slate-300">No students match that search.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-200">Modules</h3>
+                  <input
+                    value={moduleQuery}
+                    onChange={(e) => setModuleQuery(e.target.value)}
+                    placeholder="Search by code or ID"
+                    className="field w-48 sm:w-56"
+                  />
+                </div>
+                <div className="grid max-h-64 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+                  {modulesLoading ? (
+                    <p className="text-slate-300">Loading modules…</p>
+                  ) : filteredModules.length ? (
+                    filteredModules.map((module) => {
+                      const isSelected = form.moduleId === (module.id?.toString() ?? '');
+                      return (
+                        <button
+                          key={`${module.code}-${module.name}`}
+                          type="button"
+                          onClick={() => handleModuleSelect(module)}
+                          className={`rounded-2xl px-4 py-3 text-left ring-1 shadow-sm transition ${
+                            isSelected
+                              ? 'bg-sky-500/20 ring-sky-300 shadow-sky-500/40'
+                              : 'bg-black/30 ring-white/10 shadow-black/40 hover:ring-white/20'
+                          }`}
+                        >
+                          <p className="text-xs uppercase tracking-[0.2em] text-slate-300/80">ID: {module.id ?? '–'}</p>
+                          <p className="text-sm font-semibold text-white">{module.code}</p>
+                          <p className="text-sm text-slate-300">{module.name}</p>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <p className="text-slate-300">No modules match that search.</p>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
