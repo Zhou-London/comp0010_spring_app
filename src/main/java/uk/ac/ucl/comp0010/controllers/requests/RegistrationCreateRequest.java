@@ -7,25 +7,25 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(name = "RegistrationRequest")
 public class RegistrationCreateRequest {
-    @Schema(description = "Student ID", example = "1", type = "integer", format = "int64")
-    private Long studentId;
+  @Schema(description = "Student ID", example = "1", type = "integer", format = "int64")
+  private Long studentId;
 
-    @Schema(description = "Module ID", example = "1", type = "integer", format = "int64")
-    private Long moduleId;
+  @Schema(description = "Module ID", example = "1", type = "integer", format = "int64")
+  private Long moduleId;
 
-    public Long getStudentId() {
-        return studentId;
-    }
+  public Long getStudentId() {
+    return studentId;
+  }
 
-    public void setStudentId(Long studentId) {
-        this.studentId = studentId;
-    }
+  public void setStudentId(Long studentId) {
+    this.studentId = studentId;
+  }
 
-    public Long getModuleId() {
-        return moduleId;
-    }
+  public Long getModuleId() {
+    return moduleId;
+  }
 
-    public void setModuleId(Long moduleId) {
-        this.moduleId = moduleId;
-    }
+  public void setModuleId(Long moduleId) {
+    this.moduleId = moduleId;
+  }
 }
