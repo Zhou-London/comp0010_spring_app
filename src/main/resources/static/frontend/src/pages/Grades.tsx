@@ -22,7 +22,25 @@ const Grades = () => {
   const [studentQuery, setStudentQuery] = useState('');
   const [moduleQuery, setModuleQuery] = useState('');
   const [sortBy, setSortBy] = useState<'scoreDesc' | 'scoreAsc' | 'nameAsc' | 'nameDesc'>('scoreDesc');
-  const [showManualEntry, setShowManualEntry] = useState(false);
+
+  const fetchGrades = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await apiFetch<CollectionResponse<Grade>>('/grades');
+      setGrades(unwrapCollection(response, 'grades'));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to load grades');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGrades();
+    void fetchStudents();
+    void fetchModules();
+  }, []);
 
   const fetchStudents = async () => {
     setStudentsLoading(true);
@@ -43,25 +61,6 @@ const Grades = () => {
       setModulesLoading(false);
     }
   };
-
-  const fetchGrades = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await apiFetch<CollectionResponse<Grade>>('/grades');
-      setGrades(unwrapCollection(response, 'grades'));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load grades');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchGrades();
-    void fetchStudents();
-    void fetchModules();
-  }, []);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -171,25 +170,54 @@ const Grades = () => {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-3xl border border-white/5 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
-            <h2 className="text-lg font-semibold text-white">Upsert a grade</h2>
-            <p className="text-sm text-slate-300">Pick a student and module from the lists or enter IDs manually, then supply a score.</p>
-
-            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
-              <div className="flex-1 space-y-1 text-sm text-slate-200">
-                <p className="font-semibold text-white">Selection</p>
-                <p>Student: {form.studentId ? `#${form.studentId}` : 'None selected'}</p>
-                <p>Module: {form.moduleId ? `#${form.moduleId}` : 'None selected'}</p>
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/40 ring-1 ring-white/10">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold text-white">Recorded grades</h2>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="text-sm text-slate-200" htmlFor="sortBy">
+                  Sort by
+                </label>
+                <select
+                  id="sortBy"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="rounded-full bg-black/40 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/20 focus:outline-none focus:ring-white/40"
+                >
+                  <option value="scoreDesc">Score: high to low</option>
+                  <option value="scoreAsc">Score: low to high</option>
+                  <option value="nameAsc">Student: A to Z</option>
+                  <option value="nameDesc">Student: Z to A</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={fetchGrades}
+                  className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/20 transition hover:bg-white/20"
+                >
+                  Refresh
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowManualEntry((current) => !current)}
-                className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-slate-100 ring-1 ring-white/20 transition hover:bg-white/20"
-              >
-                {showManualEntry ? 'Hide manual entry' : 'Enter IDs manually'}
-              </button>
             </div>
+            {loading ? (
+              <p className="mt-4 text-slate-300">Loading grades…</p>
+            ) : (
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {sortedGrades.map((grade) => (
+                  <div
+                    key={`${grade.id ?? ''}-${grade.student?.userName ?? grade.student?.id ?? ''}-${grade.module?.code ?? grade.module?.id ?? ''}`}
+                    className="rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10 shadow-sm shadow-black/40"
+                  >
+                    <p className="text-sm uppercase tracking-[0.2em] text-slate-300/70">{grade.module?.code ?? 'Module'}</p>
+                    <p className="text-lg font-semibold text-white">Score: {grade.score}</p>
+                    <p className="text-sm text-slate-300">Student: {grade.student?.userName ?? grade.student?.id ?? 'Unknown'}</p>
+                  </div>
+                ))}
+                {grades.length === 0 && (
+                  <p className="text-slate-300">No grades recorded yet.</p>
+                )}
+              </div>
+            )}
+          </div>
 
             <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
               {showManualEntry && (
@@ -318,54 +346,6 @@ const Grades = () => {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/40 ring-1 ring-white/10">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-white">Recorded grades</h2>
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="text-sm text-slate-200" htmlFor="sortBy">
-                  Sort by
-                </label>
-                <select
-                  id="sortBy"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                  className="rounded-full bg-black/40 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/20 focus:outline-none focus:ring-white/40"
-                >
-                  <option value="scoreDesc">Score: high to low</option>
-                  <option value="scoreAsc">Score: low to high</option>
-                  <option value="nameAsc">Student: A to Z</option>
-                  <option value="nameDesc">Student: Z to A</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={fetchGrades}
-                  className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/20 transition hover:bg-white/20"
-                >
-                  Refresh
-                </button>
-              </div>
-            </div>
-            {loading ? (
-              <p className="mt-4 text-slate-300">Loading grades…</p>
-            ) : (
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                {sortedGrades.map((grade) => (
-                  <div
-                    key={`${grade.id ?? ''}-${grade.student?.userName ?? grade.student?.id ?? ''}-${grade.module?.code ?? grade.module?.id ?? ''}`}
-                    className="rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10 shadow-sm shadow-black/40"
-                  >
-                    <p className="text-sm uppercase tracking-[0.2em] text-slate-300/70">{grade.module?.code ?? 'Module'}</p>
-                    <p className="text-lg font-semibold text-white">Score: {grade.score}</p>
-                    <p className="text-sm text-slate-300">Student: {grade.student?.userName ?? grade.student?.id ?? 'Unknown'}</p>
-                  </div>
-                ))}
-                {grades.length === 0 && (
-                  <p className="text-slate-300">No grades recorded yet.</p>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
