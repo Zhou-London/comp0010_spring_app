@@ -16,8 +16,8 @@ const App = () => (
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-700 shadow-inner"></div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-300">MI5</p>
-            <p className="text-lg font-semibold">Information Center</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-300">UCL COMP0010</p>
+            <p className="text-lg font-semibold">Management Centre</p>
           </div>
         </div>
         <nav className="hidden items-center gap-2 rounded-full bg-white/5 px-2 py-1 text-sm font-medium text-slate-200 shadow-inner shadow-black/30 ring-1 ring-white/10 sm:flex">
