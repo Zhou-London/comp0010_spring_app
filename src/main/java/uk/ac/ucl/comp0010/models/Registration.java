@@ -14,6 +14,7 @@ import jakarta.persistence.UniqueConstraint;
 /**
  * Represents the registration record between a student and a module.
  */
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(
     name = "registrations",
