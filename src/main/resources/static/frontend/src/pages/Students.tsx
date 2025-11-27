@@ -11,6 +11,7 @@ const emptyForm: Student = {
 
 const Students = () => {
   const [students, setStudents] = useState<Student[]>([]);
+  const [gpaMap, setGpaMap] = useState<Record<number, number>>({});
   const [form, setForm] = useState<Student>(emptyForm);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -33,6 +34,37 @@ const Students = () => {
   useEffect(() => {
     fetchStudents();
   }, []);
+
+  useEffect(() => {
+    if (!students.length) {
+      setGpaMap({});
+      return;
+    }
+
+    const loadGpa = async () => {
+      const entries = await Promise.all(
+        students
+          .filter((student) => student.id !== undefined && student.id !== null)
+          .map(async (student) => {
+            try {
+              const response = await apiFetch<{ gpa: number }>(`/students/${student.id}/gpa`);
+              return [student.id as number, response.gpa] as const;
+            } catch (err) {
+              console.error('Failed to load GPA for student', student.id, err);
+              return [student.id as number, NaN] as const;
+            }
+          }),
+      );
+
+      const map: Record<number, number> = {};
+      entries.forEach(([id, gpa]) => {
+        map[id] = gpa;
+      });
+      setGpaMap(map);
+    };
+
+    void loadGpa();
+  }, [students]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -94,6 +126,11 @@ const Students = () => {
                     <p className="text-sm uppercase tracking-[0.2em] text-slate-300/70">{student.userName}</p>
                     <p className="text-lg font-semibold text-white">{student.firstName} {student.lastName}</p>
                     <p className="text-sm text-slate-300">{student.email}</p>
+                    {student.id !== undefined && (
+                      <p className="text-sm text-emerald-300 mt-1">
+                        GPA: {Number.isNaN(gpaMap[student.id]) || gpaMap[student.id] === undefined ? '—' : gpaMap[student.id].toFixed(2)}
+                      </p>
+                    )}
                   </div>
                 ))}
                 {students.length === 0 && (

@@ -218,6 +218,40 @@ public class StudentService {
     return grades.stream().mapToInt(Grade::getScore).average().orElse(0.0);
   }
 
+  /**
+   * Computes the GPA for a student on a 4.0 scale using common UK bands.
+   * 70+ -> 4.0, 60-69 -> 3.3, 50-59 -> 2.7, 40-49 -> 2.0, else 0.0.
+   *
+   * @param studentId student identifier
+   * @return GPA between 0.0 and 4.0
+   * @throws NoGradeAvailableException if the student has no grades
+   */
+  @Transactional(readOnly = true)
+  public double computeGpa(Long studentId) throws NoGradeAvailableException {
+    List<Grade> grades = getGradesForStudent(studentId);
+    if (grades.isEmpty()) {
+      throw new NoGradeAvailableException("Student has no grades recorded");
+    }
+
+    double totalPoints = grades.stream()
+        .mapToDouble(grade -> {
+          int score = grade.getScore();
+          if (score >= 70) {
+            return 4.0;
+          } else if (score >= 60) {
+            return 3.3;
+          } else if (score >= 50) {
+            return 2.7;
+          } else if (score >= 40) {
+            return 2.0;
+          }
+          return 0.0;
+        })
+        .sum();
+
+    return totalPoints / grades.size();
+  }
+
   private void validateUniqueness(Student student) {
     if (studentRepository.existsByUserName(student.getUserName())) {
       throw new ResourceConflictException("Username already taken: " + student.getUserName());
