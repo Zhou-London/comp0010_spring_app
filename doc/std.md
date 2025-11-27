@@ -29,10 +29,18 @@ Use the following command to run test. Make sure there is "Build Success" before
 mvn compile test checkstyle:check spotbugs:check verify site
 ```
 
-The test results can be found:
+Generate more detailed report
 
-- CheckStyle: /target/site/checkstyle/checkstyle.html
-- Jacoco: /target/site/jacoco/index.html
+- CheckStyle
+```bash
+mvn checkstyle:checkstyle
+open target/site/checkstyle/checkstyle.html
+```
+- Jacoco:
+```bash
+mvn test jacoco:report
+open target/site/jacoco/index.html
+```
 
 # 2.0 Other Useful Tips
 
