@@ -55,7 +55,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class Group007ApplicationTests {
+class SystemTest {
 
   @Autowired
   private MockMvc mockMvc;
