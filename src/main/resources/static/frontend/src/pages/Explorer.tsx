@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { PlusIcon } from '../components/Icons';
 import { type Grade, type Module, type Student } from '../types';
 
 const emptyStudent: Student = {
@@ -171,14 +172,16 @@ const Explorer = () => {
         key={`${student.userName}-${student.email}`}
         type="button"
         onClick={() => student.id && navigate(`/students/${student.id}`)}
-        className="flex w-full flex-col items-start gap-2 rounded-2xl bg-white/5 p-4 text-left ring-1 ring-white/10 transition hover:-translate-y-[1px] hover:ring-white/30"
+        className="surface-card group flex h-full flex-col gap-3 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-5 text-left"
       >
-        <div className="flex w-full items-center justify-between gap-2">
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-300/70">{student.userName}</p>
-          <span className="pill bg-white/10">ID: {student.id ?? '–'}</span>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-300/80">{student.userName}</p>
+          <span className="pill">ID: {student.id ?? '–'}</span>
         </div>
-        <p className="text-lg font-semibold text-white">{student.firstName} {student.lastName}</p>
-        <p className="text-sm text-slate-300">Average score: {average}</p>
+        <div className="space-y-1">
+          <p className="text-xl font-semibold text-white">{student.firstName} {student.lastName}</p>
+          <p className="text-sm text-slate-300">Average score · {average}</p>
+        </div>
       </button>
     );
   };
@@ -192,14 +195,16 @@ const Explorer = () => {
         key={`${module.code}-${module.name}`}
         type="button"
         onClick={() => module.id && navigate(`/modules/${module.id}`)}
-        className="flex w-full flex-col items-start gap-2 rounded-2xl bg-white/5 p-4 text-left ring-1 ring-white/10 transition hover:-translate-y-[1px] hover:ring-white/30"
+        className="surface-card group flex h-full flex-col gap-3 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-5 text-left"
       >
-        <div className="flex w-full items-center justify-between gap-2">
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-300/70">{module.code}</p>
-          <span className="pill bg-white/10">ID: {module.id ?? '–'}</span>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-300/80">{module.code}</p>
+          <span className="pill">ID: {module.id ?? '–'}</span>
         </div>
-        <p className="text-lg font-semibold text-white">{module.name}</p>
-        <p className="text-sm text-slate-300">Average grade: {average}</p>
+        <div className="space-y-1">
+          <p className="text-xl font-semibold text-white">{module.name}</p>
+          <p className="text-sm text-slate-300">Average grade · {average}</p>
+        </div>
       </button>
     );
   };
@@ -227,9 +232,10 @@ const Explorer = () => {
               <button
                 type="button"
                 onClick={openStudentModal}
-                className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900 shadow hover:-translate-y-[1px] transition"
+                className="icon-button accent text-xs"
               >
-                Add
+                <PlusIcon className="h-4 w-4" />
+                <span>Add</span>
               </button>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -249,7 +255,7 @@ const Explorer = () => {
                 <option value="id">Student ID</option>
               </select>
             </div>
-            <div className="mt-4 max-h-[32rem] space-y-3 overflow-auto pr-2">
+            <div className="mt-4 grid max-h-[32rem] grid-cols-1 gap-3 overflow-auto pr-2 sm:grid-cols-2 xl:grid-cols-3">
               {filteredStudents.map(renderStudentCard)}
               {!loading && !filteredStudents.length && <p className="text-slate-300">No students match that search.</p>}
             </div>
@@ -264,9 +270,10 @@ const Explorer = () => {
               <button
                 type="button"
                 onClick={openModuleModal}
-                className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900 shadow hover:-translate-y-[1px] transition"
+                className="icon-button accent text-xs"
               >
-                Add
+                <PlusIcon className="h-4 w-4" />
+                <span>Add</span>
               </button>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -286,7 +293,7 @@ const Explorer = () => {
                 <option value="nameAsc">Name: A to Z</option>
               </select>
             </div>
-            <div className="mt-4 max-h-[32rem] space-y-3 overflow-auto pr-2">
+            <div className="mt-4 grid max-h-[32rem] grid-cols-1 gap-3 overflow-auto pr-2 sm:grid-cols-2 xl:grid-cols-3">
               {filteredModules.map(renderModuleCard)}
               {!loading && !filteredModules.length && <p className="text-slate-300">No modules match that search.</p>}
             </div>
@@ -364,8 +371,9 @@ const Explorer = () => {
                       type="button"
                       onClick={handleSaveStudent}
                       disabled={submitting}
-                      className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow disabled:opacity-70"
+                      className="icon-button accent"
                     >
+                      <PlusIcon className="h-4 w-4" />
                       Add student
                     </button>
                   </div>
@@ -412,8 +420,9 @@ const Explorer = () => {
                       type="button"
                       onClick={handleSaveModule}
                       disabled={submitting}
-                      className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow disabled:opacity-70"
+                      className="icon-button accent"
                     >
+                      <PlusIcon className="h-4 w-4" />
                       Add module
                     </button>
                   </div>

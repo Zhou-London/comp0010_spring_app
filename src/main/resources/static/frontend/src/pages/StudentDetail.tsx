@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { EditIcon, PlusIcon, TrashIcon } from '../components/Icons';
 import { type Grade, type Module, type Registration, type Student } from '../types';
 
 interface RegistrationFormState {
@@ -48,6 +49,9 @@ const StudentDetail = () => {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [showGradeModal, setShowGradeModal] = useState(false);
 
   const fetchData = async () => {
     if (!id) return;
@@ -93,6 +97,7 @@ const StudentDetail = () => {
     try {
       await apiFetch(`/students/${id}`, { method: 'PUT', body: studentForm });
       setMessage('Student updated.');
+      setShowStudentModal(false);
       await fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save student');
@@ -135,12 +140,13 @@ const StudentDetail = () => {
           method: 'POST',
           body: { studentId: id, moduleId: Number(registrationForm.moduleId) },
         });
-        setMessage('Registration created.');
-      }
-      setRegistrationForm(emptyRegistration);
-      await fetchData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to save registration');
+      setMessage('Registration created.');
+    }
+    setRegistrationForm(emptyRegistration);
+    setShowRegistrationModal(false);
+    await fetchData();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Unable to save registration');
     } finally {
       setSubmitting(false);
     }
@@ -179,6 +185,7 @@ const StudentDetail = () => {
       });
       setMessage('Grade saved.');
       setGradeForm(emptyGrade);
+      setShowGradeModal(false);
       await fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save grade');
@@ -232,71 +239,51 @@ const StudentDetail = () => {
 
         {student && (
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.2em] text-slate-300/70">{student.userName}</p>
-                  <h2 className="text-xl font-semibold text-white">{student.firstName} {student.lastName}</h2>
+            <div className="relative rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+              <button
+                type="button"
+                className="icon-button text-xs absolute right-5 top-5"
+                onClick={() => {
+                  setStudentForm(student);
+                  setShowStudentModal(true);
+                }}
+              >
+                <EditIcon className="h-4 w-4" />
+                <span>Edit</span>
+              </button>
+              <div className="flex items-start justify-between gap-4 pr-24">
+                <div className="space-y-1">
+                  <p className="text-sm uppercase tracking-[0.25em] text-slate-300/80">{student.userName}</p>
+                  <h2 className="text-2xl font-semibold text-white">{student.firstName} {student.lastName}</h2>
                   <p className="text-sm text-slate-300">ID: {student.id}</p>
                 </div>
-                <span className="pill bg-white/10">Average score: {averageScore}</span>
+                <span className="pill bg-white/10">Avg score: {averageScore}</span>
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-200" htmlFor="firstName">First name</label>
-                  <input
-                    id="firstName"
-                    value={studentForm.firstName}
-                    onChange={(e) => setStudentForm({ ...studentForm, firstName: e.target.value })}
-                    className="field"
-                  />
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="muted-tile">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Email</p>
+                  <p className="text-sm font-semibold text-white">{student.email}</p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-200" htmlFor="lastName">Last name</label>
-                  <input
-                    id="lastName"
-                    value={studentForm.lastName}
-                    onChange={(e) => setStudentForm({ ...studentForm, lastName: e.target.value })}
-                    className="field"
-                  />
+                <div className="muted-tile">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Username</p>
+                  <p className="text-sm font-semibold text-white">{student.userName}</p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-200" htmlFor="userName">Username</label>
-                  <input
-                    id="userName"
-                    value={studentForm.userName}
-                    onChange={(e) => setStudentForm({ ...studentForm, userName: e.target.value })}
-                    className="field"
-                  />
+                <div className="muted-tile">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">First name</p>
+                  <p className="text-sm font-semibold text-white">{student.firstName}</p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm text-slate-200" htmlFor="email">Email</label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={studentForm.email}
-                    onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
-                    className="field"
-                  />
+                <div className="muted-tile">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Last name</p>
+                  <p className="text-sm font-semibold text-white">{student.lastName}</p>
                 </div>
-                <div className="sm:col-span-2 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={handleSaveStudent}
-                    disabled={submitting}
-                    className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow disabled:opacity-70"
-                  >
-                    Update student
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDeleteStudent}
-                    className="rounded-2xl bg-rose-500/80 px-4 py-3 text-sm font-semibold text-white shadow"
-                  >
-                    Delete student
-                  </button>
-                </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <button type="button" onClick={handleDeleteStudent} className="icon-button danger text-xs">
+                  <TrashIcon className="h-4 w-4" />
+                  <span>Delete</span>
+                </button>
               </div>
             </div>
 
@@ -306,10 +293,14 @@ const StudentDetail = () => {
                   <h3 className="text-lg font-semibold text-white">Registrations</h3>
                   <button
                     type="button"
-                    onClick={() => setRegistrationForm(emptyRegistration)}
-                    className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/20"
+                    onClick={() => {
+                      setRegistrationForm(emptyRegistration);
+                      setShowRegistrationModal(true);
+                    }}
+                    className="icon-button text-xs"
                   >
-                    Add
+                    <PlusIcon className="h-4 w-4" />
+                    <span>Add</span>
                   </button>
                 </div>
                 <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
@@ -325,52 +316,30 @@ const StudentDetail = () => {
                       <div className="flex gap-2 text-xs">
                         <button
                           type="button"
-                          onClick={() => setRegistrationForm({
-                            id: registration.id,
-                            moduleId: registration.module?.id?.toString() ?? '',
-                          })}
-                          className="rounded-full bg-white px-3 py-1 font-semibold text-slate-900 shadow"
+                          onClick={() => {
+                            setRegistrationForm({
+                              id: registration.id,
+                              moduleId: registration.module?.id?.toString() ?? '',
+                            });
+                            setShowRegistrationModal(true);
+                          }}
+                          className="icon-button px-3 py-2"
                         >
-                          Edit
+                          <EditIcon className="h-4 w-4" />
+                          <span>Edit</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => deleteRegistration(registration.id)}
-                          className="rounded-full bg-rose-500/80 px-3 py-1 font-semibold text-white shadow"
+                          className="icon-button danger px-3 py-2"
                         >
-                          Delete
+                          <TrashIcon className="h-4 w-4" />
+                          <span>Delete</span>
                         </button>
                       </div>
                     </div>
                   ))}
                   {!registrations.length && <p className="text-sm text-slate-300">No registrations recorded yet.</p>}
-                </div>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-2 sm:col-span-2">
-                    <label className="text-sm text-slate-200" htmlFor="moduleId">Module</label>
-                    <select
-                      id="moduleId"
-                      value={registrationForm.moduleId}
-                      onChange={(e) => setRegistrationForm({ ...registrationForm, moduleId: e.target.value })}
-                      className="field"
-                    >
-                      <option value="">Select a module</option>
-                      {modules.map((module) => (
-                        <option key={module.id} value={module.id}>{module.code} — {module.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="sm:col-span-2 flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={saveRegistration}
-                      disabled={submitting}
-                      className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow disabled:opacity-70"
-                    >
-                      {registrationForm.id ? 'Update registration' : 'Create registration'}
-                    </button>
-                  </div>
                 </div>
               </div>
 
@@ -379,10 +348,14 @@ const StudentDetail = () => {
                   <h3 className="text-lg font-semibold text-white">Grades</h3>
                   <button
                     type="button"
-                    onClick={() => setGradeForm(emptyGrade)}
-                    className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/20"
+                    onClick={() => {
+                      setGradeForm(emptyGrade);
+                      setShowGradeModal(true);
+                    }}
+                    className="icon-button text-xs"
                   >
-                    Add
+                    <PlusIcon className="h-4 w-4" />
+                    <span>Add</span>
                   </button>
                 </div>
                 <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
@@ -398,70 +371,189 @@ const StudentDetail = () => {
                       <div className="flex gap-2 text-xs">
                         <button
                           type="button"
-                          onClick={() => setGradeForm({
-                            id: grade.id,
-                            moduleId: grade.module?.id?.toString() ?? '',
-                            score: grade.score?.toString() ?? '',
-                          })}
-                          className="rounded-full bg-white px-3 py-1 font-semibold text-slate-900 shadow"
+                          onClick={() => {
+                            setGradeForm({
+                              id: grade.id,
+                              moduleId: grade.module?.id?.toString() ?? '',
+                              score: grade.score?.toString() ?? '',
+                            });
+                            setShowGradeModal(true);
+                          }}
+                          className="icon-button px-3 py-2"
                         >
-                          Edit
+                          <EditIcon className="h-4 w-4" />
+                          <span>Edit</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => deleteGrade(grade.id)}
-                          className="rounded-full bg-rose-500/80 px-3 py-1 font-semibold text-white shadow"
+                          className="icon-button danger px-3 py-2"
                         >
-                          Delete
+                          <TrashIcon className="h-4 w-4" />
+                          <span>Delete</span>
                         </button>
                       </div>
                     </div>
                   ))}
                   {!grades.length && <p className="text-sm text-slate-300">No grades recorded yet.</p>}
                 </div>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm text-slate-200" htmlFor="gradeModule">Module</label>
-                    <select
-                      id="gradeModule"
-                      value={gradeForm.moduleId}
-                      onChange={(e) => setGradeForm({ ...gradeForm, moduleId: e.target.value })}
-                      className="field"
-                    >
-                      <option value="">Select a module</option>
-                      {modules.map((module) => (
-                        <option key={module.id} value={module.id}>{module.code} — {module.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-slate-200" htmlFor="score">Score</label>
-                    <input
-                      id="score"
-                      type="number"
-                      value={gradeForm.score}
-                      onChange={(e) => setGradeForm({ ...gradeForm, score: e.target.value })}
-                      className="field"
-                      placeholder="75"
-                    />
-                  </div>
-                  <div className="sm:col-span-2 flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={saveGrade}
-                      disabled={submitting}
-                      className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow disabled:opacity-70"
-                    >
-                      {gradeForm.id ? 'Update grade' : 'Save grade'}
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {showStudentModal && (
+        <div className="dialog-backdrop">
+          <div className="dialog-panel">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Edit student</p>
+                <h3 className="text-xl font-semibold text-white">Update personal details</h3>
+              </div>
+              <button type="button" className="icon-button text-xs" onClick={() => setShowStudentModal(false)}>
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm text-slate-200" htmlFor="firstName">First name</label>
+                <input
+                  id="firstName"
+                  value={studentForm.firstName}
+                  onChange={(e) => setStudentForm({ ...studentForm, firstName: e.target.value })}
+                  className="field"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-200" htmlFor="lastName">Last name</label>
+                <input
+                  id="lastName"
+                  value={studentForm.lastName}
+                  onChange={(e) => setStudentForm({ ...studentForm, lastName: e.target.value })}
+                  className="field"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-200" htmlFor="userName">Username</label>
+                <input
+                  id="userName"
+                  value={studentForm.userName}
+                  onChange={(e) => setStudentForm({ ...studentForm, userName: e.target.value })}
+                  className="field"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-200" htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={studentForm.email}
+                  onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
+                  className="field"
+                />
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button type="button" onClick={handleSaveStudent} disabled={submitting} className="icon-button accent">
+                Save changes
+              </button>
+              <button type="button" onClick={handleDeleteStudent} className="icon-button danger">
+                <TrashIcon className="h-4 w-4" />
+                Delete student
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRegistrationModal && (
+        <div className="dialog-backdrop">
+          <div className="dialog-panel">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Registration</p>
+                <h3 className="text-xl font-semibold text-white">{registrationForm.id ? 'Edit' : 'Add'} registration</h3>
+              </div>
+              <button type="button" className="icon-button text-xs" onClick={() => setShowRegistrationModal(false)}>
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div className="space-y-2">
+                <label className="text-sm text-slate-200" htmlFor="moduleId">Module</label>
+                <select
+                  id="moduleId"
+                  value={registrationForm.moduleId}
+                  onChange={(e) => setRegistrationForm({ ...registrationForm, moduleId: e.target.value })}
+                  className="field"
+                >
+                  <option value="">Select a module</option>
+                  {modules.map((module) => (
+                    <option key={module.id} value={module.id}>{module.code} — {module.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button type="button" onClick={saveRegistration} disabled={submitting} className="icon-button accent">
+                {registrationForm.id ? 'Update registration' : 'Create registration'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showGradeModal && (
+        <div className="dialog-backdrop">
+          <div className="dialog-panel">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Grade</p>
+                <h3 className="text-xl font-semibold text-white">{gradeForm.id ? 'Edit' : 'Add'} grade</h3>
+              </div>
+              <button type="button" className="icon-button text-xs" onClick={() => setShowGradeModal(false)}>
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm text-slate-200" htmlFor="gradeModule">Module</label>
+                <select
+                  id="gradeModule"
+                  value={gradeForm.moduleId}
+                  onChange={(e) => setGradeForm({ ...gradeForm, moduleId: e.target.value })}
+                  className="field"
+                >
+                  <option value="">Select a module</option>
+                  {modules.map((module) => (
+                    <option key={module.id} value={module.id}>{module.code} — {module.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-slate-200" htmlFor="score">Score</label>
+                <input
+                  id="score"
+                  type="number"
+                  value={gradeForm.score}
+                  onChange={(e) => setGradeForm({ ...gradeForm, score: e.target.value })}
+                  className="field"
+                  placeholder="75"
+                />
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button type="button" onClick={saveGrade} disabled={submitting} className="icon-button accent">
+                {gradeForm.id ? 'Update grade' : 'Save grade'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
