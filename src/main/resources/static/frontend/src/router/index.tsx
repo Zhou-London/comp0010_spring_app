@@ -5,6 +5,8 @@ const App = React.lazy(() => import('../App'));
 const Home = React.lazy(() => import('../pages/Home'));
 const Explorer = React.lazy(() => import('../pages/Explorer'));
 const Profile = React.lazy(() => import('../pages/Profile'));
+const StudentDetail = React.lazy(() => import('../pages/StudentDetail'));
+const ModuleDetail = React.lazy(() => import('../pages/ModuleDetail'));
 
 const Loading = () => <div className="p-6 text-center text-slate-200">Loading...</div>;
 
@@ -38,6 +40,22 @@ const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<Loading />}>
             <Profile />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'students/:studentId',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <StudentDetail />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'modules/:moduleId',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ModuleDetail />
           </Suspense>
         ),
       },
