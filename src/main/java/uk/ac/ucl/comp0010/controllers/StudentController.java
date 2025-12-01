@@ -109,4 +109,19 @@ public class StudentController {
     response.put("average", average);
     return response;
   }
+
+  /**
+   * Evaluate the GPA of an existing student on a 4.0 scale.
+   *
+   * @param id student identity
+   * @return GPA
+   * @throws NoGradeAvailableException if the student got no grade
+   */
+  @GetMapping("/{id}/gpa")
+  public Map<String, Double> getGpa(@PathVariable Long id) throws NoGradeAvailableException {
+    double gpa = studentService.computeGpa(id);
+    Map<String, Double> response = new HashMap<>();
+    response.put("gpa", gpa);
+    return response;
+  }
 }
