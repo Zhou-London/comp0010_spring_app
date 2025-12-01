@@ -66,8 +66,7 @@ public class OpenApiPasswordConfig {
             return;
           }
 
-          if (Objects.equals(mediaTypeKey, APPLICATION_JSON_VALUE) || Objects.equals(mediaTypeKey,
-              org.springframework.http.MediaType.APPLICATION_JSON_VALUE)) {
+          if (Objects.equals(mediaTypeKey, APPLICATION_JSON_VALUE)) {
             ensurePasswordSchema(mediaTypeValue);
           }
         });
