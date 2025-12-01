@@ -2,10 +2,12 @@ import { NavLink, Outlet } from 'react-router-dom';
 
 const navigation = [
   { label: 'Home', path: '/' },
-  { label: 'Students', path: '/students' },
-  { label: 'Modules', path: '/modules' },
-  { label: 'Grades', path: '/grades' },
-  { label: 'Registrations', path: '/registrations' },
+  { label: 'Summary', path: '/summary' },
+  { label: 'Explorer', path: '/explorer' },
+  { label: 'Manage Students', path: '/students' },
+  { label: 'Manage Modules', path: '/modules' },
+  { label: 'Manage Grades', path: '/grades' },
+  { label: 'Manage Registrations', path: '/registrations' },
   { label: 'Profile', path: '/profile' },
 ];
 
