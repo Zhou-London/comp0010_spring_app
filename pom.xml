@@ -157,31 +157,30 @@
 				<version>3.20.0</version>
 			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.6.2</version>
-			</plugin>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-project-info-reports-plugin</artifactId>
+                                <version>3.6.2</version>
+                                <reportSets>
+                                        <reportSet>
+                                                <reports>
+                                                        <report>summary</report>
+                                                </reports>
+                                        </reportSet>
+                                </reportSets>
+                        </plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<version>3.5.0</version>
-				<configuration>
-					<includes>
-						<include>**/*.java</include>
-					</includes>
-
-					<excludes>
-						<exclude>**/frontend/**</exclude>
-						<exclude>**/static/**</exclude>
-						<exclude>**/public/**</exclude>
-					</excludes>
-
-					<configLocation>google_checks.xml</configLocation>
-					<failsOnError>true</failsOnError>
-					<violationSeverity>warning</violationSeverity>
-				</configuration>
+                                <configuration>
+                                        <includes>**/*.java</includes>
+                                        <excludes>**/frontend/**,**/static/**,**/public/**</excludes>
+                                        <configLocation>google_checks.xml</configLocation>
+                                        <failsOnError>true</failsOnError>
+                                        <violationSeverity>warning</violationSeverity>
+                                </configuration>
 				<reportSets>
 					<reportSet>
 						<reports>
@@ -216,14 +215,21 @@
 				</reportSets>
 			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.10.0</version>
-				<configuration>
-					<doclint>all,-missing</doclint>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-javadoc-plugin</artifactId>
+                                <version>3.10.0</version>
+                                <configuration>
+                                        <doclint>all,-missing</doclint>
+                                </configuration>
+                                <reportSets>
+                                        <reportSet>
+                                                <reports>
+                                                        <report>aggregate</report>
+                                                </reports>
+                                        </reportSet>
+                                </reportSets>
+                        </plugin>
+                </plugins>
+        </reporting>
 </project>

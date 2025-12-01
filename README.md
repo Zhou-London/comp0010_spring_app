@@ -40,8 +40,8 @@ For production use, build the static file, which shall be handled by a web serve
 npm run build
 ```
 
-Run the test. Test is written in src/main/java/uk/ac/ucl/comp0010/Group007Application.java
+Run the test.
 
 ```bash
-mvn test
+mvn compile test checkstyle:check spotbugs:check verify site
 ```
