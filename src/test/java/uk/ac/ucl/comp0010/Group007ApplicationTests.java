@@ -9,12 +9,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockFilterChain;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,11 +25,13 @@ import uk.ac.ucl.comp0010.models.Grade;
 import uk.ac.ucl.comp0010.models.Module;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.models.Student;
+import uk.ac.ucl.comp0010.config.ApiPasswordFilter;
 import uk.ac.ucl.comp0010.config.OpenApiPasswordConfig;
 import uk.ac.ucl.comp0010.config.SecurityConfig;
 import uk.ac.ucl.comp0010.config.WebConfig;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.exceptions.ResourceConflictException;
+import uk.ac.ucl.comp0010.exceptions.ResourceNotFoundException;
 import uk.ac.ucl.comp0010.repositories.GradeRepository;
 import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 import uk.ac.ucl.comp0010.repositories.RegistrationRepository;
@@ -44,8 +48,10 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import jakarta.servlet.http.HttpServletResponse;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -94,6 +100,7 @@ class Group007ApplicationTests {
     registrationRepository.deleteAll();
     moduleRepository.deleteAll();
     studentRepository.deleteAll();
+    sequence.set(0);
   }
 
   /**
@@ -103,14 +110,15 @@ class Group007ApplicationTests {
    */
   @Test
   void testStudentLifecycleEndpoints() throws Exception {
-    Long studentId = createStudent();
+    Student student = createStudent();
+    Long studentId = student.getId();
 
     mockMvc.perform(get("/students")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)))
         .andExpect(jsonPath("$[0].id").value(studentId));
 
     mockMvc.perform(get("/students/" + studentId)).andExpect(status().isOk())
-        .andExpect(jsonPath("$.userName").value("user" + studentId));
+        .andExpect(jsonPath("$.userName").value(student.getUserName()));
 
     Map<String, Object> updatePayload =
         withPassword(Map.of("firstName", "Updated", "lastName", "Name", "userName",
@@ -134,14 +142,15 @@ class Group007ApplicationTests {
    */
   @Test
   void testModuleLifecycleEndpoints() throws Exception {
-    Long moduleId = createModule();
+    Module module = createModule();
+    Long moduleId = module.getId();
 
     mockMvc.perform(get("/modules")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)))
-        .andExpect(jsonPath("$[0].code").value("CODE" + moduleId));
+        .andExpect(jsonPath("$[0].code").value(module.getCode()));
 
     mockMvc.perform(get("/modules/" + moduleId)).andExpect(status().isOk())
-        .andExpect(jsonPath("$.name").value("Module " + moduleId));
+        .andExpect(jsonPath("$.name").value(module.getName()));
 
     Map<String, Object> updatePayload = withPassword(
         Map.of("code", "NEW" + moduleId, "name", "Updated Module " + moduleId, "mnc", false));
@@ -164,25 +173,25 @@ class Group007ApplicationTests {
    */
   @Test
   void testStudentRegistrationEndpoints() throws Exception {
-    Long studentId = createStudent();
-    Long moduleId = createModule();
+    Student student = createStudent();
+    Module module = createModule();
 
-    Long registrationId = registerStudent(studentId, moduleId);
+    Long registrationId = registerStudent(student.getId(), module.getId());
 
-    mockMvc.perform(get("/students/" + studentId + "/registrations")).andExpect(status().isOk())
+    mockMvc.perform(get("/students/" + student.getId() + "/registrations")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)))
         .andExpect(jsonPath("$[0].id").value(registrationId));
 
-    mockMvc.perform(get("/modules/" + moduleId + "/registrations")).andExpect(status().isOk())
+    mockMvc.perform(get("/modules/" + module.getId() + "/registrations")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)))
-        .andExpect(jsonPath("$[0].student.id").value(studentId));
+        .andExpect(jsonPath("$[0].student.id").value(student.getId()));
 
     mockMvc
-        .perform(delete("/students/" + studentId + "/modules/" + moduleId)
+        .perform(delete("/students/" + student.getId() + "/modules/" + module.getId())
             .contentType(MediaType.APPLICATION_JSON).content(passwordBody()))
         .andExpect(status().isNoContent());
 
-    mockMvc.perform(get("/students/" + studentId + "/registrations")).andExpect(status().isOk())
+    mockMvc.perform(get("/students/" + student.getId() + "/registrations")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(0)));
   }
 
@@ -193,11 +202,11 @@ class Group007ApplicationTests {
    */
   @Test
   void testRegistrationControllerEndpoints() throws Exception {
-    Long studentId = createStudent();
-    Long moduleId = createModule();
+    Student student = createStudent();
+    Module module = createModule();
 
     Map<String, Object> payload =
-        withPassword(Map.of("studentId", studentId, "moduleId", moduleId));
+        withPassword(Map.of("studentId", student.getId(), "moduleId", module.getId()));
 
     MvcResult result = mockMvc
         .perform(post("/registrations").contentType(MediaType.APPLICATION_JSON)
@@ -211,16 +220,16 @@ class Group007ApplicationTests {
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)));
 
     mockMvc.perform(get("/registrations/" + registration.getId())).andExpect(status().isOk())
-        .andExpect(jsonPath("$.student.id").value(studentId));
+        .andExpect(jsonPath("$.student.id").value(student.getId()));
 
-    mockMvc.perform(get("/registrations/students/" + studentId)).andExpect(status().isOk())
+    mockMvc.perform(get("/registrations/students/" + student.getId())).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)));
 
-    mockMvc.perform(get("/registrations/modules/" + moduleId)).andExpect(status().isOk())
+    mockMvc.perform(get("/registrations/modules/" + module.getId())).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)));
 
-    mockMvc.perform(delete("/registrations").param("studentId", String.valueOf(studentId))
-        .param("moduleId", String.valueOf(moduleId)).contentType(MediaType.APPLICATION_JSON)
+    mockMvc.perform(delete("/registrations").param("studentId", String.valueOf(student.getId()))
+        .param("moduleId", String.valueOf(module.getId())).contentType(MediaType.APPLICATION_JSON)
         .content(passwordBody())).andExpect(status().isNoContent());
 
     mockMvc.perform(get("/registrations")).andExpect(status().isOk())
@@ -234,12 +243,12 @@ class Group007ApplicationTests {
    */
   @Test
   void testGradeEndpoints() throws Exception {
-    Long studentId = createStudent();
-    Long moduleId = createModule();
-    registerStudent(studentId, moduleId);
+    Student student = createStudent();
+    Module module = createModule();
+    registerStudent(student.getId(), module.getId());
 
     Map<String, Object> gradePayload =
-        withPassword(Map.of("studentId", studentId, "moduleId", moduleId, "score", 75));
+        withPassword(Map.of("studentId", student.getId(), "moduleId", module.getId(), "score", 75));
 
     MvcResult createResult = mockMvc
         .perform(post("/grades").contentType(MediaType.APPLICATION_JSON)
@@ -261,14 +270,14 @@ class Group007ApplicationTests {
             .content(objectMapper.writeValueAsString(updatePayload)))
         .andExpect(status().isOk()).andExpect(jsonPath("$.score").value(90));
 
-    mockMvc.perform(get("/students/" + studentId + "/grades")).andExpect(status().isOk())
+    mockMvc.perform(get("/students/" + student.getId() + "/grades")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)))
         .andExpect(jsonPath("$[0].score").value(90));
 
-    mockMvc.perform(get("/modules/" + moduleId + "/grades")).andExpect(status().isOk())
+    mockMvc.perform(get("/modules/" + module.getId() + "/grades")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)));
 
-    mockMvc.perform(get("/students/" + studentId + "/average")).andExpect(status().isOk())
+    mockMvc.perform(get("/students/" + student.getId() + "/average")).andExpect(status().isOk())
         .andExpect(jsonPath("$.average").value(90.0));
 
     mockMvc.perform(delete("/grades/" + grade.getId()).contentType(MediaType.APPLICATION_JSON)
@@ -285,15 +294,15 @@ class Group007ApplicationTests {
    */
   @Test
   void testGradeUpsertAndStudentGradeEndpoints() throws Exception {
-    Long studentId = createStudent();
-    Long moduleId = createModule();
-    registerStudent(studentId, moduleId);
+    Student student = createStudent();
+    Module module = createModule();
+    registerStudent(student.getId(), module.getId());
 
     Map<String, Object> studentGradePayload =
-        withPassword(Map.of("moduleId", moduleId, "score", 50));
+        withPassword(Map.of("moduleId", module.getId(), "score", 50));
 
     MvcResult gradeResult = mockMvc
-        .perform(post("/students/" + studentId + "/grades").contentType(MediaType.APPLICATION_JSON)
+        .perform(post("/students/" + student.getId() + "/grades").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(studentGradePayload)))
         .andExpect(status().isOk()).andReturn();
 
@@ -301,7 +310,7 @@ class Group007ApplicationTests {
         objectMapper.readValue(gradeResult.getResponse().getContentAsString(), Grade.class);
 
     Map<String, Object> upsertPayload =
-        withPassword(Map.of("studentId", studentId, "moduleId", moduleId, "score", 65));
+        withPassword(Map.of("studentId", student.getId(), "moduleId", module.getId(), "score", 65));
 
     mockMvc
         .perform(post("/grades/upsert").contentType(MediaType.APPLICATION_JSON)
@@ -332,19 +341,50 @@ class Group007ApplicationTests {
    */
   @Test
   void testStudentConflictExceptionHandled() throws Exception {
-    Long existingId = createStudent();
-    Student existingStudent =
-        studentRepository.findById(existingId).orElseThrow(() -> new IllegalStateException());
+    Student existingStudent = createStudent();
 
     Map<String, Object> duplicatePayload =
         withPassword(Map.of("firstName", "Other", "lastName", "User", "userName",
-            existingStudent.getUserName(), "email", "other" + existingId + "@example.com"));
+            existingStudent.getUserName(), "email", "other" + existingStudent.getId() + "@example.com"));
 
     mockMvc
         .perform(post("/students").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(duplicatePayload)))
         .andExpect(status().isConflict()).andExpect(
             jsonPath("$.error").value("Username already taken: " + existingStudent.getUserName()));
+  }
+
+  /**
+   * Ensure StudentService rejects creation when an id is already provided.
+   */
+  @Test
+  void testStudentServiceRejectsPresetIdOnCreate() {
+    Student student = new Student("First", "Last", "user", "a@a.com");
+    student.setId(99L);
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> studentService.createStudent(student))
+        .isInstanceOf(ResourceConflictException.class)
+        .hasMessageContaining("Student ID must be null");
+  }
+
+  /**
+   * Verify updating a student with a duplicate email fails validation.
+   */
+  @Test
+  void testStudentServiceUpdateEmailConflict() {
+    Student existing = studentRepository.save(new Student("First", "Last", "user", "a@a.com"));
+    Student other = studentRepository.save(new Student("Second", "User", "user2", "b@b.com"));
+
+    Student updated = new Student("Second", "User", "user2", "a@a.com");
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> studentService.updateStudent(other.getId(), updated))
+        .isInstanceOf(ResourceConflictException.class)
+        .hasMessageContaining("Email already registered");
+
+    studentRepository.delete(existing);
+    studentRepository.delete(other);
   }
 
   /**
@@ -355,11 +395,11 @@ class Group007ApplicationTests {
    */
   @Test
   void testNoRegistrationExceptionHandled() throws Exception {
-    Long studentId = createStudent();
-    Long moduleId = createModule();
+    Student student = createStudent();
+    Module module = createModule();
 
     mockMvc
-        .perform(delete("/students/" + studentId + "/modules/" + moduleId)
+        .perform(delete("/students/" + student.getId() + "/modules/" + module.getId())
             .contentType(MediaType.APPLICATION_JSON).content(passwordBody()))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.error").value("Student is not registered for module"));
@@ -373,9 +413,9 @@ class Group007ApplicationTests {
    */
   @Test
   void testAverageWithoutGradesThrowsBadRequest() throws Exception {
-    Long studentId = createStudent();
+    Student student = createStudent();
 
-    mockMvc.perform(get("/students/" + studentId + "/average")).andExpect(status().isBadRequest())
+    mockMvc.perform(get("/students/" + student.getId() + "/average")).andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.error").value("Student has no grades recorded"));
   }
 
@@ -394,6 +434,37 @@ class Group007ApplicationTests {
   }
 
   /**
+   * Ensure the password filter allows GET requests and rejects malformed or invalid payloads.
+   */
+  @Test
+  void testApiPasswordFilterBranches() throws Exception {
+    ApiPasswordFilter filter = new ApiPasswordFilter(PASSWORD, objectMapper);
+
+    MockHttpServletRequest getRequest = new MockHttpServletRequest("GET", "/students");
+    MockHttpServletResponse getResponse = new MockHttpServletResponse();
+    filter.doFilter(getRequest, getResponse, new MockFilterChain());
+    org.assertj.core.api.Assertions
+        .assertThat(getResponse.getStatus())
+        .isNotEqualTo(HttpServletResponse.SC_UNAUTHORIZED);
+
+    MockHttpServletRequest invalidJsonRequest = new MockHttpServletRequest("POST", "/students");
+    invalidJsonRequest.setContent("not-json".getBytes(StandardCharsets.UTF_8));
+    MockHttpServletResponse invalidJsonResponse = new MockHttpServletResponse();
+    filter.doFilter(invalidJsonRequest, invalidJsonResponse, new MockFilterChain());
+    org.assertj.core.api.Assertions
+        .assertThat(invalidJsonResponse.getStatus())
+        .isEqualTo(HttpServletResponse.SC_UNAUTHORIZED);
+
+    MockHttpServletRequest wrongPasswordRequest = new MockHttpServletRequest("POST", "/students");
+    wrongPasswordRequest.setContent("{\"password\":\"wrong\"}".getBytes(StandardCharsets.UTF_8));
+    MockHttpServletResponse wrongPasswordResponse = new MockHttpServletResponse();
+    filter.doFilter(wrongPasswordRequest, wrongPasswordResponse, new MockFilterChain());
+    org.assertj.core.api.Assertions
+        .assertThat(wrongPasswordResponse.getStatus())
+        .isEqualTo(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+
+  /**
    * Validate that CORS configuration allows all origins and methods as configured.
    */
   @Test
@@ -405,6 +476,7 @@ class Group007ApplicationTests {
     org.assertj.core.api.Assertions.assertThat(config.getAllowedOriginPatterns()).contains("*");
     org.assertj.core.api.Assertions.assertThat(config.getAllowedMethods()).contains("*");
     org.assertj.core.api.Assertions.assertThat(config.getAllowedHeaders()).contains("*");
+    org.assertj.core.api.Assertions.assertThat(config.getAllowCredentials()).isFalse();
   }
 
   /**
@@ -451,6 +523,45 @@ class Group007ApplicationTests {
         .get(MediaType.APPLICATION_JSON_VALUE).getSchema();
 
     org.assertj.core.api.Assertions.assertThat(schema.getProperties()).containsKey("password");
+  }
+
+  /**
+   * Ensure OpenAPI customiser handles references and null paths gracefully.
+   */
+  @Test
+  void testOpenApiPasswordCustomizerReferenceAndNullPaths() {
+    OpenApiPasswordConfig config = new OpenApiPasswordConfig();
+
+    OpenAPI noPaths = new OpenAPI();
+    config.passwordFieldCustomiser().customise(noPaths);
+    org.assertj.core.api.Assertions.assertThat(noPaths.getPaths()).isNull();
+
+    OpenAPI referencedSchemaApi = new OpenAPI();
+    RequestBody requestBody = new RequestBody();
+    Content content = new Content();
+    io.swagger.v3.oas.models.media.MediaType mediaType =
+        new io.swagger.v3.oas.models.media.MediaType();
+    mediaType.setSchema(new ObjectSchema().$ref("#/components/schemas/Student"));
+    content.addMediaType(MediaType.APPLICATION_JSON_VALUE, mediaType);
+    requestBody.setContent(content);
+
+    Operation patchOperation = new Operation();
+    patchOperation.setRequestBody(requestBody);
+
+    PathItem nullPathItem = new PathItem();
+    nullPathItem.operation(PathItem.HttpMethod.PATCH, patchOperation);
+    referencedSchemaApi.setPaths(new io.swagger.v3.oas.models.Paths());
+    referencedSchemaApi.getPaths().addPathItem("/students/{id}", null);
+    referencedSchemaApi.getPaths().addPathItem("/students", nullPathItem);
+
+    config.passwordFieldCustomiser().customise(referencedSchemaApi);
+
+    Schema<?> schema = referencedSchemaApi.getPaths().get("/students").getPatch().getRequestBody()
+        .getContent().get(MediaType.APPLICATION_JSON_VALUE).getSchema();
+
+    org.assertj.core.api.Assertions.assertThat(schema).isInstanceOf(io.swagger.v3.oas.models.media.ComposedSchema.class);
+    org.assertj.core.api.Assertions.assertThat(((io.swagger.v3.oas.models.media.ComposedSchema) schema)
+        .getAllOf()).hasSize(2);
   }
 
   /**
@@ -516,6 +627,30 @@ class Group007ApplicationTests {
   }
 
   /**
+   * Validate student registration and unregistration through the service layer.
+   */
+  @Test
+  void testStudentServiceRegistrationBranches() throws Exception {
+    Student student = studentService.createStudent(new Student("First", "Last", "user", "a@a.com"));
+    Module module = moduleService.createModule(new Module("CODE1", "Module", true));
+
+    Registration registration = studentService.registerStudentToModule(student.getId(), module.getId());
+    org.assertj.core.api.Assertions.assertThat(registration.getId()).isNotNull();
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> studentService.registerStudentToModule(student.getId(), module.getId()))
+        .isInstanceOf(ResourceConflictException.class)
+        .hasMessageContaining("Student already registered for module");
+
+    studentService.unregisterStudentFromModule(student.getId(), module.getId());
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> studentService.unregisterStudentFromModule(student.getId(), module.getId()))
+        .isInstanceOf(NoRegistrationException.class)
+        .hasMessageContaining("Student is not registered for module");
+  }
+
+  /**
    * Validate module update rejects conflicting codes.
    */
   @Test
@@ -532,6 +667,66 @@ class Group007ApplicationTests {
 
     moduleRepository.delete(existing);
     moduleRepository.delete(other);
+  }
+
+  /**
+   * Ensure module creation rejects preset identifiers and conflicting codes.
+   */
+  @Test
+  void testModuleServiceCreationValidation() {
+    Module presetId = new Module("CODE3", "Preset", false);
+    presetId.setId(5L);
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> moduleService.createModule(presetId))
+        .isInstanceOf(ResourceConflictException.class)
+        .hasMessageContaining("Module ID must be null");
+
+    moduleRepository.save(new Module("CODE4", "Existing", true));
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> moduleService.createModule(new Module("CODE4", "Dup", true)))
+        .isInstanceOf(ResourceConflictException.class)
+        .hasMessageContaining("Module code already exists");
+  }
+
+  /**
+   * Validate registration service guards against missing identifiers and duplicates.
+   * @throws NoRegistrationException 
+   */
+  @Test
+  void testRegistrationServiceValidationPaths() throws NoRegistrationException {
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> registrationService.register(null, 1L))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining("No Student or Module provided");
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> registrationService.register(1L, null))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining("No Student or Module provided");
+
+    Student student = studentRepository.save(new Student("First", "Last", "user", "a@a.com"));
+    Module module = moduleRepository.save(new Module("CODEX", "Name", true));
+
+    registrationService.register(student.getId(), module.getId());
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> registrationService.register(student.getId(), module.getId()))
+        .isInstanceOf(ResourceConflictException.class)
+        .hasMessageContaining("Student already registered for module");
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> registrationService.unregister(student.getId(), module.getId() + 1))
+        .isInstanceOf(ResourceNotFoundException.class)
+        .hasMessageContaining("Module not found with id");
+
+    registrationService.unregister(student.getId(), module.getId());
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> registrationService.unregister(student.getId(), module.getId()))
+        .isInstanceOf(NoRegistrationException.class)
+        .hasMessageContaining("Student is not registered for module");
   }
 
   /**
@@ -554,6 +749,25 @@ class Group007ApplicationTests {
     }
 
     org.assertj.core.api.Assertions.assertThat(average).isEqualTo(90.0);
+  }
+
+  /**
+   * Ensure grade service enforces identifiers and registration checks.
+   */
+  @Test
+  void testGradeServiceValidationBranches() {
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> gradeService.createGrade(null, null, 50))
+        .isInstanceOf(NoRegistrationException.class)
+        .hasMessageContaining("No Student or Module provided");
+
+    Student student = studentRepository.save(new Student("First", "Last", "user", "a@a.com"));
+    Module module = moduleRepository.save(new Module("CODE3", "Module", true));
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> gradeService.upsertGrade(student.getId(), module.getId(), 80))
+        .isInstanceOf(NoRegistrationException.class)
+        .hasMessageContaining("Student must be registered before receiving a grade");
   }
 
   /**
@@ -602,7 +816,7 @@ class Group007ApplicationTests {
     }
   }
 
-  private Long createStudent() throws Exception {
+  private Student createStudent() throws Exception {
     int suffix = sequence.incrementAndGet();
     Map<String, Object> req = withPassword(Map.of("firstName", "First" + suffix, "lastName",
         "Last" + suffix, "userName", "user" + suffix, "email", "user" + suffix + "@example.com"));
@@ -612,12 +826,10 @@ class Group007ApplicationTests {
             .content(objectMapper.writeValueAsString(req)))
         .andExpect(status().isCreated()).andReturn();
 
-    Student student =
-        objectMapper.readValue(result.getResponse().getContentAsString(), Student.class);
-    return student.getId();
+    return objectMapper.readValue(result.getResponse().getContentAsString(), Student.class);
   }
 
-  private Long createModule() throws Exception {
+  private Module createModule() throws Exception {
     int suffix = sequence.incrementAndGet();
     Map<String, Object> req =
         withPassword(Map.of("code", "CODE" + suffix, "name", "Module " + suffix, "mnc", true));
@@ -627,8 +839,7 @@ class Group007ApplicationTests {
             .content(objectMapper.writeValueAsString(req)))
         .andExpect(status().isCreated()).andReturn();
 
-    Module module = objectMapper.readValue(result.getResponse().getContentAsString(), Module.class);
-    return module.getId();
+    return objectMapper.readValue(result.getResponse().getContentAsString(), Module.class);
   }
 
   private Long registerStudent(Long studentId, Long moduleId) throws Exception {
