@@ -1,73 +1,63 @@
-import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { apiFetch, unwrapCollection, type CollectionResponse } from "../api";
+import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
 import {
   type Grade,
   type Module,
   type Registration,
   type Student,
-} from "../types";
+} from '../types';
 
 const spotlightCards = [
   {
-    title: "Students",
-    description: "Create, browse, and celebrate every learner in the registry.",
-    to: "/students",
+    title: 'Explorer',
+    description: 'Searchable, sortable, and fully editable views for every record.',
+    to: '/explorer',
   },
   {
-    title: "Modules",
-    description:
-      "Curate modules with clarity—codes, titles, and whether they are core.",
-    to: "/modules",
-  },
-  {
-    title: "Grades",
-    description: "Capture scores instantly with secure upsert actions.",
-    to: "/grades",
-  },
-  {
-    title: "Registrations",
-    description: "Pair students to modules with one gesture.",
-    to: "/registrations",
+    title: 'Profile',
+    description: 'Backend API cheat sheet with the essentials to integrate quickly.',
+    to: '/profile',
   },
 ];
 
 const Home = () => {
-  const [stats, setStats] = useState({
-    students: 0,
-    modules: 0,
-    grades: 0,
-    registrations: 0,
-  });
+  const [students, setStudents] = useState<Student[]>([]);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchAll = async () => {
       try {
-        const [studentRes, moduleRes, gradeRes, registrationRes] =
-          await Promise.all([
-            apiFetch<CollectionResponse<Student>>("/students"),
-            apiFetch<CollectionResponse<Module>>("/modules"),
-            apiFetch<CollectionResponse<Grade>>("/grades"),
-            apiFetch<CollectionResponse<Registration>>("/registrations"),
-          ]);
+        const [studentRes, moduleRes, registrationRes, gradeRes] = await Promise.all([
+          apiFetch<CollectionResponse<Student>>('/students'),
+          apiFetch<CollectionResponse<Module>>('/modules'),
+          apiFetch<CollectionResponse<Registration>>('/registrations'),
+          apiFetch<CollectionResponse<Grade>>('/grades'),
+        ]);
 
-        setStats({
-          students: unwrapCollection(studentRes, "students").length,
-          modules: unwrapCollection(moduleRes, "modules").length,
-          grades: unwrapCollection(gradeRes, "grades").length,
-          registrations: unwrapCollection(registrationRes, "registrations")
-            .length,
-        });
-      } catch (error) {
-        console.error(error);
+        setStudents(unwrapCollection(studentRes, 'students'));
+        setModules(unwrapCollection(moduleRes, 'modules'));
+        setRegistrations(unwrapCollection(registrationRes, 'registrations'));
+        setGrades(unwrapCollection(gradeRes, 'grades'));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unable to load dashboard data');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStats();
+    void fetchAll();
   }, []);
+
+  const avgGrade = useMemo(() => {
+    if (!grades.length) return '–';
+    const total = grades.reduce((acc, grade) => acc + (grade.score ?? 0), 0);
+    return (total / grades.length).toFixed(1);
+  }, [grades]);
 
   return (
     <div className="glass-panel">
@@ -81,8 +71,7 @@ const Home = () => {
             <br /> TEAM 007 Presents
           </h1>
           <p className="max-w-2xl text-lg text-slate-200/80">
-            Manage students, modules, grades, and registrations with graceful
-            controls.
+            Manage students, modules, grades, and registrations with graceful controls.
           </p>
           <div className="flex flex-wrap gap-3 text-sm text-slate-200/80">
             <span className="pill">Zero-install UI</span>
@@ -138,20 +127,20 @@ const Home = () => {
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
-                label: "Students",
-                value: stats.students,
+                label: 'Students',
+                value: students.length,
               },
               {
-                label: "Modules",
-                value: stats.modules,
+                label: 'Modules',
+                value: modules.length,
               },
               {
-                label: "Grades",
-                value: stats.grades,
+                label: 'Registrations',
+                value: registrations.length,
               },
               {
-                label: "Registrations",
-                value: stats.registrations,
+                label: 'Average grade',
+                value: avgGrade,
               },
             ].map((item) => (
               <div
@@ -162,10 +151,118 @@ const Home = () => {
                   {item.label}
                 </p>
                 <p className="mt-2 text-3xl font-semibold text-white">
-                  {loading ? "…" : item.value}
+                  {loading ? '…' : item.value}
                 </p>
               </div>
             ))}
+          </div>
+        </section>
+
+        {error && <p className="text-sm text-rose-300">{error}</p>}
+
+        <section className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Students</h2>
+                <p className="text-sm text-slate-300">Recent arrivals from the API.</p>
+              </div>
+              <Link
+                to="/explorer#students"
+                className="pill bg-white/10 text-xs text-slate-200"
+              >
+                Read more
+              </Link>
+            </div>
+            <div className="mt-4 space-y-3">
+              {students.slice(0, 4).map((student) => (
+                <div key={`${student.userName}-${student.email}`} className="rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+                  <p className="text-sm uppercase tracking-[0.2em] text-slate-300/70">{student.userName}</p>
+                  <p className="text-lg font-semibold text-white">{student.firstName} {student.lastName}</p>
+                  <p className="text-sm text-slate-300">{student.email}</p>
+                </div>
+              ))}
+              {!students.length && !loading && <p className="text-slate-300">No students yet.</p>}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Modules</h2>
+                <p className="text-sm text-slate-300">Glance at the catalogue and jump into details.</p>
+              </div>
+              <Link
+                to="/explorer#modules"
+                className="pill bg-white/10 text-xs text-slate-200"
+              >
+                Read more
+              </Link>
+            </div>
+            <div className="mt-4 space-y-3">
+              {modules.slice(0, 4).map((module) => (
+                <div key={`${module.code}-${module.name}`} className="rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+                  <p className="text-sm uppercase tracking-[0.2em] text-slate-300/70">{module.code}</p>
+                  <p className="text-lg font-semibold text-white">{module.name}</p>
+                  <p className="text-sm text-slate-300">{module.mnc ? 'Mandatory' : 'Elective'}</p>
+                </div>
+              ))}
+              {!modules.length && !loading && <p className="text-slate-300">No modules yet.</p>}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Registrations</h2>
+                <p className="text-sm text-slate-300">Connections between students and modules.</p>
+              </div>
+              <Link
+                to="/explorer#registrations"
+                className="pill bg-white/10 text-xs text-slate-200"
+              >
+                Read more
+              </Link>
+            </div>
+            <div className="mt-4 space-y-3">
+              {registrations.slice(0, 4).map((registration) => (
+                <div
+                  key={`${registration.id ?? `${registration.student?.userName}-${registration.module?.code}`}`}
+                  className="rounded-2xl bg-black/30 p-4 ring-1 ring-white/10"
+                >
+                  <p className="text-sm text-slate-200">
+                    {registration.student?.userName ?? 'Unknown student'} → {registration.module?.code ?? 'Unknown module'}
+                  </p>
+                </div>
+              ))}
+              {!registrations.length && !loading && <p className="text-slate-300">No registrations yet.</p>}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Grades</h2>
+                <p className="text-sm text-slate-300">Latest marks with their module context.</p>
+              </div>
+              <Link
+                to="/explorer#grades"
+                className="pill bg-white/10 text-xs text-slate-200"
+              >
+                Read more
+              </Link>
+            </div>
+            <div className="mt-4 space-y-3">
+              {grades.slice(0, 4).map((grade, index) => (
+                <div key={`${grade.id ?? index}`} className="rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+                  <p className="text-sm text-slate-200">
+                    {grade.student?.userName ?? 'Unknown'} · {grade.module?.code ?? 'Module'}
+                    <span className="ml-2 rounded-full bg-white/10 px-2 py-1 text-xs text-white ring-1 ring-white/10">{grade.score ?? '—'}</span>
+                  </p>
+                </div>
+              ))}
+              {!grades.length && !loading && <p className="text-slate-300">No grades recorded.</p>}
+            </div>
           </div>
         </section>
       </div>
