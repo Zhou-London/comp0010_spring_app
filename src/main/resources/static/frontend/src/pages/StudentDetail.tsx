@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
-import { EditIcon, PlusIcon, TrashIcon } from '../components/Icons';
 import { type Grade, type Module, type Registration, type Student } from '../types';
 
 interface RegistrationFormState {
@@ -247,9 +246,9 @@ const StudentDetail = () => {
                   setStudentForm(student);
                   setShowStudentModal(true);
                 }}
+                aria-label="Edit student"
               >
-                <EditIcon className="h-4 w-4" />
-                <span>Edit</span>
+                <span aria-hidden>✏️</span>
               </button>
               <div className="flex items-start justify-between gap-4 pr-24">
                 <div className="space-y-1">
@@ -260,30 +259,23 @@ const StudentDetail = () => {
                 <span className="pill bg-white/10">Avg score: {averageScore}</span>
               </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="muted-tile">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Email</p>
-                  <p className="text-sm font-semibold text-white">{student.email}</p>
+              <div className="mt-5 space-y-2">
+                <div className="info-row">
+                  <span className="info-label">Email</span>
+                  <span className="info-value">{student.email}</span>
                 </div>
-                <div className="muted-tile">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Username</p>
-                  <p className="text-sm font-semibold text-white">{student.userName}</p>
+                <div className="info-row">
+                  <span className="info-label">Username</span>
+                  <span className="info-value">{student.userName}</span>
                 </div>
-                <div className="muted-tile">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">First name</p>
-                  <p className="text-sm font-semibold text-white">{student.firstName}</p>
+                <div className="info-row">
+                  <span className="info-label">First name</span>
+                  <span className="info-value">{student.firstName}</span>
                 </div>
-                <div className="muted-tile">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Last name</p>
-                  <p className="text-sm font-semibold text-white">{student.lastName}</p>
+                <div className="info-row">
+                  <span className="info-label">Last name</span>
+                  <span className="info-value">{student.lastName}</span>
                 </div>
-              </div>
-
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button type="button" onClick={handleDeleteStudent} className="icon-button danger text-xs">
-                  <TrashIcon className="h-4 w-4" />
-                  <span>Delete</span>
-                </button>
               </div>
             </div>
 
@@ -298,9 +290,9 @@ const StudentDetail = () => {
                       setShowRegistrationModal(true);
                     }}
                     className="icon-button text-xs"
+                    aria-label="Add registration"
                   >
-                    <PlusIcon className="h-4 w-4" />
-                    <span>Add</span>
+                    <span aria-hidden>➕</span>
                   </button>
                 </div>
                 <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
@@ -324,17 +316,9 @@ const StudentDetail = () => {
                             setShowRegistrationModal(true);
                           }}
                           className="icon-button px-3 py-2"
+                          aria-label="Edit registration"
                         >
-                          <EditIcon className="h-4 w-4" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteRegistration(registration.id)}
-                          className="icon-button danger px-3 py-2"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                          <span>Delete</span>
+                          <span aria-hidden>✏️</span>
                         </button>
                       </div>
                     </div>
@@ -353,9 +337,9 @@ const StudentDetail = () => {
                       setShowGradeModal(true);
                     }}
                     className="icon-button text-xs"
+                    aria-label="Add grade"
                   >
-                    <PlusIcon className="h-4 w-4" />
-                    <span>Add</span>
+                    <span aria-hidden>➕</span>
                   </button>
                 </div>
                 <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
@@ -380,17 +364,9 @@ const StudentDetail = () => {
                             setShowGradeModal(true);
                           }}
                           className="icon-button px-3 py-2"
+                          aria-label="Edit grade"
                         >
-                          <EditIcon className="h-4 w-4" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteGrade(grade.id)}
-                          className="icon-button danger px-3 py-2"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                          <span>Delete</span>
+                          <span aria-hidden>✏️</span>
                         </button>
                       </div>
                     </div>
@@ -456,12 +432,24 @@ const StudentDetail = () => {
               </div>
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
-              <button type="button" onClick={handleSaveStudent} disabled={submitting} className="icon-button accent">
-                Save changes
+              <button
+                type="button"
+                onClick={handleSaveStudent}
+                disabled={submitting}
+                className="icon-button accent"
+                aria-label="Save student"
+              >
+                <span aria-hidden>💾</span>
+                <span className="sr-only">Save student</span>
               </button>
-              <button type="button" onClick={handleDeleteStudent} className="icon-button danger">
-                <TrashIcon className="h-4 w-4" />
-                Delete student
+              <button
+                type="button"
+                onClick={handleDeleteStudent}
+                className="icon-button danger"
+                aria-label="Delete student"
+              >
+                <span aria-hidden>🗑️</span>
+                <span className="sr-only">Delete student</span>
               </button>
             </div>
           </div>
@@ -498,9 +486,26 @@ const StudentDetail = () => {
               </div>
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
-              <button type="button" onClick={saveRegistration} disabled={submitting} className="icon-button accent">
-                {registrationForm.id ? 'Update registration' : 'Create registration'}
+              <button
+                type="button"
+                onClick={saveRegistration}
+                disabled={submitting}
+                className="icon-button accent"
+                aria-label={registrationForm.id ? 'Update registration' : 'Create registration'}
+              >
+                <span aria-hidden>💾</span>
               </button>
+              {registrationForm.id && (
+                <button
+                  type="button"
+                  onClick={() => deleteRegistration(registrationForm.id)}
+                  className="icon-button danger"
+                  aria-label="Delete registration"
+                >
+                  <span aria-hidden>🗑️</span>
+                  <span className="sr-only">Delete registration</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -547,9 +552,26 @@ const StudentDetail = () => {
               </div>
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
-              <button type="button" onClick={saveGrade} disabled={submitting} className="icon-button accent">
-                {gradeForm.id ? 'Update grade' : 'Save grade'}
+              <button
+                type="button"
+                onClick={saveGrade}
+                disabled={submitting}
+                className="icon-button accent"
+                aria-label={gradeForm.id ? 'Update grade' : 'Save grade'}
+              >
+                <span aria-hidden>💾</span>
               </button>
+              {gradeForm.id && (
+                <button
+                  type="button"
+                  onClick={() => deleteGrade(gradeForm.id)}
+                  className="icon-button danger"
+                  aria-label="Delete grade"
+                >
+                  <span aria-hidden>🗑️</span>
+                  <span className="sr-only">Delete grade</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

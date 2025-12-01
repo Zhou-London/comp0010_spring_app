@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
-import { PlusIcon } from '../components/Icons';
 import { type Grade, type Module, type Student } from '../types';
 
 const emptyStudent: Student = {
@@ -172,7 +171,7 @@ const Explorer = () => {
         key={`${student.userName}-${student.email}`}
         type="button"
         onClick={() => student.id && navigate(`/students/${student.id}`)}
-        className="surface-card group flex h-full flex-col gap-3 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-5 text-left"
+        className="surface-card explorer-card group flex h-full flex-col gap-3 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-5 text-left"
       >
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs uppercase tracking-[0.3em] text-slate-300/80">{student.userName}</p>
@@ -195,7 +194,7 @@ const Explorer = () => {
         key={`${module.code}-${module.name}`}
         type="button"
         onClick={() => module.id && navigate(`/modules/${module.id}`)}
-        className="surface-card group flex h-full flex-col gap-3 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-5 text-left"
+        className="surface-card explorer-card group flex h-full flex-col gap-3 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-5 text-left"
       >
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs uppercase tracking-[0.3em] text-slate-300/80">{module.code}</p>
@@ -233,9 +232,9 @@ const Explorer = () => {
                 type="button"
                 onClick={openStudentModal}
                 className="icon-button accent text-xs"
+                aria-label="Add student"
               >
-                <PlusIcon className="h-4 w-4" />
-                <span>Add</span>
+                <span aria-hidden>➕</span>
               </button>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -255,7 +254,7 @@ const Explorer = () => {
                 <option value="id">Student ID</option>
               </select>
             </div>
-            <div className="mt-4 grid max-h-[32rem] grid-cols-1 gap-3 overflow-auto pr-2 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-4 grid max-h-[32rem] gap-3 overflow-auto pr-2 explorer-grid">
               {filteredStudents.map(renderStudentCard)}
               {!loading && !filteredStudents.length && <p className="text-slate-300">No students match that search.</p>}
             </div>
@@ -271,9 +270,9 @@ const Explorer = () => {
                 type="button"
                 onClick={openModuleModal}
                 className="icon-button accent text-xs"
+                aria-label="Add module"
               >
-                <PlusIcon className="h-4 w-4" />
-                <span>Add</span>
+                <span aria-hidden>➕</span>
               </button>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -293,7 +292,7 @@ const Explorer = () => {
                 <option value="nameAsc">Name: A to Z</option>
               </select>
             </div>
-            <div className="mt-4 grid max-h-[32rem] grid-cols-1 gap-3 overflow-auto pr-2 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-4 grid max-h-[32rem] gap-3 overflow-auto pr-2 explorer-grid">
               {filteredModules.map(renderModuleCard)}
               {!loading && !filteredModules.length && <p className="text-slate-300">No modules match that search.</p>}
             </div>
@@ -372,9 +371,10 @@ const Explorer = () => {
                       onClick={handleSaveStudent}
                       disabled={submitting}
                       className="icon-button accent"
+                      aria-label="Save student"
                     >
-                      <PlusIcon className="h-4 w-4" />
-                      Add student
+                      <span aria-hidden>💾</span>
+                      <span className="sr-only">Save student</span>
                     </button>
                   </div>
                 </div>
@@ -421,9 +421,10 @@ const Explorer = () => {
                       onClick={handleSaveModule}
                       disabled={submitting}
                       className="icon-button accent"
+                      aria-label="Save module"
                     >
-                      <PlusIcon className="h-4 w-4" />
-                      Add module
+                      <span aria-hidden>💾</span>
+                      <span className="sr-only">Save module</span>
                     </button>
                   </div>
                 </div>

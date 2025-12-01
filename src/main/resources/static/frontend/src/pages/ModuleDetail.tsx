@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
-import { EditIcon, PlusIcon, TrashIcon } from '../components/Icons';
 import { type Grade, type Module, type Registration, type Student } from '../types';
 
 interface RegistrationFormState {
@@ -246,9 +245,9 @@ const ModuleDetail = () => {
                   setModuleForm(module);
                   setShowModuleModal(true);
                 }}
+                aria-label="Edit module"
               >
-                <EditIcon className="h-4 w-4" />
-                <span>Edit</span>
+                <span aria-hidden>✏️</span>
               </button>
               <div className="flex items-start justify-between gap-4 pr-24">
                 <div className="space-y-1">
@@ -260,26 +259,19 @@ const ModuleDetail = () => {
                 <span className="pill bg-white/10">Avg grade: {averageGrade}</span>
               </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="muted-tile">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Module code</p>
-                  <p className="text-sm font-semibold text-white">{module.code}</p>
+              <div className="mt-5 space-y-2">
+                <div className="info-row">
+                  <span className="info-label">Module code</span>
+                  <span className="info-value">{module.code}</span>
                 </div>
-                <div className="muted-tile">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Module name</p>
-                  <p className="text-sm font-semibold text-white">{module.name}</p>
+                <div className="info-row">
+                  <span className="info-label">Module name</span>
+                  <span className="info-value">{module.name}</span>
                 </div>
-                <div className="muted-tile">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Status</p>
-                  <p className="text-sm font-semibold text-white">{module.mnc ? 'Mandatory' : 'Elective'}</p>
+                <div className="info-row">
+                  <span className="info-label">Status</span>
+                  <span className="info-value">{module.mnc ? 'Mandatory' : 'Elective'}</span>
                 </div>
-              </div>
-
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button type="button" onClick={handleDeleteModule} className="icon-button danger text-xs">
-                  <TrashIcon className="h-4 w-4" />
-                  <span>Delete</span>
-                </button>
               </div>
             </div>
 
@@ -294,9 +286,9 @@ const ModuleDetail = () => {
                       setShowRegistrationModal(true);
                     }}
                     className="icon-button text-xs"
+                    aria-label="Add registration"
                   >
-                    <PlusIcon className="h-4 w-4" />
-                    <span>Add</span>
+                    <span aria-hidden>➕</span>
                   </button>
                 </div>
                 <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
@@ -320,17 +312,9 @@ const ModuleDetail = () => {
                             setShowRegistrationModal(true);
                           }}
                           className="icon-button px-3 py-2"
+                          aria-label="Edit registration"
                         >
-                          <EditIcon className="h-4 w-4" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteRegistration(registration.id)}
-                          className="icon-button danger px-3 py-2"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                          <span>Delete</span>
+                          <span aria-hidden>✏️</span>
                         </button>
                       </div>
                     </div>
@@ -349,9 +333,9 @@ const ModuleDetail = () => {
                       setShowGradeModal(true);
                     }}
                     className="icon-button text-xs"
+                    aria-label="Add grade"
                   >
-                    <PlusIcon className="h-4 w-4" />
-                    <span>Add</span>
+                    <span aria-hidden>➕</span>
                   </button>
                 </div>
                 <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
@@ -376,17 +360,9 @@ const ModuleDetail = () => {
                             setShowGradeModal(true);
                           }}
                           className="icon-button px-3 py-2"
+                          aria-label="Edit grade"
                         >
-                          <EditIcon className="h-4 w-4" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteGrade(grade.id)}
-                          className="icon-button danger px-3 py-2"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                          <span>Delete</span>
+                          <span aria-hidden>✏️</span>
                         </button>
                       </div>
                     </div>
@@ -446,12 +422,24 @@ const ModuleDetail = () => {
               </div>
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
-              <button type="button" onClick={handleSaveModule} disabled={submitting} className="icon-button accent">
-                Save changes
+              <button
+                type="button"
+                onClick={handleSaveModule}
+                disabled={submitting}
+                className="icon-button accent"
+                aria-label="Save module"
+              >
+                <span aria-hidden>💾</span>
+                <span className="sr-only">Save module</span>
               </button>
-              <button type="button" onClick={handleDeleteModule} className="icon-button danger">
-                <TrashIcon className="h-4 w-4" />
-                Delete module
+              <button
+                type="button"
+                onClick={handleDeleteModule}
+                className="icon-button danger"
+                aria-label="Delete module"
+              >
+                <span aria-hidden>🗑️</span>
+                <span className="sr-only">Delete module</span>
               </button>
             </div>
           </div>
@@ -488,9 +476,26 @@ const ModuleDetail = () => {
               </div>
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
-              <button type="button" onClick={saveRegistration} disabled={submitting} className="icon-button accent">
-                {registrationForm.id ? 'Update registration' : 'Create registration'}
+              <button
+                type="button"
+                onClick={saveRegistration}
+                disabled={submitting}
+                className="icon-button accent"
+                aria-label={registrationForm.id ? 'Update registration' : 'Create registration'}
+              >
+                <span aria-hidden>💾</span>
               </button>
+              {registrationForm.id && (
+                <button
+                  type="button"
+                  onClick={() => deleteRegistration(registrationForm.id)}
+                  className="icon-button danger"
+                  aria-label="Delete registration"
+                >
+                  <span aria-hidden>🗑️</span>
+                  <span className="sr-only">Delete registration</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -537,9 +542,26 @@ const ModuleDetail = () => {
               </div>
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
-              <button type="button" onClick={saveGrade} disabled={submitting} className="icon-button accent">
-                {gradeForm.id ? 'Update grade' : 'Save grade'}
+              <button
+                type="button"
+                onClick={saveGrade}
+                disabled={submitting}
+                className="icon-button accent"
+                aria-label={gradeForm.id ? 'Update grade' : 'Save grade'}
+              >
+                <span aria-hidden>💾</span>
               </button>
+              {gradeForm.id && (
+                <button
+                  type="button"
+                  onClick={() => deleteGrade(gradeForm.id)}
+                  className="icon-button danger"
+                  aria-label="Delete grade"
+                >
+                  <span aria-hidden>🗑️</span>
+                  <span className="sr-only">Delete grade</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
