@@ -43,5 +43,5 @@ npm run build
 Run the test.
 
 ```bash
-mvn test
+mvn compile test checkstyle:check spotbugs:check verify site
 ```
