@@ -250,97 +250,98 @@ const StudentDetail = () => {
               >
                 <span aria-hidden>{editingStudent ? '✖️' : '✏️'}</span>
               </button>
-              <div className="flex items-start justify-between gap-4 pr-24">
-                <div className="space-y-1">
-                  <p className="text-sm uppercase tracking-[0.25em] text-slate-300/80">{student.userName}</p>
-                  <h2 className="text-2xl font-semibold text-white">{student.firstName} {student.lastName}</h2>
-                </div>
-                <span className="pill bg-white/10">Avg score: {averageScore}</span>
-              </div>
 
-              <div className="mt-5 space-y-2">
+              <div className="space-y-3">
+                <div className="info-row">
+                  <span className="info-label">First name</span>
+                  {editingStudent ? (
+                    <input
+                      id="firstName"
+                      value={studentForm.firstName}
+                      onChange={(e) => setStudentForm({ ...studentForm, firstName: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{student.firstName}</span>
+                  )}
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Last name</span>
+                  {editingStudent ? (
+                    <input
+                      id="lastName"
+                      value={studentForm.lastName}
+                      onChange={(e) => setStudentForm({ ...studentForm, lastName: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{student.lastName}</span>
+                  )}
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Username</span>
+                  {editingStudent ? (
+                    <input
+                      id="userName"
+                      value={studentForm.userName}
+                      onChange={(e) => setStudentForm({ ...studentForm, userName: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{student.userName}</span>
+                  )}
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Email</span>
+                  {editingStudent ? (
+                    <input
+                      id="email"
+                      type="email"
+                      value={studentForm.email}
+                      onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{student.email}</span>
+                  )}
+                </div>
                 <div className="info-row">
                   <span className="info-label">Student ID</span>
                   <span className="info-value">{student.id}</span>
                 </div>
-                <div className="info-row">
-                  <span className="info-label">Email</span>
-                  <span className="info-value">{student.email}</span>
-                </div>
               </div>
 
               {editingStudent && (
-                <div className="mt-5 space-y-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm text-slate-200" htmlFor="firstName">First name</label>
-                      <input
-                        id="firstName"
-                        value={studentForm.firstName}
-                        onChange={(e) => setStudentForm({ ...studentForm, firstName: e.target.value })}
-                        className="field"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-slate-200" htmlFor="lastName">Last name</label>
-                      <input
-                        id="lastName"
-                        value={studentForm.lastName}
-                        onChange={(e) => setStudentForm({ ...studentForm, lastName: e.target.value })}
-                        className="field"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-slate-200" htmlFor="userName">Username</label>
-                      <input
-                        id="userName"
-                        value={studentForm.userName}
-                        onChange={(e) => setStudentForm({ ...studentForm, userName: e.target.value })}
-                        className="field"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-slate-200" htmlFor="email">Email</label>
-                      <input
-                        id="email"
-                        type="email"
-                        value={studentForm.email}
-                        onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
-                        className="field"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={handleSaveStudent}
-                      disabled={submitting}
-                      className="icon-button accent"
-                      aria-label="Save student"
-                    >
-                      <span aria-hidden>💾</span>
-                      <span className="sr-only">Save student</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingStudent(false);
-                        setStudentForm(student);
-                      }}
-                      className="icon-button text-xs"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleDeleteStudent}
-                      className="icon-button danger"
-                      aria-label="Delete student"
-                    >
-                      <span aria-hidden>🗑️</span>
-                      <span className="sr-only">Delete student</span>
-                    </button>
-                  </div>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveStudent}
+                    disabled={submitting}
+                    className="icon-button accent"
+                    aria-label="Save student"
+                  >
+                    <span aria-hidden>💾</span>
+                    <span className="sr-only">Save student</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingStudent(false);
+                      setStudentForm(student);
+                    }}
+                    className="icon-button text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteStudent}
+                    className="icon-button danger"
+                    aria-label="Delete student"
+                  >
+                    <span aria-hidden>🗑️</span>
+                    <span className="sr-only">Delete student</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -444,8 +445,11 @@ const StudentDetail = () => {
               </div>
 
               <div className="rounded-3xl border border-white/5 bg-white/5 p-6 ring-1 ring-white/10">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-lg font-semibold text-white">Grades</h3>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-semibold text-white">Grades</h3>
+                    <span className="pill bg-white/10 text-xs">Avg grade: {averageScore}</span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {

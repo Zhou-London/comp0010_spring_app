@@ -249,91 +249,88 @@ const ModuleDetail = () => {
               >
                 <span aria-hidden>{editingModule ? '✖️' : '✏️'}</span>
               </button>
-              <div className="flex items-start justify-between gap-4 pr-24">
-                <div className="space-y-1">
-                  <p className="text-sm uppercase tracking-[0.25em] text-slate-300/80">{module.code}</p>
-                  <h2 className="text-2xl font-semibold text-white">{module.name}</h2>
-                </div>
-                <span className="pill bg-white/10">Avg grade: {averageGrade}</span>
-              </div>
 
-              <div className="mt-5 space-y-2">
+              <div className="space-y-3">
+                <div className="info-row">
+                  <span className="info-label">Module code</span>
+                  {editingModule ? (
+                    <input
+                      id="code"
+                      value={moduleForm.code}
+                      onChange={(e) => setModuleForm({ ...moduleForm, code: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{module.code}</span>
+                  )}
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Module name</span>
+                  {editingModule ? (
+                    <input
+                      id="name"
+                      value={moduleForm.name}
+                      onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{module.name}</span>
+                  )}
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Mandatory</span>
+                  {editingModule ? (
+                    <label className="flex items-center gap-3">
+                      <input
+                        id="mnc"
+                        type="checkbox"
+                        checked={moduleForm.mnc}
+                        onChange={(e) => setModuleForm({ ...moduleForm, mnc: e.target.checked })}
+                        className="h-5 w-5 rounded border-white/30 bg-white/10 text-sky-400 focus:ring-white/40"
+                      />
+                      <span className="text-slate-200">Mandatory module</span>
+                    </label>
+                  ) : (
+                    <span className="info-value">{module.mnc ? 'Mandatory' : 'Elective'}</span>
+                  )}
+                </div>
                 <div className="info-row">
                   <span className="info-label">Module ID</span>
                   <span className="info-value">{module.id}</span>
                 </div>
-                <div className="info-row">
-                  <span className="info-label">Status</span>
-                  <span className="info-value">{module.mnc ? 'Mandatory' : 'Elective'}</span>
-                </div>
               </div>
 
               {editingModule && (
-                <div className="mt-5 space-y-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm text-slate-200" htmlFor="code">Module code</label>
-                      <input
-                        id="code"
-                        value={moduleForm.code}
-                        onChange={(e) => setModuleForm({ ...moduleForm, code: e.target.value })}
-                        className="field"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-slate-200" htmlFor="name">Module name</label>
-                      <input
-                        id="name"
-                        value={moduleForm.name}
-                        onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })}
-                        className="field"
-                      />
-                    </div>
-                    <div className="space-y-2 sm:col-span-2">
-                      <label className="text-sm text-slate-200" htmlFor="mnc">Mandatory</label>
-                      <div className="flex items-center gap-3 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10">
-                        <input
-                          id="mnc"
-                          type="checkbox"
-                          checked={moduleForm.mnc}
-                          onChange={(e) => setModuleForm({ ...moduleForm, mnc: e.target.checked })}
-                          className="h-5 w-5 rounded border-white/30 bg-white/10 text-sky-400 focus:ring-white/40"
-                        />
-                        <span className="text-slate-200">Toggle if this module is mandatory.</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={handleSaveModule}
-                      disabled={submitting}
-                      className="icon-button accent"
-                      aria-label="Save module"
-                    >
-                      <span aria-hidden>💾</span>
-                      <span className="sr-only">Save module</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingModule(false);
-                        setModuleForm(module);
-                      }}
-                      className="icon-button text-xs"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleDeleteModule}
-                      className="icon-button danger"
-                      aria-label="Delete module"
-                    >
-                      <span aria-hidden>🗑️</span>
-                      <span className="sr-only">Delete module</span>
-                    </button>
-                  </div>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveModule}
+                    disabled={submitting}
+                    className="icon-button accent"
+                    aria-label="Save module"
+                  >
+                    <span aria-hidden>💾</span>
+                    <span className="sr-only">Save module</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingModule(false);
+                      setModuleForm(module);
+                    }}
+                    className="icon-button text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteModule}
+                    className="icon-button danger"
+                    aria-label="Delete module"
+                  >
+                    <span aria-hidden>🗑️</span>
+                    <span className="sr-only">Delete module</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -437,8 +434,11 @@ const ModuleDetail = () => {
               </div>
 
               <div className="rounded-3xl border border-white/5 bg-white/5 p-6 ring-1 ring-white/10">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-lg font-semibold text-white">Grades</h3>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-semibold text-white">Grades</h3>
+                    <span className="pill bg-white/10 text-xs">Avg grade: {averageGrade}</span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
