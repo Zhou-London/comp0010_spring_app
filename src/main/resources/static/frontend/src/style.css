@@ -259,12 +259,25 @@ a {
   color: var(--text-secondary) !important;
 }
 
+:root[data-theme='light'] .text-slate-200\/80,
+:root[data-theme='light'] .text-slate-200\/70,
+:root[data-theme='light'] .text-slate-300\/80,
+:root[data-theme='light'] .text-slate-300\/70 {
+  color: var(--text-secondary) !important;
+}
+
 :root[data-theme='light'] .text-emerald-300 {
   color: #065f46 !important;
 }
 
 :root[data-theme='light'] .text-rose-300 {
   color: #b91c1c !important;
+}
+
+:root[data-theme='light'] .text-gradient {
+  background: linear-gradient(120deg, #0f172a, #2563eb, #0f172a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 :root[data-theme='light'] .bg-white\/5,
