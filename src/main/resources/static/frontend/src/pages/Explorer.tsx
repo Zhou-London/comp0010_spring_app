@@ -175,7 +175,7 @@ const Explorer = () => {
       >
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs uppercase tracking-[0.3em] text-slate-300/80">{student.userName}</p>
-          <span className="pill">ID: {student.id ?? '–'}</span>
+          <span className="pill shrink-0 whitespace-nowrap">ID: {student.id ?? '–'}</span>
         </div>
         <div className="space-y-1">
           <p className="text-xl font-semibold text-white">{student.firstName} {student.lastName}</p>
@@ -198,7 +198,7 @@ const Explorer = () => {
       >
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs uppercase tracking-[0.3em] text-slate-300/80">{module.code}</p>
-          <span className="pill">ID: {module.id ?? '–'}</span>
+          <span className="pill shrink-0 whitespace-nowrap">ID: {module.id ?? '–'}</span>
         </div>
         <div className="space-y-1">
           <p className="text-xl font-semibold text-white">{module.name}</p>
@@ -230,11 +230,14 @@ const Explorer = () => {
               </div>
               <button
                 type="button"
-                onClick={openStudentModal}
+                onClick={() => {
+                  if (!studentFormOpen) openStudentModal();
+                  else setStudentFormOpen(false);
+                }}
                 className="icon-button accent text-xs"
                 aria-label="Add student"
               >
-                <span aria-hidden>➕</span>
+                <span aria-hidden>{studentFormOpen ? '—' : '➕'}</span>
               </button>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -254,6 +257,64 @@ const Explorer = () => {
                 <option value="id">Student ID</option>
               </select>
             </div>
+            {studentFormOpen && (
+              <div className="mt-4 space-y-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input
+                    value={studentForm.firstName}
+                    onChange={(e) => setStudentForm({ ...studentForm, firstName: e.target.value })}
+                    className="field"
+                    placeholder="First name"
+                  />
+                  <input
+                    value={studentForm.lastName}
+                    onChange={(e) => setStudentForm({ ...studentForm, lastName: e.target.value })}
+                    className="field"
+                    placeholder="Last name"
+                  />
+                  <input
+                    value={studentForm.userName}
+                    onChange={(e) => setStudentForm({ ...studentForm, userName: e.target.value })}
+                    className="field"
+                    placeholder="Username"
+                  />
+                  <input
+                    type="email"
+                    value={studentForm.email}
+                    onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
+                    className="field"
+                    placeholder="Email"
+                  />
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveStudent}
+                    disabled={submitting}
+                    className="icon-button accent"
+                    aria-label="Save student"
+                  >
+                    <span aria-hidden>💾</span>
+                    <span className="sr-only">Save student</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStudentFormOpen(false);
+                      setStudentForm(emptyStudent);
+                      setSavingError('');
+                      setSavingMessage('');
+                    }}
+                    className="icon-button text-xs"
+                  >
+                    Cancel
+                  </button>
+                  {savingMessage && <span className="text-sm text-emerald-300">{savingMessage}</span>}
+                  {savingError && <span className="text-sm text-rose-300">{savingError}</span>}
+                </div>
+              </div>
+            )}
+
             <div className="mt-4 grid max-h-[32rem] gap-3 overflow-auto pr-2 explorer-grid">
               {filteredStudents.map(renderStudentCard)}
               {!loading && !filteredStudents.length && <p className="text-slate-300">No students match that search.</p>}
@@ -268,11 +329,14 @@ const Explorer = () => {
               </div>
               <button
                 type="button"
-                onClick={openModuleModal}
+                onClick={() => {
+                  if (!moduleFormOpen) openModuleModal();
+                  else setModuleFormOpen(false);
+                }}
                 className="icon-button accent text-xs"
                 aria-label="Add module"
               >
-                <span aria-hidden>➕</span>
+                <span aria-hidden>{moduleFormOpen ? '—' : '➕'}</span>
               </button>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -292,6 +356,60 @@ const Explorer = () => {
                 <option value="nameAsc">Name: A to Z</option>
               </select>
             </div>
+            {moduleFormOpen && (
+              <div className="mt-4 space-y-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input
+                    value={moduleForm.code}
+                    onChange={(e) => setModuleForm({ ...moduleForm, code: e.target.value })}
+                    className="field"
+                    placeholder="Module code"
+                  />
+                  <input
+                    value={moduleForm.name}
+                    onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })}
+                    className="field"
+                    placeholder="Module name"
+                  />
+                  <label className="flex items-center gap-3 sm:col-span-2 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10">
+                    <input
+                      type="checkbox"
+                      checked={moduleForm.mnc}
+                      onChange={(e) => setModuleForm({ ...moduleForm, mnc: e.target.checked })}
+                      className="h-5 w-5 rounded border-white/30 bg-white/10 text-sky-400 focus:ring-white/40"
+                    />
+                    <span className="text-slate-200">Mandatory module</span>
+                  </label>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveModule}
+                    disabled={submitting}
+                    className="icon-button accent"
+                    aria-label="Save module"
+                  >
+                    <span aria-hidden>💾</span>
+                    <span className="sr-only">Save module</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModuleFormOpen(false);
+                      setModuleForm(emptyModule);
+                      setSavingError('');
+                      setSavingMessage('');
+                    }}
+                    className="icon-button text-xs"
+                  >
+                    Cancel
+                  </button>
+                  {savingMessage && <span className="text-sm text-emerald-300">{savingMessage}</span>}
+                  {savingError && <span className="text-sm text-rose-300">{savingError}</span>}
+                </div>
+              </div>
+            )}
+
             <div className="mt-4 grid max-h-[32rem] gap-3 overflow-auto pr-2 explorer-grid">
               {filteredModules.map(renderModuleCard)}
               {!loading && !filteredModules.length && <p className="text-slate-300">No modules match that search.</p>}
@@ -299,139 +417,6 @@ const Explorer = () => {
           </div>
         </div>
 
-        {(studentFormOpen || moduleFormOpen) && (
-          <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 px-4 py-6">
-            <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl ring-1 ring-white/20">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Create</p>
-                  <h3 className="text-xl font-semibold text-white">{studentFormOpen ? 'Add a student' : 'Add a module'}</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStudentFormOpen(false);
-                    setModuleFormOpen(false);
-                  }}
-                  className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/20"
-                >
-                  Close
-                </button>
-              </div>
-
-              {savingMessage && <p className="mt-2 text-sm text-emerald-300">{savingMessage}</p>}
-              {savingError && <p className="mt-2 text-sm text-rose-300">{savingError}</p>}
-
-              {studentFormOpen && (
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm text-slate-200" htmlFor="firstName">First name</label>
-                    <input
-                      id="firstName"
-                      value={studentForm.firstName}
-                      onChange={(e) => setStudentForm({ ...studentForm, firstName: e.target.value })}
-                      className="field"
-                      placeholder="Ada"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-slate-200" htmlFor="lastName">Last name</label>
-                    <input
-                      id="lastName"
-                      value={studentForm.lastName}
-                      onChange={(e) => setStudentForm({ ...studentForm, lastName: e.target.value })}
-                      className="field"
-                      placeholder="Lovelace"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-slate-200" htmlFor="userName">Username</label>
-                    <input
-                      id="userName"
-                      value={studentForm.userName}
-                      onChange={(e) => setStudentForm({ ...studentForm, userName: e.target.value })}
-                      className="field"
-                      placeholder="ada.l"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-slate-200" htmlFor="email">Email</label>
-                    <input
-                      id="email"
-                      type="email"
-                      value={studentForm.email}
-                      onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
-                      className="field"
-                      placeholder="ada@example.com"
-                    />
-                  </div>
-                  <div className="sm:col-span-2 flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={handleSaveStudent}
-                      disabled={submitting}
-                      className="icon-button accent"
-                      aria-label="Save student"
-                    >
-                      <span aria-hidden>💾</span>
-                      <span className="sr-only">Save student</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {moduleFormOpen && (
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm text-slate-200" htmlFor="code">Module code</label>
-                    <input
-                      id="code"
-                      value={moduleForm.code}
-                      onChange={(e) => setModuleForm({ ...moduleForm, code: e.target.value })}
-                      className="field"
-                      placeholder="COMP0010"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-slate-200" htmlFor="name">Module name</label>
-                    <input
-                      id="name"
-                      value={moduleForm.name}
-                      onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })}
-                      className="field"
-                      placeholder="Software Engineering"
-                    />
-                  </div>
-                  <div className="space-y-2 sm:col-span-2">
-                    <label className="text-sm text-slate-200" htmlFor="mnc">Mandatory</label>
-                    <div className="flex items-center gap-3 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10">
-                      <input
-                        id="mnc"
-                        type="checkbox"
-                        checked={moduleForm.mnc}
-                        onChange={(e) => setModuleForm({ ...moduleForm, mnc: e.target.checked })}
-                        className="h-5 w-5 rounded border-white/30 bg-white/10 text-sky-400 focus:ring-white/40"
-                      />
-                      <span className="text-slate-200">Toggle if this module is mandatory.</span>
-                    </div>
-                  </div>
-                  <div className="sm:col-span-2 flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={handleSaveModule}
-                      disabled={submitting}
-                      className="icon-button accent"
-                      aria-label="Save module"
-                    >
-                      <span aria-hidden>💾</span>
-                      <span className="sr-only">Save module</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

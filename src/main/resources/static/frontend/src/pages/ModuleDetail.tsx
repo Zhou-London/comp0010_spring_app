@@ -47,9 +47,9 @@ const ModuleDetail = () => {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [showModuleModal, setShowModuleModal] = useState(false);
-  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
-  const [showGradeModal, setShowGradeModal] = useState(false);
+  const [editingModule, setEditingModule] = useState(false);
+  const [editingRegistrationId, setEditingRegistrationId] = useState<number | 'new' | null>(null);
+  const [editingGradeId, setEditingGradeId] = useState<number | 'new' | null>(null);
 
   const fetchData = async () => {
     if (!id) return;
@@ -95,7 +95,7 @@ const ModuleDetail = () => {
     try {
       await apiFetch(`/modules/${id}`, { method: 'PUT', body: moduleForm });
       setMessage('Module updated.');
-      setShowModuleModal(false);
+      setEditingModule(false);
       await fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save module');
@@ -138,13 +138,13 @@ const ModuleDetail = () => {
           method: 'POST',
           body: { studentId: Number(registrationForm.studentId), moduleId: id },
         });
-      setMessage('Registration created.');
-    }
-    setRegistrationForm(emptyRegistration);
-    setShowRegistrationModal(false);
-    await fetchData();
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Unable to save registration');
+        setMessage('Registration created.');
+      }
+      setRegistrationForm(emptyRegistration);
+      setEditingRegistrationId(null);
+      await fetchData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to save registration');
     } finally {
       setSubmitting(false);
     }
@@ -183,7 +183,7 @@ const ModuleDetail = () => {
       });
       setMessage('Grade saved.');
       setGradeForm(emptyGrade);
-      setShowGradeModal(false);
+      setEditingGradeId(null);
       await fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save grade');
@@ -243,36 +243,96 @@ const ModuleDetail = () => {
                 className="icon-button text-xs absolute right-5 top-5"
                 onClick={() => {
                   setModuleForm(module);
-                  setShowModuleModal(true);
+                  setEditingModule((prev) => !prev);
                 }}
                 aria-label="Edit module"
               >
-                <span aria-hidden>✏️</span>
+                <span aria-hidden>{editingModule ? '✖️' : '✏️'}</span>
               </button>
-              <div className="flex items-start justify-between gap-4 pr-24">
-                <div className="space-y-1">
-                  <p className="text-sm uppercase tracking-[0.25em] text-slate-300/80">{module.code}</p>
-                  <h2 className="text-2xl font-semibold text-white">{module.name}</h2>
-                  <p className="text-sm text-slate-300">ID: {module.id}</p>
-                  <p className="text-sm text-slate-300">{module.mnc ? 'Mandatory' : 'Elective'}</p>
-                </div>
-                <span className="pill bg-white/10">Avg grade: {averageGrade}</span>
-              </div>
 
-              <div className="mt-5 space-y-2">
+              <div className="space-y-3">
                 <div className="info-row">
                   <span className="info-label">Module code</span>
-                  <span className="info-value">{module.code}</span>
+                  {editingModule ? (
+                    <input
+                      id="code"
+                      value={moduleForm.code}
+                      onChange={(e) => setModuleForm({ ...moduleForm, code: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{module.code}</span>
+                  )}
                 </div>
                 <div className="info-row">
                   <span className="info-label">Module name</span>
-                  <span className="info-value">{module.name}</span>
+                  {editingModule ? (
+                    <input
+                      id="name"
+                      value={moduleForm.name}
+                      onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{module.name}</span>
+                  )}
                 </div>
                 <div className="info-row">
-                  <span className="info-label">Status</span>
-                  <span className="info-value">{module.mnc ? 'Mandatory' : 'Elective'}</span>
+                  <span className="info-label">Mandatory</span>
+                  {editingModule ? (
+                    <label className="flex items-center gap-3">
+                      <input
+                        id="mnc"
+                        type="checkbox"
+                        checked={moduleForm.mnc}
+                        onChange={(e) => setModuleForm({ ...moduleForm, mnc: e.target.checked })}
+                        className="h-5 w-5 rounded border-white/30 bg-white/10 text-sky-400 focus:ring-white/40"
+                      />
+                      <span className="text-slate-200">Mandatory module</span>
+                    </label>
+                  ) : (
+                    <span className="info-value">{module.mnc ? 'Mandatory' : 'Elective'}</span>
+                  )}
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Module ID</span>
+                  <span className="info-value">{module.id}</span>
                 </div>
               </div>
+
+              {editingModule && (
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveModule}
+                    disabled={submitting}
+                    className="icon-button accent"
+                    aria-label="Save module"
+                  >
+                    <span aria-hidden>💾</span>
+                    <span className="sr-only">Save module</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingModule(false);
+                      setModuleForm(module);
+                    }}
+                    className="icon-button text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteModule}
+                    className="icon-button danger"
+                    aria-label="Delete module"
+                  >
+                    <span aria-hidden>🗑️</span>
+                    <span className="sr-only">Delete module</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-6">
@@ -283,14 +343,64 @@ const ModuleDetail = () => {
                     type="button"
                     onClick={() => {
                       setRegistrationForm(emptyRegistration);
-                      setShowRegistrationModal(true);
+                      setEditingRegistrationId((prev) => (prev === 'new' ? null : 'new'));
                     }}
                     className="icon-button text-xs"
                     aria-label="Add registration"
                   >
-                    <span aria-hidden>➕</span>
+                    <span aria-hidden>{editingRegistrationId === 'new' ? '—' : '➕'}</span>
                   </button>
                 </div>
+                {editingRegistrationId !== null && (
+                  <div className="mt-3 space-y-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+                    <div className="space-y-2">
+                      <label className="text-sm text-slate-200" htmlFor="studentId">Student</label>
+                      <select
+                        id="studentId"
+                        value={registrationForm.studentId}
+                        onChange={(e) => setRegistrationForm({ ...registrationForm, studentId: e.target.value })}
+                        className="field"
+                      >
+                        <option value="">Select a student</option>
+                        {students.map((student) => (
+                          <option key={student.id} value={student.id}>{student.userName} — {student.email}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={saveRegistration}
+                        disabled={submitting}
+                        className="icon-button accent"
+                        aria-label={registrationForm.id ? 'Update registration' : 'Create registration'}
+                      >
+                        <span aria-hidden>💾</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingRegistrationId(null);
+                          setRegistrationForm(emptyRegistration);
+                        }}
+                        className="icon-button text-xs"
+                      >
+                        Cancel
+                      </button>
+                      {registrationForm.id && (
+                        <button
+                          type="button"
+                          onClick={() => deleteRegistration(registrationForm.id)}
+                          className="icon-button danger"
+                          aria-label="Delete registration"
+                        >
+                          <span aria-hidden>🗑️</span>
+                          <span className="sr-only">Delete registration</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
                   {registrations.map((registration) => (
                     <div
@@ -309,7 +419,7 @@ const ModuleDetail = () => {
                               id: registration.id,
                               studentId: registration.student?.id?.toString() ?? '',
                             });
-                            setShowRegistrationModal(true);
+                            setEditingRegistrationId(registration.id ?? null);
                           }}
                           className="icon-button px-3 py-2"
                           aria-label="Edit registration"
@@ -324,20 +434,86 @@ const ModuleDetail = () => {
               </div>
 
               <div className="rounded-3xl border border-white/5 bg-white/5 p-6 ring-1 ring-white/10">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-lg font-semibold text-white">Grades</h3>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-semibold text-white">Grades</h3>
+                    <span className="pill bg-white/10 text-xs">Avg grade: {averageGrade}</span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
                       setGradeForm(emptyGrade);
-                      setShowGradeModal(true);
+                      setEditingGradeId((prev) => (prev === 'new' ? null : 'new'));
                     }}
                     className="icon-button text-xs"
                     aria-label="Add grade"
                   >
-                    <span aria-hidden>➕</span>
+                    <span aria-hidden>{editingGradeId === 'new' ? '—' : '➕'}</span>
                   </button>
                 </div>
+                {editingGradeId !== null && (
+                  <div className="mt-3 space-y-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2 sm:col-span-2">
+                        <label className="text-sm text-slate-200" htmlFor="gradeStudent">Student</label>
+                        <select
+                          id="gradeStudent"
+                          value={gradeForm.studentId}
+                          onChange={(e) => setGradeForm({ ...gradeForm, studentId: e.target.value })}
+                          className="field"
+                        >
+                          <option value="">Select a student</option>
+                          {students.map((student) => (
+                            <option key={student.id} value={student.id}>{student.userName} — {student.email}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-slate-200" htmlFor="moduleScore">Score</label>
+                        <input
+                          id="moduleScore"
+                          type="number"
+                          value={gradeForm.score}
+                          onChange={(e) => setGradeForm({ ...gradeForm, score: e.target.value })}
+                          className="field"
+                          placeholder="80"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={saveGrade}
+                        disabled={submitting}
+                        className="icon-button accent"
+                        aria-label={gradeForm.id ? 'Update grade' : 'Save grade'}
+                      >
+                        <span aria-hidden>💾</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingGradeId(null);
+                          setGradeForm(emptyGrade);
+                        }}
+                        className="icon-button text-xs"
+                      >
+                        Cancel
+                      </button>
+                      {gradeForm.id && (
+                        <button
+                          type="button"
+                          onClick={() => deleteGrade(gradeForm.id)}
+                          className="icon-button danger"
+                          aria-label="Delete grade"
+                        >
+                          <span aria-hidden>🗑️</span>
+                          <span className="sr-only">Delete grade</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
                   {grades.map((grade) => (
                     <div
@@ -357,7 +533,7 @@ const ModuleDetail = () => {
                               studentId: grade.student?.id?.toString() ?? '',
                               score: grade.score?.toString() ?? '',
                             });
-                            setShowGradeModal(true);
+                            setEditingGradeId(grade.id ?? null);
                           }}
                           className="icon-button px-3 py-2"
                           aria-label="Edit grade"
@@ -374,198 +550,6 @@ const ModuleDetail = () => {
           </div>
         )}
       </div>
-
-      {showModuleModal && (
-        <div className="dialog-backdrop">
-          <div className="dialog-panel">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Edit module</p>
-                <h3 className="text-xl font-semibold text-white">Update module details</h3>
-              </div>
-              <button type="button" className="icon-button text-xs" onClick={() => setShowModuleModal(false)}>
-                Close
-              </button>
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm text-slate-200" htmlFor="code">Module code</label>
-                <input
-                  id="code"
-                  value={moduleForm.code}
-                  onChange={(e) => setModuleForm({ ...moduleForm, code: e.target.value })}
-                  className="field"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-200" htmlFor="name">Module name</label>
-                <input
-                  id="name"
-                  value={moduleForm.name}
-                  onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })}
-                  className="field"
-                />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <label className="text-sm text-slate-200" htmlFor="mnc">Mandatory</label>
-                <div className="flex items-center gap-3 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10">
-                  <input
-                    id="mnc"
-                    type="checkbox"
-                    checked={moduleForm.mnc}
-                    onChange={(e) => setModuleForm({ ...moduleForm, mnc: e.target.checked })}
-                    className="h-5 w-5 rounded border-white/30 bg-white/10 text-sky-400 focus:ring-white/40"
-                  />
-                  <span className="text-slate-200">Toggle if this module is mandatory.</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={handleSaveModule}
-                disabled={submitting}
-                className="icon-button accent"
-                aria-label="Save module"
-              >
-                <span aria-hidden>💾</span>
-                <span className="sr-only">Save module</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteModule}
-                className="icon-button danger"
-                aria-label="Delete module"
-              >
-                <span aria-hidden>🗑️</span>
-                <span className="sr-only">Delete module</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showRegistrationModal && (
-        <div className="dialog-backdrop">
-          <div className="dialog-panel">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Registration</p>
-                <h3 className="text-xl font-semibold text-white">{registrationForm.id ? 'Edit' : 'Add'} registration</h3>
-              </div>
-              <button type="button" className="icon-button text-xs" onClick={() => setShowRegistrationModal(false)}>
-                Close
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              <div className="space-y-2">
-                <label className="text-sm text-slate-200" htmlFor="studentId">Student</label>
-                <select
-                  id="studentId"
-                  value={registrationForm.studentId}
-                  onChange={(e) => setRegistrationForm({ ...registrationForm, studentId: e.target.value })}
-                  className="field"
-                >
-                  <option value="">Select a student</option>
-                  {students.map((student) => (
-                    <option key={student.id} value={student.id}>{student.userName} — {student.email}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={saveRegistration}
-                disabled={submitting}
-                className="icon-button accent"
-                aria-label={registrationForm.id ? 'Update registration' : 'Create registration'}
-              >
-                <span aria-hidden>💾</span>
-              </button>
-              {registrationForm.id && (
-                <button
-                  type="button"
-                  onClick={() => deleteRegistration(registrationForm.id)}
-                  className="icon-button danger"
-                  aria-label="Delete registration"
-                >
-                  <span aria-hidden>🗑️</span>
-                  <span className="sr-only">Delete registration</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showGradeModal && (
-        <div className="dialog-backdrop">
-          <div className="dialog-panel">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Grade</p>
-                <h3 className="text-xl font-semibold text-white">{gradeForm.id ? 'Edit' : 'Add'} grade</h3>
-              </div>
-              <button type="button" className="icon-button text-xs" onClick={() => setShowGradeModal(false)}>
-                Close
-              </button>
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2 sm:col-span-2">
-                <label className="text-sm text-slate-200" htmlFor="gradeStudent">Student</label>
-                <select
-                  id="gradeStudent"
-                  value={gradeForm.studentId}
-                  onChange={(e) => setGradeForm({ ...gradeForm, studentId: e.target.value })}
-                  className="field"
-                >
-                  <option value="">Select a student</option>
-                  {students.map((student) => (
-                    <option key={student.id} value={student.id}>{student.userName} — {student.email}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-200" htmlFor="moduleScore">Score</label>
-                <input
-                  id="moduleScore"
-                  type="number"
-                  value={gradeForm.score}
-                  onChange={(e) => setGradeForm({ ...gradeForm, score: e.target.value })}
-                  className="field"
-                  placeholder="80"
-                />
-              </div>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={saveGrade}
-                disabled={submitting}
-                className="icon-button accent"
-                aria-label={gradeForm.id ? 'Update grade' : 'Save grade'}
-              >
-                <span aria-hidden>💾</span>
-              </button>
-              {gradeForm.id && (
-                <button
-                  type="button"
-                  onClick={() => deleteGrade(gradeForm.id)}
-                  className="icon-button danger"
-                  aria-label="Delete grade"
-                >
-                  <span aria-hidden>🗑️</span>
-                  <span className="sr-only">Delete grade</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
