@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.ac.ucl.comp0010.controllers.responses.StudentStatisticsResponse;
 import uk.ac.ucl.comp0010.exceptions.NoGradeAvailableException;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.exceptions.ResourceConflictException;
@@ -95,6 +98,14 @@ class StudentServiceTest {
   void updateStudentChecksConflictsAndSaves() {
     Student existing = new Student("Ada", "Lovelace", "ada", "ada@example.com");
     Student updated = new Student("Ada", "Lovelace", "ada2", "ada2@example.com");
+    updated.setMajor("Mathematics");
+    updated.setEntryYear(2020);
+    updated.setGraduateYear(2024);
+    updated.setTuitionFee(new BigDecimal("9000.00"));
+    updated.setPaidTuitionFee(new BigDecimal("3000.00"));
+    updated.setBirthDate(LocalDate.of(2001, 1, 1));
+    updated.setHomeStudent(Boolean.TRUE);
+    updated.setSex("Female");
 
     when(studentRepository.findById(1L)).thenReturn(Optional.of(existing),
         Optional.of(new Student("Ada", "Lovelace", "ada", "ada@example.com")),
@@ -105,6 +116,14 @@ class StudentServiceTest {
 
     Student result = studentService.updateStudent(1L, updated);
     assertThat(result.getUserName()).isEqualTo("ada2");
+    assertThat(result.getMajor()).isEqualTo("Mathematics");
+    assertThat(result.getEntryYear()).isEqualTo(2020);
+    assertThat(result.getGraduateYear()).isEqualTo(2024);
+    assertThat(result.getTuitionFee()).isEqualByComparingTo("9000.00");
+    assertThat(result.getPaidTuitionFee()).isEqualByComparingTo("3000.00");
+    assertThat(result.getBirthDate()).isEqualTo(LocalDate.of(2001, 1, 1));
+    assertThat(result.getHomeStudent()).isTrue();
+    assertThat(result.getSex()).isEqualTo("Female");
 
     when(studentRepository.existsByUserName("ada2")).thenReturn(true);
     assertThatThrownBy(() -> studentService.updateStudent(1L, updated))
@@ -228,5 +247,30 @@ class StudentServiceTest {
 
     assertThat(studentService.getAllStudents()).hasSize(1);
     verify(studentRepository).findAll();
+  }
+
+  @Test
+  void statisticsResponseIncludesProfileAndAverage() {
+    Student student = new Student("Ada", "Lovelace", "ada", "ada@example.com");
+    student.setId(1L);
+    student.setMajor("Computer Science");
+    student.setEntryYear(2022);
+    student.setGraduateYear(2025);
+    student.setTuitionFee(new BigDecimal("10000"));
+    student.setPaidTuitionFee(new BigDecimal("7500"));
+    student.setBirthDate(LocalDate.of(2003, 5, 1));
+    student.setHomeStudent(Boolean.FALSE);
+    student.setSex("Female");
+
+    when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+    when(gradeRepository.findAllByStudent(student))
+        .thenReturn(List.of(new Grade(student, new Module(), 80), new Grade(student, new Module(), 60)));
+
+    StudentStatisticsResponse stats = studentService.getStudentStatistics(1L);
+
+    assertThat(stats.getAverageScore()).isEqualTo(70.0);
+    assertThat(stats.getOutstandingTuition()).isEqualByComparingTo("2500");
+    assertThat(stats.getMajor()).isEqualTo("Computer Science");
+    assertThat(stats.getHomeStudent()).isFalse();
   }
 }

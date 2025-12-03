@@ -20,6 +20,14 @@ const emptyStudent: Student = {
   lastName: '',
   userName: '',
   email: '',
+  entryYear: null,
+  graduateYear: null,
+  major: '',
+  tuitionFee: null,
+  paidTuitionFee: null,
+  birthDate: null,
+  homeStudent: null,
+  sex: '',
 };
 
 const emptyRegistration: RegistrationFormState = {
@@ -61,6 +69,16 @@ const StudentDetail = () => {
   const [registrationSort, setRegistrationSort] = useState<'code' | 'name' | 'id'>('code');
   const [gradeQuery, setGradeQuery] = useState('');
   const [gradeSort, setGradeSort] = useState<'module' | 'scoreDesc' | 'scoreAsc'>('module');
+
+  const toNumberOrNull = (value: string) => (value ? Number(value) : null);
+  const toBooleanOrNull = (value: string) => {
+    if (value === '') return null;
+    return value === 'true';
+  };
+  const formatCurrency = (value?: number | null) => {
+    if (value == null) return '—';
+    return `£${value.toFixed(2)}`;
+  };
 
   const fetchData = async () => {
     if (!id) return;
@@ -104,6 +122,17 @@ const StudentDetail = () => {
     const total = grades.reduce((acc, grade) => acc + (grade.score ?? 0), 0);
     return (total / grades.length).toFixed(1);
   }, [grades]);
+
+  const outstandingTuition = useMemo(() => {
+    if (student?.tuitionFee == null) return null;
+    const paid = student.paidTuitionFee ?? 0;
+    return Number((student.tuitionFee - paid).toFixed(2));
+  }, [student]);
+
+  const residencyLabel = useMemo(() => {
+    if (student?.homeStudent == null) return '—';
+    return student.homeStudent ? 'Home student' : 'International';
+  }, [student]);
 
   const filteredRegistrations = useMemo(() => {
     const query = registrationQuery.trim().toLowerCase();
@@ -520,6 +549,123 @@ const StudentDetail = () => {
             )}
           </div>
           <div className="info-row">
+            <span className="info-label">Major</span>
+            {editingStudent ? (
+              <input
+                id="major"
+                value={studentForm.major ?? ''}
+                onChange={(e) => setStudentForm({ ...studentForm, major: e.target.value })}
+                className="field max-w-sm"
+              />
+            ) : (
+              <span className="info-value">{student?.major || '—'}</span>
+            )}
+          </div>
+          <div className="info-row">
+            <span className="info-label">Entry year</span>
+            {editingStudent ? (
+              <input
+                id="entryYear"
+                type="number"
+                value={studentForm.entryYear ?? ''}
+                onChange={(e) => setStudentForm({ ...studentForm, entryYear: toNumberOrNull(e.target.value) })}
+                className="field max-w-xs"
+              />
+            ) : (
+              <span className="info-value">{student?.entryYear ?? '—'}</span>
+            )}
+          </div>
+          <div className="info-row">
+            <span className="info-label">Graduate year</span>
+            {editingStudent ? (
+              <input
+                id="graduateYear"
+                type="number"
+                value={studentForm.graduateYear ?? ''}
+                onChange={(e) => setStudentForm({ ...studentForm, graduateYear: toNumberOrNull(e.target.value) })}
+                className="field max-w-xs"
+              />
+            ) : (
+              <span className="info-value">{student?.graduateYear ?? '—'}</span>
+            )}
+          </div>
+          <div className="info-row">
+            <span className="info-label">Birth date</span>
+            {editingStudent ? (
+              <input
+                id="birthDate"
+                type="date"
+                value={studentForm.birthDate ?? ''}
+                onChange={(e) => setStudentForm({ ...studentForm, birthDate: e.target.value || null })}
+                className="field max-w-xs"
+              />
+            ) : (
+              <span className="info-value">{student?.birthDate || '—'}</span>
+            )}
+          </div>
+          <div className="info-row">
+            <span className="info-label">Sex</span>
+            {editingStudent ? (
+              <input
+                id="sex"
+                value={studentForm.sex ?? ''}
+                onChange={(e) => setStudentForm({ ...studentForm, sex: e.target.value })}
+                className="field max-w-xs"
+              />
+            ) : (
+              <span className="info-value">{student?.sex || '—'}</span>
+            )}
+          </div>
+          <div className="info-row">
+            <span className="info-label">Residency</span>
+            {editingStudent ? (
+              <select
+                id="homeStudent"
+                value={studentForm.homeStudent == null ? '' : String(studentForm.homeStudent)}
+                onChange={(e) => setStudentForm({ ...studentForm, homeStudent: toBooleanOrNull(e.target.value) })}
+                className="field max-w-xs"
+              >
+                <option value="">Select</option>
+                <option value="true">Home student</option>
+                <option value="false">International</option>
+              </select>
+            ) : (
+              <span className="info-value">
+                {student?.homeStudent == null ? '—' : student.homeStudent ? 'Home student' : 'International'}
+              </span>
+            )}
+          </div>
+          <div className="info-row">
+            <span className="info-label">Tuition fee</span>
+            {editingStudent ? (
+              <input
+                id="tuitionFee"
+                type="number"
+                step="0.01"
+                value={studentForm.tuitionFee ?? ''}
+                onChange={(e) => setStudentForm({ ...studentForm, tuitionFee: toNumberOrNull(e.target.value) })}
+                className="field max-w-xs"
+              />
+            ) : (
+              <span className="info-value">{formatCurrency(student?.tuitionFee)}</span>
+            )}
+          </div>
+          <div className="info-row">
+            <span className="info-label">Paid tuition</span>
+            {editingStudent ? (
+              <input
+                id="paidTuitionFee"
+                type="number"
+                step="0.01"
+                value={studentForm.paidTuitionFee ?? ''}
+                onChange={(e) => setStudentForm({ ...studentForm, paidTuitionFee: toNumberOrNull(e.target.value) })}
+                className="field max-w-xs"
+              />
+            ) : (
+              <span className="info-value">{formatCurrency(student?.paidTuitionFee)}</span>
+            )}
+          </div>
+          <div className="info-row">
             <span className="info-label">Student ID</span>
             <span className="info-value">{student?.id}</span>
           </div>
@@ -556,6 +702,26 @@ const StudentDetail = () => {
               <span aria-hidden>🗑️</span>
               <span className="sr-only">Delete student</span>
             </button>
+          </div>
+        )}
+
+        {!editingStudent && (
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="surface-card rounded-2xl p-4 ring-1 ring-white/10">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Average</p>
+              <p className="text-2xl font-semibold text-white">{averageScore}</p>
+              <p className="text-sm text-slate-300">Across {grades.length || 'no'} recorded grades.</p>
+            </div>
+            <div className="surface-card rounded-2xl p-4 ring-1 ring-white/10">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Outstanding</p>
+              <p className="text-2xl font-semibold text-white">{formatCurrency(outstandingTuition)}</p>
+              <p className="text-sm text-slate-300">Remaining from total tuition.</p>
+            </div>
+            <div className="surface-card rounded-2xl p-4 ring-1 ring-white/10">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Residency</p>
+              <p className="text-2xl font-semibold text-white">{residencyLabel}</p>
+              <p className="text-sm text-slate-300">Used for fee calculations.</p>
+            </div>
           </div>
         )}
       </div>
