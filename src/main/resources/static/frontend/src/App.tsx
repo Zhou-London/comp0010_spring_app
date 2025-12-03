@@ -4,7 +4,8 @@ import { MoonIcon, SunIcon } from './components/Icons';
 
 const navigation = [
   { label: 'Home', path: '/' },
-  { label: 'Explorer', path: '/explorer' },
+  { label: 'Students', path: '/students' },
+  { label: 'Modules', path: '/modules' },
   { label: 'Profile', path: '/profile' },
 ];
 

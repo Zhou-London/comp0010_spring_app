@@ -110,7 +110,7 @@ const ModuleDetail = () => {
     setError('');
     try {
       await apiFetch(`/modules/${id}`, { method: 'DELETE' });
-      navigate('/explorer');
+      navigate('/modules');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete module');
     } finally {
@@ -224,10 +224,10 @@ const ModuleDetail = () => {
             <p className="text-slate-200/80">Update this module, registrations, and grades in one place.</p>
           </div>
           <Link
-            to="/explorer"
+            to="/modules"
             className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-slate-200 ring-1 ring-white/20 hover:bg-white/20"
           >
-            Back to explorer
+            Back to modules
           </Link>
         </div>
 
