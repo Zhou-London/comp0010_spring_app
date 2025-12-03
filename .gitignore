@@ -9,7 +9,7 @@
 target
 
 # Env file
-*.env
+*.env.*
 
 .idea/
 
