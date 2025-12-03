@@ -47,7 +47,7 @@ const App = () => {
   return (
     <div className={`app-shell ${theme === 'light' ? 'theme-light' : 'theme-dark'}`}>
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-10 sm:py-14">
-        <header className="flex items-center justify-between rounded-full bg-white/5 px-6 py-3 shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl ring-1 ring-white/10">
+        <header className="relative z-20 flex items-center justify-between rounded-full bg-white/5 px-6 py-3 shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl ring-1 ring-white/10">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-700 shadow-inner"></div>
             <div>
@@ -88,13 +88,13 @@ const App = () => {
                 type="button"
                 onClick={() => setMenuOpen((prev) => !prev)}
                 className="icon-button"
-                aria-label="User profile"
+                aria-label="User menu"
               >
                 <span aria-hidden>👤</span>
-                <span className="hidden sm:inline">User Profile</span>
+                <span className="hidden sm:inline">User</span>
               </button>
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-black/70 p-2 text-sm text-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
+                <div className="absolute right-0 z-30 mt-2 w-48 rounded-2xl menu-surface p-2 text-sm">
                   <button
                     type="button"
                     className="w-full rounded-xl px-3 py-2 text-left hover:bg-white/10"
@@ -120,7 +120,7 @@ const App = () => {
                 </div>
               )}
             </div>
-            <button type="button" onClick={toggleTheme} className="icon-button" aria-label={themeLabel}>
+            <button type="button" onClick={toggleTheme} className="icon-button compact" aria-label={themeLabel}>
               {themeIcon}
               <span className="hidden sm:inline">{themeLabel}</span>
             </button>
