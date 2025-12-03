@@ -53,7 +53,7 @@ const routes: RouteObject[] = [
         ),
       },
       {
-        path: 'students/:studentId',
+        path: 'students/:studentId/:section?',
         element: (
           <Suspense fallback={<Loading />}>
             <StudentDetail />
@@ -61,7 +61,7 @@ const routes: RouteObject[] = [
         ),
       },
       {
-        path: 'modules/:moduleId',
+        path: 'modules/:moduleId/:section?',
         element: (
           <Suspense fallback={<Loading />}>
             <ModuleDetail />
