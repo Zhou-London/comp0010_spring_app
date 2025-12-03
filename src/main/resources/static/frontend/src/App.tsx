@@ -46,8 +46,8 @@ const App = () => {
 
   return (
     <div className={`app-shell ${theme === 'light' ? 'theme-light' : 'theme-dark'}`}>
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-10 sm:py-14">
-        <header className="relative z-20 flex items-center justify-between rounded-full bg-white/5 px-6 py-3 shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl ring-1 ring-white/10">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-14">
+        <header className="relative z-20 flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-white/5 px-6 py-3 shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl ring-1 ring-white/10">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-700 shadow-inner"></div>
             <div>
@@ -55,7 +55,7 @@ const App = () => {
               <p className="text-lg font-semibold">Management Centre</p>
             </div>
           </div>
-          <nav className="hidden items-center gap-2 rounded-full bg-white/5 px-2 py-1 text-sm font-medium text-slate-200 shadow-inner shadow-black/30 ring-1 ring-white/10 sm:flex">
+          <nav className="order-3 flex w-full flex-wrap items-center justify-center gap-2 rounded-2xl bg-white/5 px-2 py-1 text-sm font-medium text-slate-200 shadow-inner shadow-black/30 ring-1 ring-white/10 sm:order-none sm:w-auto">
             {navigation.map((item) => (
               <NavLink
                 key={item.path}
@@ -73,7 +73,7 @@ const App = () => {
               </NavLink>
             ))}
           </nav>
-          <div className="flex items-center gap-2" ref={menuRef}>
+          <div className="flex flex-1 items-center justify-end gap-2" ref={menuRef}>
             {user ? (
               <div className="hidden rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 shadow-inner shadow-black/30 sm:block">
                 Signed in as <span className="text-white">{user.username}</span>

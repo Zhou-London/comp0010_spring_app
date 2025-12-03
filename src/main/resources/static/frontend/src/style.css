@@ -312,3 +312,18 @@ a {
 :root[data-theme='light'] .shadow-black\/40 {
   --tw-shadow-color: rgba(15, 23, 42, 0.35) !important;
 }
+
+@media (max-width: 640px) {
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .info-row .info-value {
+    width: 100%;
+  }
+
+  .surface-card.explorer-card {
+    max-width: 100%;
+  }
+}
