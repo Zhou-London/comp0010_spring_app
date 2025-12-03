@@ -52,7 +52,7 @@ const Api = () => {
     <div className="glass-panel">
       <div className="flex flex-col gap-8 p-8 sm:p-10">
         <div className="flex flex-col gap-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-300">API</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-300">APIs hub</p>
           <h1 className="text-3xl font-semibold text-white sm:text-4xl">Backend tokens & endpoints</h1>
           <p className="text-slate-200/80">
             Authenticate once to unlock create, update, and delete operations. Your current bearer token is displayed below

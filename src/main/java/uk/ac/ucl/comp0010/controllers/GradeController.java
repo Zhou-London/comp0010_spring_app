@@ -21,7 +21,7 @@ import uk.ac.ucl.comp0010.services.GradeService;
  * Controller for Grade.
  */
 @RestController
-@RequestMapping("/grades")
+@RequestMapping("/api/grades")
 public class GradeController {
   private final GradeService gradeService;
 

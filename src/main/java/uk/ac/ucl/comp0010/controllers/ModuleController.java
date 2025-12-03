@@ -22,7 +22,7 @@ import uk.ac.ucl.comp0010.services.RegistrationService;
  * REST controller for module operations.
  */
 @RestController
-@RequestMapping("/modules")
+@RequestMapping("/api/modules")
 public class ModuleController {
   private final ModuleService moduleService;
   private final RegistrationService registrationService;

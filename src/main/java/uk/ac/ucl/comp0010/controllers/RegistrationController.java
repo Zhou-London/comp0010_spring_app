@@ -20,7 +20,7 @@ import uk.ac.ucl.comp0010.services.RegistrationService;
  * REST controller for registration interactions.
  */
 @RestController
-@RequestMapping("/registrations")
+@RequestMapping("/api/registrations")
 public class RegistrationController {
   private final RegistrationService registrationService;
 

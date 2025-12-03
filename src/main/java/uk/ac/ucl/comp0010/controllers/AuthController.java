@@ -18,7 +18,7 @@ import uk.ac.ucl.comp0010.services.UserService;
  * Endpoints for registering and logging in users.
  */
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
   private final UserService userService;
