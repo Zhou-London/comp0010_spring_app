@@ -239,18 +239,25 @@ const ModuleDetail = () => {
 
         {module && (
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="relative rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
-              <button
-                type="button"
-                className="icon-button text-xs absolute right-5 top-5"
-                onClick={() => requireAuth(() => {
-                  setModuleForm(module);
-                  setEditingModule((prev) => !prev);
-                })}
-                aria-label="Edit module"
-              >
-                <span aria-hidden>{editingModule ? '✖️' : '✏️'}</span>
-              </button>
+            <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+              <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Module profile</p>
+                  <h2 className="text-xl font-semibold text-white">Module details</h2>
+                </div>
+                <button
+                  type="button"
+                  className="icon-button accent px-4 py-2 text-sm"
+                  onClick={() => requireAuth(() => {
+                    setModuleForm(module);
+                    setEditingModule((prev) => !prev);
+                  })}
+                  aria-label="Edit module"
+                >
+                  <span aria-hidden>{editingModule ? '✖️' : '✏️'}</span>
+                  <span>{editingModule ? 'Close' : 'Edit'}</span>
+                </button>
+              </div>
 
               <div className="space-y-3">
                 <div className="info-row">

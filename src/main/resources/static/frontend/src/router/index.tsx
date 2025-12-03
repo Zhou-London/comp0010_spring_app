@@ -45,7 +45,7 @@ const routes: RouteObject[] = [
         ),
       },
       {
-        path: 'api',
+        path: 'doc-api',
         element: (
           <Suspense fallback={<Loading />}>
             <Api />

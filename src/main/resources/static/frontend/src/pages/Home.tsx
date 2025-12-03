@@ -22,7 +22,7 @@ const spotlightCards = [
   {
     title: 'APIs',
     description: 'Backend API cheat sheet with the essentials to integrate quickly.',
-    to: '/api',
+    to: '/doc-api/',
   },
 ];
 

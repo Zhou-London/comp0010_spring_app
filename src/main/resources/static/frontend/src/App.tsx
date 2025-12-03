@@ -8,7 +8,7 @@ const navigation = [
   { label: 'Home', path: '/' },
   { label: 'Students', path: '/students' },
   { label: 'Modules', path: '/modules' },
-  { label: 'API', path: '/api' },
+  { label: 'APIs hub', path: '/doc-api/' },
 ];
 
 const App = () => {
