@@ -34,7 +34,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     boolean safeMethod = HttpMethod.GET.matches(request.getMethod())
         || HttpMethod.OPTIONS.matches(request.getMethod());
-    boolean authPath = request.getRequestURI().startsWith("/auth");
+    boolean authPath = request.getRequestURI().startsWith("/api/auth");
     if (safeMethod || authPath) {
       filterChain.doFilter(request, response);
       return;

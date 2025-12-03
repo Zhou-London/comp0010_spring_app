@@ -25,7 +25,7 @@ import uk.ac.ucl.comp0010.services.StudentService;
  * REST controller for student operations.
  */
 @RestController
-@RequestMapping("/students")
+@RequestMapping("/api/students")
 public class StudentController {
   private final StudentService studentService;
 

@@ -20,9 +20,9 @@ const spotlightCards = [
     to: '/modules',
   },
   {
-    title: 'Profile',
+    title: 'APIs',
     description: 'Backend API cheat sheet with the essentials to integrate quickly.',
-    to: '/profile',
+    to: '/api',
   },
 ];
 

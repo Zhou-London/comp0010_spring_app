@@ -113,24 +113,24 @@ class SystemTest {
     Student student = createStudent();
     Long studentId = student.getId();
 
-    mockMvc.perform(get("/students")).andExpect(status().isOk())
+    mockMvc.perform(get("/api/students")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)))
         .andExpect(jsonPath("$[0].id").value(studentId));
 
-    mockMvc.perform(get("/students/" + studentId)).andExpect(status().isOk())
+    mockMvc.perform(get("/api/students/" + studentId)).andExpect(status().isOk())
         .andExpect(jsonPath("$.userName").value(student.getUserName()));
 
     Map<String, Object> updatePayload = Map.of("firstName", "Updated", "lastName", "Name",
         "userName", "updated" + studentId, "email", "updated" + studentId + "@example.com");
 
     mockMvc
-        .perform(authorized(put("/students/" + studentId).contentType(MediaType.APPLICATION_JSON)
+        .perform(authorized(put("/api/students/" + studentId).contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(updatePayload))))
         .andExpect(status().isOk()).andExpect(jsonPath("$.userName").value("updated" + studentId));
 
-    mockMvc.perform(authorized(delete("/students/" + studentId))).andExpect(status().isNoContent());
+    mockMvc.perform(authorized(delete("/api/students/" + studentId))).andExpect(status().isNoContent());
 
-    mockMvc.perform(get("/students/" + studentId)).andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/students/" + studentId)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -138,24 +138,24 @@ class SystemTest {
     Module module = createModule();
     Long moduleId = module.getId();
 
-    mockMvc.perform(get("/modules")).andExpect(status().isOk())
+    mockMvc.perform(get("/api/modules")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)))
         .andExpect(jsonPath("$[0].code").value(module.getCode()));
 
-    mockMvc.perform(get("/modules/" + moduleId)).andExpect(status().isOk())
+    mockMvc.perform(get("/api/modules/" + moduleId)).andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value(module.getName()));
 
     Map<String, Object> updatePayload =
         Map.of("code", "NEW" + moduleId, "name", "Updated Module " + moduleId, "mnc", false);
 
     mockMvc
-        .perform(authorized(put("/modules/" + moduleId).contentType(MediaType.APPLICATION_JSON)
+        .perform(authorized(put("/api/modules/" + moduleId).contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(updatePayload))))
         .andExpect(status().isOk()).andExpect(jsonPath("$.code").value("NEW" + moduleId));
 
-    mockMvc.perform(authorized(delete("/modules/" + moduleId))).andExpect(status().isNoContent());
+    mockMvc.perform(authorized(delete("/api/modules/" + moduleId))).andExpect(status().isNoContent());
 
-    mockMvc.perform(get("/modules/" + moduleId)).andExpect(status().isNotFound());
+    mockMvc.perform(get("/api/modules/" + moduleId)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -166,31 +166,31 @@ class SystemTest {
     Map<String, Object> payload = Map.of("studentId", student.getId(), "moduleId", module.getId());
 
     MvcResult result = mockMvc
-        .perform(authorized(post("/registrations").contentType(MediaType.APPLICATION_JSON)
+        .perform(authorized(post("/api/registrations").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(payload))))
         .andExpect(status().isCreated()).andReturn();
 
     Registration registration =
         objectMapper.readValue(result.getResponse().getContentAsString(), Registration.class);
 
-    mockMvc.perform(get("/registrations")).andExpect(status().isOk())
+    mockMvc.perform(get("/api/registrations")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)));
 
-    mockMvc.perform(get("/registrations/" + registration.getId())).andExpect(status().isOk())
+    mockMvc.perform(get("/api/registrations/" + registration.getId())).andExpect(status().isOk())
         .andExpect(jsonPath("$.student.id").value(student.getId()));
 
-    mockMvc.perform(get("/registrations/students/" + student.getId())).andExpect(status().isOk())
+    mockMvc.perform(get("/api/registrations/students/" + student.getId())).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)));
 
-    mockMvc.perform(get("/registrations/modules/" + module.getId())).andExpect(status().isOk())
+    mockMvc.perform(get("/api/registrations/modules/" + module.getId())).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)));
 
     mockMvc
-        .perform(authorized(delete("/registrations").param("studentId", String.valueOf(student.getId()))
+        .perform(authorized(delete("/api/registrations").param("studentId", String.valueOf(student.getId()))
             .param("moduleId", String.valueOf(module.getId()))))
         .andExpect(status().isNoContent());
 
-    mockMvc.perform(get("/registrations")).andExpect(status().isOk())
+    mockMvc.perform(get("/api/registrations")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(0)));
   }
 
@@ -204,38 +204,38 @@ class SystemTest {
         "score", 75);
 
     MvcResult createResult = mockMvc
-        .perform(authorized(post("/grades").contentType(MediaType.APPLICATION_JSON)
+        .perform(authorized(post("/api/grades").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(gradePayload))))
         .andExpect(status().isCreated()).andReturn();
 
     Grade grade =
         objectMapper.readValue(createResult.getResponse().getContentAsString(), Grade.class);
 
-    mockMvc.perform(get("/grades")).andExpect(status().isOk())
+    mockMvc.perform(get("/api/grades")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)));
 
-    mockMvc.perform(get("/grades/" + grade.getId())).andExpect(status().isOk())
+    mockMvc.perform(get("/api/grades/" + grade.getId())).andExpect(status().isOk())
         .andExpect(jsonPath("$.score").value(75));
 
     Map<String, Object> updatePayload = Map.of("score", 90);
     mockMvc
-        .perform(authorized(put("/grades/" + grade.getId()).contentType(MediaType.APPLICATION_JSON)
+        .perform(authorized(put("/api/grades/" + grade.getId()).contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(updatePayload))))
         .andExpect(status().isOk()).andExpect(jsonPath("$.score").value(90));
 
-    mockMvc.perform(get("/students/" + student.getId() + "/grades")).andExpect(status().isOk())
+    mockMvc.perform(get("/api/students/" + student.getId() + "/grades")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)))
         .andExpect(jsonPath("$[0].score").value(90));
 
-    mockMvc.perform(get("/modules/" + module.getId() + "/grades")).andExpect(status().isOk())
+    mockMvc.perform(get("/api/modules/" + module.getId() + "/grades")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(1)));
 
-    mockMvc.perform(get("/students/" + student.getId() + "/average")).andExpect(status().isOk())
+    mockMvc.perform(get("/api/students/" + student.getId() + "/average")).andExpect(status().isOk())
         .andExpect(jsonPath("$.average").value(90.0));
 
-    mockMvc.perform(authorized(delete("/grades/" + grade.getId()))).andExpect(status().isNoContent());
+    mockMvc.perform(authorized(delete("/api/grades/" + grade.getId()))).andExpect(status().isNoContent());
 
-    mockMvc.perform(get("/grades")).andExpect(status().isOk())
+    mockMvc.perform(get("/api/grades")).andExpect(status().isOk())
         .andExpect(jsonPath("$.length()", org.hamcrest.Matchers.is(0)));
   }
 
@@ -243,7 +243,7 @@ class SystemTest {
   void testAverageWithoutGradesThrowsBadRequest() throws Exception {
     Student student = createStudent();
 
-    mockMvc.perform(get("/students/" + student.getId() + "/average"))
+    mockMvc.perform(get("/api/students/" + student.getId() + "/average"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.error").value("Student has no grades recorded"));
   }
@@ -251,7 +251,7 @@ class SystemTest {
   @Test
   void testUnauthorizedWriteRequestsBlocked() throws Exception {
     mockMvc
-        .perform(post("/students").contentType(MediaType.APPLICATION_JSON)
+        .perform(post("/api/students").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(Map.of("firstName", "Jane"))))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.error").value("Unauthorized"));
@@ -261,14 +261,14 @@ class SystemTest {
   void testAuthEndpointsIssueTokens() throws Exception {
     Map<String, Object> registerPayload = Map.of("username", "newuser", "password", "pass123");
 
-    mockMvc.perform(post("/auth/register").contentType(MediaType.APPLICATION_JSON)
+    mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(registerPayload))).andExpect(status().isCreated())
         .andExpect(jsonPath("$.token").isNotEmpty());
 
     Map<String, Object> loginPayload = Map.of("username", registerPayload.get("username"),
         "password", registerPayload.get("password"));
 
-    mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+    mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(loginPayload))).andExpect(status().isOk())
         .andExpect(jsonPath("$.token").isNotEmpty());
   }
@@ -413,7 +413,7 @@ class SystemTest {
     req.put("email", "user" + suffix + "@example.com");
 
     MvcResult result = mockMvc
-        .perform(authorized(post("/students").contentType(MediaType.APPLICATION_JSON)
+        .perform(authorized(post("/api/students").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(req))))
         .andExpect(status().isCreated()).andReturn();
 
@@ -425,7 +425,7 @@ class SystemTest {
     Map<String, Object> req = Map.of("code", "CODE" + suffix, "name", "Module " + suffix, "mnc", true);
 
     MvcResult result = mockMvc
-        .perform(authorized(post("/modules").contentType(MediaType.APPLICATION_JSON)
+        .perform(authorized(post("/api/modules").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(req))))
         .andExpect(status().isCreated()).andReturn();
 
@@ -434,7 +434,7 @@ class SystemTest {
 
   private Long registerStudent(Long studentId, Long moduleId) throws Exception {
     MvcResult result = mockMvc
-        .perform(authorized(post("/students/" + studentId + "/modules/" + moduleId)))
+        .perform(authorized(post("/api/students/" + studentId + "/modules/" + moduleId)))
         .andExpect(status().isOk()).andReturn();
 
     Registration registration = objectMapper.readValue(result.getResponse().getContentAsString(),
