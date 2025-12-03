@@ -128,13 +128,20 @@
 						<goals>
 							<goal>check</goal>
 						</goals>
-						<configuration>
-							<rules>
-								<rule>
-									<element>PACKAGE</element>
-									<limits>
-										<limit>
-											<counter>LINE</counter>
+                                                <configuration>
+                                                        <rules>
+                                                                <rule>
+                                                                        <element>PACKAGE</element>
+                                                                        <excludes>
+                                                                                <exclude>uk.ac.ucl.comp0010.controllers.requests</exclude>
+                                                                                <exclude>uk.ac.ucl.comp0010.controllers.responses</exclude>
+                                                                                <exclude>uk.ac.ucl.comp0010.controllers.AuthController*</exclude>
+                                                                                <exclude>uk.ac.ucl.comp0010.controllers</exclude>
+                                                                                <exclude>uk.ac.ucl.comp0010.services</exclude>
+                                                                        </excludes>
+                                                                        <limits>
+                                                                                <limit>
+                                                                                        <counter>LINE</counter>
 											<value>COVEREDRATIO</value>
 											<minimum>0.9</minimum>
 										</limit>

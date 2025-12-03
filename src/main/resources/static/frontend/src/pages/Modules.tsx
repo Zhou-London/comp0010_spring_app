@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Module } from '../types';
 
 const emptyModule: Module = {
@@ -11,6 +12,7 @@ const emptyModule: Module = {
 
 const Modules = () => {
   const navigate = useNavigate();
+  const { requireAuth } = useAuth();
 
   const [modules, setModules] = useState<Module[]>([]);
   const [grades, setGrades] = useState<Grade[]>([]);
@@ -79,7 +81,7 @@ const Modules = () => {
     setModuleFormOpen(true);
   };
 
-  const handleSaveModule = async () => {
+  const saveModule = async () => {
     setSubmitting(true);
     setSavingError('');
     setSavingMessage('');
@@ -140,10 +142,10 @@ const Modules = () => {
             </div>
             <button
               type="button"
-              onClick={() => {
+              onClick={() => requireAuth(() => {
                 if (!moduleFormOpen) openModuleModal();
                 else setModuleFormOpen(false);
-              }}
+              })}
               className="icon-button accent text-xs"
               aria-label="Add module"
             >
@@ -195,7 +197,7 @@ const Modules = () => {
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
-                  onClick={handleSaveModule}
+                  onClick={() => requireAuth(saveModule)}
                   disabled={submitting}
                   className="icon-button accent"
                   aria-label="Save module"
