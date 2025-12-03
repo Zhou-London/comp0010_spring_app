@@ -1,11 +1,13 @@
-# COMP0010 Student Records Service
+# COMP0010 Student Management Centre
 
 A Spring Boot + React monorepo for managing students, modules, registrations, and grades. The backend exposes a documented REST API with token-based authentication, while the frontend (Vite + React + Tailwind CSS) consumes the same endpoints for a modern UI experience.
+
+Presented by **Team 007**. The clock is ticking and so are your grades.
 
 ![Project Poster](assets/poster.png)
 
 ## Table of Contents
-- [COMP0010 Student Records Service](#comp0010-student-records-service)
+- [COMP0010 Student Management Centre](#comp0010-student-management-centre)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Architecture](#architecture)
