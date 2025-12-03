@@ -29,7 +29,7 @@ A simple full-stack project based on **Spring-Boot**.
 
 ## Get Started
 
-Run the application.
+Run the application. Backend port is **2800**.
 
 ```bash
 mvn spring-boot:run
@@ -45,7 +45,7 @@ Alternatively, use **curl**.
 curl -X GET localhost:2800/grade
 ```
 
-Run the frontend server.
+Run the frontend server. Frontend port is **5173**.
 
 ```bash
 cd src/main/resources/static/frontend
