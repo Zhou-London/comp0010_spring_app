@@ -103,11 +103,11 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.12</version>
-				<configuration>
-					<excludes>
-						<exclude>**/*Application*</exclude>
-					</excludes>
-				</configuration>
+                                <configuration>
+                                        <excludes>
+                                                <exclude>**/*Application*</exclude>
+                                        </excludes>
+                                </configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -133,25 +133,21 @@
                                                                 <rule>
                                                                         <element>PACKAGE</element>
                                                                         <excludes>
-                                                                                <exclude>uk.ac.ucl.comp0010.controllers.requests</exclude>
-                                                                                <exclude>uk.ac.ucl.comp0010.controllers.responses</exclude>
                                                                                 <exclude>uk.ac.ucl.comp0010.controllers.AuthController*</exclude>
-                                                                                <exclude>uk.ac.ucl.comp0010.controllers</exclude>
-                                                                                <exclude>uk.ac.ucl.comp0010.services</exclude>
                                                                         </excludes>
                                                                         <limits>
                                                                                 <limit>
                                                                                         <counter>LINE</counter>
-											<value>COVEREDRATIO</value>
-											<minimum>0.9</minimum>
-										</limit>
-									</limits>
-								</rule>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+                                                                                        <value>COVEREDRATIO</value>
+                                                                                        <minimum>0.9</minimum>
+                                                                                </limit>
+                                                                        </limits>
+                                                                </rule>
+                                                        </rules>
+                                                </configuration>
+                                        </execution>
+                                </executions>
+                        </plugin>
 		</plugins>
 	</build>
 
