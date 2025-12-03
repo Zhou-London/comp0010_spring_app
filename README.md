@@ -5,17 +5,19 @@ A Spring Boot + React monorepo for managing students, modules, registrations, an
 ![Project Poster](assets/poster.png)
 
 ## Table of Contents
-- [Features](#features)
-- [Architecture](#architecture)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Backend](#backend)
-  - [Frontend](#frontend)
-- [API Documentation](#api-documentation)
-- [Testing](#testing)
-- [Project Layout](#project-layout)
-- [Contributing](#contributing)
-- [License](#license)
+- [COMP0010 Student Records Service](#comp0010-student-records-service)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Architecture](#architecture)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Backend](#backend)
+    - [Frontend](#frontend)
+  - [API Documentation](#api-documentation)
+  - [Testing](#testing)
+  - [Project Layout](#project-layout)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Features
 - **Student lifecycle management**: CRUD endpoints for students, modules, registrations, and grades, including GPA and average calculations.
@@ -38,7 +40,7 @@ A Spring Boot + React monorepo for managing students, modules, registrations, an
 
 Clone and enter the project directory:
 ```bash
-git clone <repo-url>
+git clone https://github.com/ucl-comp0010-2025-classroom/coursework-d-25-t2-s-25-ap1-java_007.git
 cd comp0010_spring_app
 ```
 
