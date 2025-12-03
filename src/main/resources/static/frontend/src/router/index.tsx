@@ -5,7 +5,7 @@ const App = React.lazy(() => import('../App'));
 const Home = React.lazy(() => import('../pages/Home'));
 const Students = React.lazy(() => import('../pages/Students'));
 const Modules = React.lazy(() => import('../pages/Modules'));
-const Profile = React.lazy(() => import('../pages/Profile'));
+const Api = React.lazy(() => import('../pages/Api'));
 const StudentDetail = React.lazy(() => import('../pages/StudentDetail'));
 const ModuleDetail = React.lazy(() => import('../pages/ModuleDetail'));
 
@@ -45,10 +45,10 @@ const routes: RouteObject[] = [
         ),
       },
       {
-        path: 'profile',
+        path: 'api',
         element: (
           <Suspense fallback={<Loading />}>
-            <Profile />
+            <Api />
           </Suspense>
         ),
       },

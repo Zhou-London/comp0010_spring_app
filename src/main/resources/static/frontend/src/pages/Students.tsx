@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Student } from '../types';
 
 const emptyStudent: Student = {
@@ -12,6 +13,7 @@ const emptyStudent: Student = {
 
 const Students = () => {
   const navigate = useNavigate();
+  const { requireAuth } = useAuth();
 
   const [students, setStudents] = useState<Student[]>([]);
   const [grades, setGrades] = useState<Grade[]>([]);
@@ -83,7 +85,7 @@ const Students = () => {
     setStudentFormOpen(true);
   };
 
-  const handleSaveStudent = async () => {
+  const saveStudent = async () => {
     setSubmitting(true);
     setSavingError('');
     setSavingMessage('');
@@ -144,10 +146,10 @@ const Students = () => {
             </div>
             <button
               type="button"
-              onClick={() => {
+              onClick={() => requireAuth(() => {
                 if (!studentFormOpen) openStudentModal();
                 else setStudentFormOpen(false);
-              }}
+              })}
               className="icon-button accent text-xs"
               aria-label="Add student"
             >
@@ -203,7 +205,7 @@ const Students = () => {
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
-                  onClick={handleSaveStudent}
+                  onClick={() => requireAuth(saveStudent)}
                   disabled={submitting}
                   className="icon-button accent"
                   aria-label="Save student"

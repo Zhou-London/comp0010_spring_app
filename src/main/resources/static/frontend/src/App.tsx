@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { MoonIcon, SunIcon } from './components/Icons';
+import AuthModal from './components/AuthModal';
+import { useAuth } from './contexts/AuthContext';
 
 const navigation = [
   { label: 'Home', path: '/' },
   { label: 'Students', path: '/students' },
   { label: 'Modules', path: '/modules' },
-  { label: 'Profile', path: '/profile' },
+  { label: 'API', path: '/api' },
 ];
 
 const App = () => {
+  const { user, openAuth, logout } = useAuth();
   const preferredTheme = useMemo<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('app-theme');
     if (saved === 'light' || saved === 'dark') return saved;
@@ -17,11 +20,24 @@ const App = () => {
   }, []);
 
   const [theme, setTheme] = useState<'light' | 'dark'>(preferredTheme);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('app-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
 
@@ -57,9 +73,52 @@ const App = () => {
               </NavLink>
             ))}
           </nav>
-          <div className="flex items-center gap-2">
-            <div className="hidden rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 shadow-inner shadow-black/30 sm:block">
-              API password: <span className="text-white">team007</span>
+          <div className="flex items-center gap-2" ref={menuRef}>
+            {user ? (
+              <div className="hidden rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 shadow-inner shadow-black/30 sm:block">
+                Signed in as <span className="text-white">{user.username}</span>
+              </div>
+            ) : (
+              <div className="hidden rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 shadow-inner shadow-black/30 sm:block">
+                Read-only · sign in to edit
+              </div>
+            )}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setMenuOpen((prev) => !prev)}
+                className="icon-button"
+                aria-label="User profile"
+              >
+                <span aria-hidden>👤</span>
+                <span className="hidden sm:inline">User Profile</span>
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-black/70 p-2 text-sm text-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
+                  <button
+                    type="button"
+                    className="w-full rounded-xl px-3 py-2 text-left hover:bg-white/10"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      openAuth('login');
+                    }}
+                  >
+                    {user ? 'Switch user / log in' : 'Log in'}
+                  </button>
+                  {user && (
+                    <button
+                      type="button"
+                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-white/10"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        logout();
+                      }}
+                    >
+                      Log out
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <button type="button" onClick={toggleTheme} className="icon-button" aria-label={themeLabel}>
               {themeIcon}
@@ -69,6 +128,7 @@ const App = () => {
         </header>
 
         <Outlet />
+        <AuthModal />
       </div>
     </div>
   );

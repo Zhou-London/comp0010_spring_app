@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Module, type Registration, type Student } from '../types';
 
 interface RegistrationFormState {
@@ -33,6 +34,7 @@ const emptyGrade: GradeFormState = {
 const StudentDetail = () => {
   const { studentId } = useParams();
   const navigate = useNavigate();
+  const { requireAuth } = useAuth();
   const id = Number(studentId);
 
   const [student, setStudent] = useState<Student | null>(null);
@@ -247,10 +249,10 @@ const StudentDetail = () => {
                 <button
                   type="button"
                   className="icon-button accent px-4 py-2 text-sm"
-                  onClick={() => {
+                  onClick={() => requireAuth(() => {
                     setStudentForm(student);
                     setEditingStudent((prev) => !prev);
-                  }}
+                  })}
                   aria-label="Edit student"
                 >
                   <span aria-hidden>{editingStudent ? '✖️' : '✏️'}</span>
@@ -322,7 +324,7 @@ const StudentDetail = () => {
                 <div className="mt-5 flex flex-wrap gap-3">
                   <button
                     type="button"
-                    onClick={handleSaveStudent}
+                    onClick={() => requireAuth(handleSaveStudent)}
                     disabled={submitting}
                     className="icon-button accent"
                     aria-label="Save student"
@@ -342,7 +344,7 @@ const StudentDetail = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={handleDeleteStudent}
+                    onClick={() => requireAuth(handleDeleteStudent)}
                     className="icon-button danger"
                     aria-label="Delete student"
                   >
@@ -359,10 +361,10 @@ const StudentDetail = () => {
                   <h3 className="text-lg font-semibold text-white">Registrations</h3>
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={() => requireAuth(() => {
                       setRegistrationForm(emptyRegistration);
                       setEditingRegistrationId((prev) => (prev === 'new' ? null : 'new'));
-                    }}
+                    })}
                     className="icon-button text-xs"
                     aria-label="Add registration"
                   >
@@ -388,7 +390,7 @@ const StudentDetail = () => {
                     <div className="flex flex-wrap gap-3">
                       <button
                         type="button"
-                        onClick={saveRegistration}
+                        onClick={() => requireAuth(saveRegistration)}
                         disabled={submitting}
                         className="icon-button accent"
                         aria-label={registrationForm.id ? 'Update registration' : 'Create registration'}
@@ -408,7 +410,7 @@ const StudentDetail = () => {
                       {registrationForm.id && (
                         <button
                           type="button"
-                          onClick={() => deleteRegistration(registrationForm.id)}
+                          onClick={() => requireAuth(() => deleteRegistration(registrationForm.id))}
                           className="icon-button danger"
                           aria-label="Delete registration"
                         >
@@ -432,13 +434,13 @@ const StudentDetail = () => {
                       <div className="flex gap-2 text-xs">
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={() => requireAuth(() => {
                             setRegistrationForm({
                               id: registration.id,
                               moduleId: registration.module?.id?.toString() ?? '',
                             });
                             setEditingRegistrationId(registration.id ?? null);
-                          }}
+                          })}
                           className="icon-button px-3 py-2"
                           aria-label="Edit registration"
                         >
@@ -457,15 +459,15 @@ const StudentDetail = () => {
                     <h3 className="text-lg font-semibold text-white">Grades</h3>
                     <span className="pill bg-white/10 text-xs">Avg grade: {averageScore}</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setGradeForm(emptyGrade);
-                      setEditingGradeId((prev) => (prev === 'new' ? null : 'new'));
-                    }}
-                    className="icon-button text-xs"
-                    aria-label="Add grade"
-                  >
+                <button
+                  type="button"
+                  onClick={() => requireAuth(() => {
+                    setGradeForm(emptyGrade);
+                    setEditingGradeId((prev) => (prev === 'new' ? null : 'new'));
+                  })}
+                  className="icon-button text-xs"
+                  aria-label="Add grade"
+                >
                     <span aria-hidden>{editingGradeId === 'new' ? '—' : '➕'}</span>
                   </button>
                 </div>
@@ -501,7 +503,7 @@ const StudentDetail = () => {
                     <div className="flex flex-wrap gap-3">
                       <button
                         type="button"
-                        onClick={saveGrade}
+                        onClick={() => requireAuth(saveGrade)}
                         disabled={submitting}
                         className="icon-button accent"
                         aria-label={gradeForm.id ? 'Update grade' : 'Save grade'}
@@ -521,7 +523,7 @@ const StudentDetail = () => {
                       {gradeForm.id && (
                         <button
                           type="button"
-                          onClick={() => deleteGrade(gradeForm.id)}
+                          onClick={() => requireAuth(() => deleteGrade(gradeForm.id))}
                           className="icon-button danger"
                           aria-label="Delete grade"
                         >
@@ -545,14 +547,14 @@ const StudentDetail = () => {
                       <div className="flex gap-2 text-xs">
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={() => requireAuth(() => {
                             setGradeForm({
                               id: grade.id,
                               moduleId: grade.module?.id?.toString() ?? '',
                               score: grade.score?.toString() ?? '',
                             });
                             setEditingGradeId(grade.id ?? null);
-                          }}
+                          })}
                           className="icon-button px-3 py-2"
                           aria-label="Edit grade"
                         >
