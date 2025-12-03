@@ -216,7 +216,6 @@ const Home = () => {
                 <h2 className="text-lg font-semibold text-white">Registrations</h2>
                 <p className="text-sm text-slate-300">Connections between students and modules.</p>
               </div>
-              <span className="pill bg-white/10 text-xs text-slate-200">Read more</span>
             </div>
             <div className="mt-4 space-y-3">
               {registrations.slice(0, 4).map((registration) => (
@@ -239,7 +238,6 @@ const Home = () => {
                 <h2 className="text-lg font-semibold text-white">Grades</h2>
                 <p className="text-sm text-slate-300">Latest marks with their module context.</p>
               </div>
-              <span className="pill bg-white/10 text-xs text-slate-200">Read more</span>
             </div>
             <div className="mt-4 space-y-3">
               {grades.slice(0, 4).map((grade, index) => (
