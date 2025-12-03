@@ -111,7 +111,7 @@ const StudentDetail = () => {
     setError('');
     try {
       await apiFetch(`/students/${id}`, { method: 'DELETE' });
-      navigate('/explorer');
+      navigate('/students');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete student');
     } finally {
@@ -225,10 +225,10 @@ const StudentDetail = () => {
             <p className="text-slate-200/80">Update this student, manage registrations, and maintain grades.</p>
           </div>
           <Link
-            to="/explorer"
+            to="/students"
             className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-slate-200 ring-1 ring-white/20 hover:bg-white/20"
           >
-            Back to explorer
+            Back to students
           </Link>
         </div>
 

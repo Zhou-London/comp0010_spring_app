@@ -3,7 +3,8 @@ import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 
 const App = React.lazy(() => import('../App'));
 const Home = React.lazy(() => import('../pages/Home'));
-const Explorer = React.lazy(() => import('../pages/Explorer'));
+const Students = React.lazy(() => import('../pages/Students'));
+const Modules = React.lazy(() => import('../pages/Modules'));
 const Profile = React.lazy(() => import('../pages/Profile'));
 const StudentDetail = React.lazy(() => import('../pages/StudentDetail'));
 const ModuleDetail = React.lazy(() => import('../pages/ModuleDetail'));
@@ -28,10 +29,18 @@ const routes: RouteObject[] = [
         ),
       },
       {
-        path: 'explorer',
+        path: 'students',
         element: (
           <Suspense fallback={<Loading />}>
-            <Explorer />
+            <Students />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'modules',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Modules />
           </Suspense>
         ),
       },

@@ -10,9 +10,14 @@ import {
 
 const spotlightCards = [
   {
-    title: 'Explorer',
-    description: 'Searchable, sortable, and fully editable views for every record.',
-    to: '/explorer',
+    title: 'Students',
+    description: 'Searchable, sortable, and fully editable student records.',
+    to: '/students',
+  },
+  {
+    title: 'Modules',
+    description: 'Filter and browse every module with quick detail access.',
+    to: '/modules',
   },
   {
     title: 'Profile',
@@ -167,10 +172,7 @@ const Home = () => {
                 <h2 className="text-lg font-semibold text-white">Students</h2>
                 <p className="text-sm text-slate-300">Recent arrivals from the API.</p>
               </div>
-              <Link
-                to="/explorer#students"
-                className="pill bg-white/10 text-xs text-slate-200"
-              >
+              <Link to="/students" className="pill bg-white/10 text-xs text-slate-200">
                 Read more
               </Link>
             </div>
@@ -192,10 +194,7 @@ const Home = () => {
                 <h2 className="text-lg font-semibold text-white">Modules</h2>
                 <p className="text-sm text-slate-300">Glance at the catalogue and jump into details.</p>
               </div>
-              <Link
-                to="/explorer#modules"
-                className="pill bg-white/10 text-xs text-slate-200"
-              >
+              <Link to="/modules" className="pill bg-white/10 text-xs text-slate-200">
                 Read more
               </Link>
             </div>
@@ -217,12 +216,6 @@ const Home = () => {
                 <h2 className="text-lg font-semibold text-white">Registrations</h2>
                 <p className="text-sm text-slate-300">Connections between students and modules.</p>
               </div>
-              <Link
-                to="/explorer#registrations"
-                className="pill bg-white/10 text-xs text-slate-200"
-              >
-                Read more
-              </Link>
             </div>
             <div className="mt-4 space-y-3">
               {registrations.slice(0, 4).map((registration) => (
@@ -245,12 +238,6 @@ const Home = () => {
                 <h2 className="text-lg font-semibold text-white">Grades</h2>
                 <p className="text-sm text-slate-300">Latest marks with their module context.</p>
               </div>
-              <Link
-                to="/explorer#grades"
-                className="pill bg-white/10 text-xs text-slate-200"
-              >
-                Read more
-              </Link>
             </div>
             <div className="mt-4 space-y-3">
               {grades.slice(0, 4).map((grade, index) => (
