@@ -24,6 +24,7 @@
   --muted-surface: rgba(255, 255, 255, 0.04);
   --accent: #0ea5e9;
   --accent-strong: #2563eb;
+  --overlay-scrim: rgba(5, 6, 11, 0.65);
 }
 
 :root[data-theme='light'] {
@@ -49,6 +50,7 @@
   --muted-surface: rgba(226, 232, 240, 0.7);
   --accent: #2563eb;
   --accent-strong: #1d4ed8;
+  --overlay-scrim: rgba(15, 23, 42, 0.35);
 }
 
 body {
@@ -106,6 +108,10 @@ a {
   background: var(--pill-bg);
   border: 1px solid var(--pill-border);
   color: var(--text-primary);
+  max-width: 100%;
+  word-break: break-word;
+  white-space: normal;
+  text-align: center;
 }
 
 .text-gradient {
@@ -130,7 +136,10 @@ a {
 
 .surface-card.explorer-card {
   width: 100%;
-  max-width: 320px;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
 }
 
@@ -139,8 +148,12 @@ a {
 }
 
 .explorer-grid {
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   align-items: stretch;
+}
+
+.explorer-grid > * {
+  height: 100%;
 }
 
 .icon-button {
@@ -184,6 +197,18 @@ a {
   color: white;
   border-color: transparent;
   box-shadow: 0 12px 30px rgba(248, 113, 113, 0.25);
+}
+
+.modal-overlay {
+  background: var(--overlay-scrim);
+  backdrop-filter: blur(2px);
+}
+
+.modal-card {
+  background: var(--panel-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--panel-shadow);
 }
 
 .menu-surface {
