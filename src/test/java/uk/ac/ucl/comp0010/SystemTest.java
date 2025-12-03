@@ -40,7 +40,6 @@ import uk.ac.ucl.comp0010.repositories.StudentRepository;
 import uk.ac.ucl.comp0010.repositories.UserAccountRepository;
 import uk.ac.ucl.comp0010.services.GradeService;
 import uk.ac.ucl.comp0010.services.ModuleService;
-import uk.ac.ucl.comp0010.services.RegistrationService;
 import uk.ac.ucl.comp0010.services.StudentService;
 import uk.ac.ucl.comp0010.services.UserService;
 
@@ -77,9 +76,6 @@ class SystemTest {
 
   @Autowired
   private ModuleService moduleService;
-
-  @Autowired
-  private RegistrationService registrationService;
 
   @Autowired
   private GradeService gradeService;
