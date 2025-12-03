@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.ac.ucl.comp0010.controllers.requests.StudentGradeRequest;
+import uk.ac.ucl.comp0010.controllers.responses.StudentStatisticsResponse;
 import uk.ac.ucl.comp0010.models.Grade;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.models.Student;
@@ -79,5 +80,18 @@ class StudentControllerTest {
 
     assertThat(average.get("average")).isEqualTo(70.0);
     assertThat(gpa.get("gpa")).isEqualTo(3.3);
+
+    StudentStatisticsResponse response = new StudentStatisticsResponseBuilder().build();
+    when(studentService.getStudentStatistics(1L)).thenReturn(response);
+    assertThat(studentController.getStatistics(1L)).isEqualTo(response);
+  }
+}
+
+/**
+ * Helper builder for StudentStatisticsResponse instances in tests.
+ */
+class StudentStatisticsResponseBuilder {
+  StudentStatisticsResponse build() {
+    return StudentStatisticsResponse.fromStudent(new Student(), null);
   }
 }

@@ -11,7 +11,15 @@ CREATE TABLE students (
   first_name VARCHAR(255) NOT NULL,
   last_name VARCHAR(255) NOT NULL,
   user_name VARCHAR(255) NOT NULL UNIQUE,
-  email VARCHAR(255) NOT NULL UNIQUE
+  email VARCHAR(255) NOT NULL UNIQUE,
+  entry_year INTEGER,
+  graduate_year INTEGER,
+  major VARCHAR(255),
+  tuition_fee NUMERIC(10, 2),
+  paid_tuition_fee NUMERIC(10, 2),
+  birth_date DATE,
+  home_student BOOLEAN,
+  sex VARCHAR(50)
 );
 
 CREATE TABLE modules (

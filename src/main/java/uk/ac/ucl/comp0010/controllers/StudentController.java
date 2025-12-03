@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ucl.comp0010.controllers.requests.StudentGradeRequest;
+import uk.ac.ucl.comp0010.controllers.responses.StudentStatisticsResponse;
 import uk.ac.ucl.comp0010.exceptions.NoGradeAvailableException;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.models.Grade;
@@ -108,6 +109,17 @@ public class StudentController {
     Map<String, Double> response = new HashMap<>();
     response.put("average", average);
     return response;
+  }
+
+  /**
+   * Retrieve detailed statistics for a student.
+   *
+   * @param id student identity
+   * @return StudentStatisticsResponse containing profile and computed values
+   */
+  @GetMapping("/{id}/stats")
+  public StudentStatisticsResponse getStatistics(@PathVariable Long id) {
+    return studentService.getStudentStatistics(id);
   }
 
   /**

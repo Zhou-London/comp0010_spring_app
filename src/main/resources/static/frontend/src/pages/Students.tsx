@@ -9,6 +9,14 @@ const emptyStudent: Student = {
   lastName: '',
   userName: '',
   email: '',
+  entryYear: null,
+  graduateYear: null,
+  major: '',
+  tuitionFee: null,
+  paidTuitionFee: null,
+  birthDate: null,
+  homeStudent: null,
+  sex: '',
 };
 
 const Students = () => {
@@ -28,6 +36,12 @@ const Students = () => {
   const [submitting, setSubmitting] = useState(false);
   const [savingError, setSavingError] = useState('');
   const [savingMessage, setSavingMessage] = useState('');
+
+  const toNumberOrNull = (value: string) => (value ? Number(value) : null);
+  const toBooleanOrNull = (value: string) => {
+    if (value === '') return null;
+    return value === 'true';
+  };
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -105,6 +119,13 @@ const Students = () => {
   const renderStudentCard = (student: Student) => {
     const stats = student.id ? studentAverages.get(student.id) : undefined;
     const average = stats ? (stats.sum / stats.count).toFixed(1) : '–';
+    const cohort = student.entryYear && student.graduateYear
+      ? `${student.entryYear} – ${student.graduateYear}`
+      : student.entryYear
+        ? `Entry ${student.entryYear}`
+        : 'Timeline pending';
+    const residency = student.homeStudent == null ? 'Residency unknown'
+      : student.homeStudent ? 'Home student' : 'International';
 
     return (
       <button
@@ -119,7 +140,8 @@ const Students = () => {
         </div>
         <div className="space-y-1">
           <p className="text-xl font-semibold text-white">{student.firstName} {student.lastName}</p>
-          <p className="text-sm text-slate-300">Average score · {average}</p>
+          <p className="text-sm text-slate-300">{student.major || 'Major not set'} · {cohort}</p>
+          <p className="text-sm text-slate-300">Average score · {average} · {residency}</p>
         </div>
       </button>
     );
@@ -200,6 +222,64 @@ const Students = () => {
                   onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
                   className="field"
                   placeholder="Email"
+                />
+                <input
+                  value={studentForm.major ?? ''}
+                  onChange={(e) => setStudentForm({ ...studentForm, major: e.target.value })}
+                  className="field"
+                  placeholder="Major"
+                />
+                <input
+                  type="number"
+                  value={studentForm.entryYear ?? ''}
+                  onChange={(e) => setStudentForm({ ...studentForm, entryYear: toNumberOrNull(e.target.value) })}
+                  className="field"
+                  placeholder="Entry year"
+                />
+                <input
+                  type="number"
+                  value={studentForm.graduateYear ?? ''}
+                  onChange={(e) => setStudentForm({ ...studentForm, graduateYear: toNumberOrNull(e.target.value) })}
+                  className="field"
+                  placeholder="Graduate year"
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  value={studentForm.tuitionFee ?? ''}
+                  onChange={(e) => setStudentForm({ ...studentForm, tuitionFee: toNumberOrNull(e.target.value) })}
+                  className="field"
+                  placeholder="Tuition fee"
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  value={studentForm.paidTuitionFee ?? ''}
+                  onChange={(e) => setStudentForm({ ...studentForm, paidTuitionFee: toNumberOrNull(e.target.value) })}
+                  className="field"
+                  placeholder="Paid tuition fee"
+                />
+                <input
+                  type="date"
+                  value={studentForm.birthDate ?? ''}
+                  onChange={(e) => setStudentForm({ ...studentForm, birthDate: e.target.value || null })}
+                  className="field"
+                  placeholder="Birth date"
+                />
+                <select
+                  value={studentForm.homeStudent == null ? '' : String(studentForm.homeStudent)}
+                  onChange={(e) => setStudentForm({ ...studentForm, homeStudent: toBooleanOrNull(e.target.value) })}
+                  className="field"
+                >
+                  <option value="">Residency status</option>
+                  <option value="true">Home student</option>
+                  <option value="false">International</option>
+                </select>
+                <input
+                  value={studentForm.sex ?? ''}
+                  onChange={(e) => setStudentForm({ ...studentForm, sex: e.target.value })}
+                  className="field"
+                  placeholder="Sex"
                 />
               </div>
               <div className="flex flex-wrap items-center gap-3">
