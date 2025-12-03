@@ -159,6 +159,13 @@ a {
   transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
+.icon-button.compact {
+  gap: 0.2rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
 .icon-button:hover {
   transform: translateY(-1px) scale(1.01);
   border-color: var(--card-border-strong);
@@ -177,6 +184,14 @@ a {
   color: white;
   border-color: transparent;
   box-shadow: 0 12px 30px rgba(248, 113, 113, 0.25);
+}
+
+.menu-surface {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--panel-shadow);
+  color: var(--text-primary);
+  backdrop-filter: blur(12px);
 }
 
 .info-row {

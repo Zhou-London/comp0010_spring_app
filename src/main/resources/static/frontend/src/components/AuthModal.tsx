@@ -34,8 +34,8 @@ const AuthModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-3xl bg-gradient-to-b from-white/10 via-white/5 to-black/50 p-6 text-white ring-1 ring-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+    <div className="dialog-backdrop">
+      <div className="dialog-panel space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-300">User access</p>
