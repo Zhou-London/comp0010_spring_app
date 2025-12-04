@@ -60,27 +60,6 @@ const Registrations = () => {
     void fetchStudents();
     void fetchModules();
   }, []);
-
-  const fetchStudents = async () => {
-    setStudentsLoading(true);
-    try {
-      const response = await apiFetch<CollectionResponse<Student>>('/students');
-      setStudents(unwrapCollection(response, 'students'));
-    } finally {
-      setStudentsLoading(false);
-    }
-  };
-
-  const fetchModules = async () => {
-    setModulesLoading(true);
-    try {
-      const response = await apiFetch<CollectionResponse<Module>>('/modules');
-      setModules(unwrapCollection(response, 'modules'));
-    } finally {
-      setModulesLoading(false);
-    }
-  };
-
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setSubmitting(true);
