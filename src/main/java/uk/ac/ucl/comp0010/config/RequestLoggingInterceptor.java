@@ -16,6 +16,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
   private static final Logger LOGGER = LoggerFactory.getLogger(RequestLoggingInterceptor.class);
   private static final String START_TIME_ATTRIBUTE = "requestStartTime";
 
+  @SuppressWarnings("null")
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
@@ -23,6 +24,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
     return true;
   }
 
+  @SuppressWarnings("null")
   @Override
   public void afterCompletion(
       HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
