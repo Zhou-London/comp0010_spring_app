@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
 import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Module, type Registration, type Student } from '../types';
 
@@ -706,21 +707,21 @@ const StudentDetail = () => {
         )}
 
         {!editingStudent && (
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <div className="surface-card rounded-2xl p-4 ring-1 ring-white/10">
+          <div className="mt-5 grid items-stretch gap-4 sm:grid-cols-3">
+            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Average</p>
-              <p className="text-2xl font-semibold text-white">{averageScore}</p>
-              <p className="text-sm text-slate-300">Across {grades.length || 'no'} recorded grades.</p>
+              <p className="text-2xl font-semibold text-white break-words leading-snug">{averageScore}</p>
+              <p className="text-sm text-slate-300 leading-relaxed break-words">Across {grades.length || 'no'} recorded grades.</p>
             </div>
-            <div className="surface-card rounded-2xl p-4 ring-1 ring-white/10">
+            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Outstanding</p>
-              <p className="text-2xl font-semibold text-white">{formatCurrency(outstandingTuition)}</p>
-              <p className="text-sm text-slate-300">Remaining from total tuition.</p>
+              <p className="text-2xl font-semibold text-white break-words leading-snug">{formatCurrency(outstandingTuition)}</p>
+              <p className="text-sm text-slate-300 leading-relaxed break-words">Remaining from total tuition.</p>
             </div>
-            <div className="surface-card rounded-2xl p-4 ring-1 ring-white/10">
+            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Residency</p>
-              <p className="text-2xl font-semibold text-white">{residencyLabel}</p>
-              <p className="text-sm text-slate-300">Used for fee calculations.</p>
+              <p className="text-2xl font-semibold text-white break-words leading-snug">{residencyLabel}</p>
+              <p className="text-sm text-slate-300 leading-relaxed break-words">Used for fee calculations.</p>
             </div>
           </div>
         )}
@@ -984,7 +985,17 @@ const StudentDetail = () => {
         </div>
 
         {loading && <p className="text-slate-200">Loading…</p>}
-        {error && <p className="text-sm text-rose-300">{error}</p>}
+        {error && (
+          <ErrorMessage
+            message={error}
+            title="Student data error"
+            tips={[
+              'Ensure the student still exists or return to the student list.',
+              'Refresh the page if your session timed out while editing.',
+              'Retry after signing back in if you recently changed access.',
+            ]}
+          />
+        )}
         {message && <p className="text-sm text-emerald-300">{message}</p>}
 
         {student && activeSection === 'overview' && renderOverview()}

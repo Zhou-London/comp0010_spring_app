@@ -261,6 +261,89 @@ a {
   padding: 0.9rem 1rem;
 }
 
+.error-pop {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: linear-gradient(120deg, rgba(248, 113, 113, 0.15), rgba(239, 68, 68, 0.08));
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+  color: #fecdd3;
+}
+
+.error-pop--floating {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(720px, calc(100vw - 2rem));
+  z-index: 60;
+  max-width: 100%;
+  animation: error-pop-in 200ms ease;
+}
+
+.error-pop__icon {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(248, 113, 113, 0.2);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  font-size: 1.1rem;
+}
+
+.error-pop__body {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.error-pop__title {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: #fecdd3;
+}
+
+.error-pop__message {
+  color: #ffe4e6;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.error-pop__tips {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+  color: #fecdd3;
+  opacity: 0.95;
+  font-size: 0.9rem;
+}
+
+.error-pop__tips li::marker {
+  color: #fca5a5;
+}
+
+@keyframes error-pop-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 .dialog-backdrop {
   position: fixed;
   inset: 0;

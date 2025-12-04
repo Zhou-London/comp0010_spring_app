@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
 import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Module } from '../types';
 
@@ -132,7 +133,17 @@ const Modules = () => {
           </p>
         </div>
 
-        {error && <p className="text-sm text-rose-300">{error}</p>}
+        {error && (
+          <ErrorMessage
+            message={error}
+            title="Unable to load modules"
+            tips={[
+              'Check your network connection and refresh the page.',
+              'Confirm the server is running and reachable.',
+              'If the problem continues, try signing in again before retrying.',
+            ]}
+          />
+        )}
 
         <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -217,9 +228,20 @@ const Modules = () => {
                 >
                   Cancel
                 </button>
-                {savingMessage && <span className="text-sm text-emerald-300">{savingMessage}</span>}
-                {savingError && <span className="text-sm text-rose-300">{savingError}</span>}
               </div>
+              {savingMessage && <span className="text-sm text-emerald-300">{savingMessage}</span>}
+          {savingError && (
+            <ErrorMessage
+              message={savingError}
+              title="Module save failed"
+              tips={[
+                'Ensure the module code and name are filled in without duplicates.',
+                'Verify you are signed in with permission to create modules.',
+                'Try saving again after refreshing if the issue persists.',
+              ]}
+              floating
+            />
+          )}
             </div>
           )}
 

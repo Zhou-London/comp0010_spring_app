@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
 import { type Grade, type Module, type Student } from '../types';
 
 const emptyForm = {
@@ -339,7 +340,18 @@ const Grades = () => {
                 {submitting ? 'Saving…' : 'Upsert grade'}
               </button>
               {message && <p className="text-sm text-emerald-300">{message}</p>}
-              {error && <p className="text-sm text-rose-300">{error}</p>}
+          {error && (
+            <ErrorMessage
+              message={error}
+              title="Grade save failed"
+              tips={[
+                'Enter a numeric score and pick both a student and module.',
+                'Confirm the student and module still exist before saving.',
+                'Try refreshing or signing back in if the error continues.',
+              ]}
+              floating
+            />
+          )}
             </form>
 
             <div className="mt-6 space-y-6">

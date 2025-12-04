@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import ErrorMessage from './ErrorMessage';
 
 const AuthModal = () => {
   const { authOpen, closeAuth, authMode, setAuthMode, login, register, authError, clearError, setAuthError } = useAuth();
@@ -61,7 +62,18 @@ const AuthModal = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {authError && <p className="text-sm text-rose-300">{authError}</p>}
+          {authError && (
+            <ErrorMessage
+              message={authError}
+              title="Sign-in error"
+              tips={[
+                'Confirm your username and password are correct.',
+                'If you just registered, try signing in again or resetting your password.',
+                'Reach out to an administrator if you believe your account should work.',
+              ]}
+              floating
+            />
+          )}
           <div className="flex flex-wrap items-center gap-3">
             <button type="submit" className="icon-button accent px-5" disabled={submitting}>
               <span aria-hidden>{authMode === 'login' ? '🔒' : '✨'}</span>

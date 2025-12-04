@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
 import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Student } from '../types';
 
@@ -158,7 +159,17 @@ const Students = () => {
           </p>
         </div>
 
-        {error && <p className="text-sm text-rose-300">{error}</p>}
+        {error && (
+          <ErrorMessage
+            message={error}
+            title="Unable to load students"
+            tips={[
+              'Check your connection or reload the page to pull the directory again.',
+              'Ensure the server API is available and responding.',
+              'If you recently logged out or in, try authenticating once more before retrying.',
+            ]}
+          />
+        )}
 
         <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -305,9 +316,20 @@ const Students = () => {
                 >
                   Cancel
                 </button>
-                {savingMessage && <span className="text-sm text-emerald-300">{savingMessage}</span>}
-                {savingError && <span className="text-sm text-rose-300">{savingError}</span>}
               </div>
+              {savingMessage && <span className="text-sm text-emerald-300">{savingMessage}</span>}
+          {savingError && (
+            <ErrorMessage
+              message={savingError}
+              title="Student save failed"
+              tips={[
+                'Ensure all required name and contact fields are filled in.',
+                'Confirm the username or email is unique before saving.',
+                'Try again after refreshing if you recently signed in or changed roles.',
+              ]}
+              floating
+            />
+          )}
             </div>
           )}
 

@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
 import { type Module, type Registration, type Student } from '../types';
 
 const emptyForm = {
@@ -298,7 +299,18 @@ const Registrations = () => {
                 {submitting ? 'Saving…' : 'Save registration'}
               </button>
               {message && <p className="text-sm text-emerald-300">{message}</p>}
-              {error && <p className="text-sm text-rose-300">{error}</p>}
+          {error && (
+            <ErrorMessage
+              message={error}
+              title="Registration error"
+              tips={[
+                'Pick both a student and module before saving.',
+                'Confirm the selected records still exist and are visible.',
+                'Retry after a refresh if the session may have expired.',
+              ]}
+              floating
+            />
+          )}
             </form>
 
             <div className="mt-6 space-y-6">

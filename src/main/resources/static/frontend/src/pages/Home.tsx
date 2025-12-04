@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
 import {
   type Grade,
   type Module,
@@ -163,7 +164,17 @@ const Home = () => {
           </div>
         </section>
 
-        {error && <p className="text-sm text-rose-300">{error}</p>}
+        {error && (
+          <ErrorMessage
+            message={error}
+            title="Home data error"
+            tips={[
+              'Verify the backend server is running and reachable.',
+              'Refresh the dashboard to retry the summary requests.',
+              'Sign in again if you think your session expired.',
+            ]}
+          />
+        )}
 
         <section className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
