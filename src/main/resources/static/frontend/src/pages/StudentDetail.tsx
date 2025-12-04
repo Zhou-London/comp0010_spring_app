@@ -353,6 +353,17 @@ const StudentDetail = () => {
           </div>
 
           <div className="space-y-3">
+            {error && (
+              <ErrorMessage
+                message={error}
+                title="Registration error"
+                tips={[
+                  'Select a module before saving this registration.',
+                  'Verify your session is active and you have edit permissions.',
+                  'Refresh the page and retry if the issue keeps happening.',
+                ]}
+              />
+            )}
             <label className="text-sm opacity-80" htmlFor="moduleId">Module</label>
             <select
               id="moduleId"
@@ -414,6 +425,17 @@ const StudentDetail = () => {
           </div>
 
           <div className="space-y-3">
+            {error && (
+              <ErrorMessage
+                message={error}
+                title="Grade error"
+                tips={[
+                  'Choose a module and enter a numeric score before saving.',
+                  'Make sure the student and module still exist in the system.',
+                  'If you just signed in, refresh the page and try again.',
+                ]}
+              />
+            )}
             <label className="text-sm opacity-80" htmlFor="gradeModule">Module</label>
             <select
               id="gradeModule"
@@ -707,18 +729,18 @@ const StudentDetail = () => {
         )}
 
         {!editingStudent && (
-          <div className="mt-5 grid items-stretch gap-4 sm:grid-cols-3">
-            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
+          <div className="mt-5 grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="surface-card flex h-full min-h-[150px] flex-col gap-3 rounded-2xl p-5 ring-1 ring-white/10">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Average</p>
               <p className="text-2xl font-semibold text-white break-words leading-snug">{averageScore}</p>
               <p className="text-sm text-slate-300 leading-relaxed break-words">Across {grades.length || 'no'} recorded grades.</p>
             </div>
-            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
+            <div className="surface-card flex h-full min-h-[150px] flex-col gap-3 rounded-2xl p-5 ring-1 ring-white/10">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Outstanding</p>
               <p className="text-2xl font-semibold text-white break-words leading-snug">{formatCurrency(outstandingTuition)}</p>
               <p className="text-sm text-slate-300 leading-relaxed break-words">Remaining from total tuition.</p>
             </div>
-            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
+            <div className="surface-card flex h-full min-h-[150px] flex-col gap-3 rounded-2xl p-5 ring-1 ring-white/10">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Residency</p>
               <p className="text-2xl font-semibold text-white break-words leading-snug">{residencyLabel}</p>
               <p className="text-sm text-slate-300 leading-relaxed break-words">Used for fee calculations.</p>
