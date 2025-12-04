@@ -286,604 +286,358 @@ const StudentDetail = () => {
     }
   };
 
-  const renderSectionTabs = () => (
-    <div className="flex flex-wrap gap-2">
-      {[
-        { key: 'overview', label: 'Overview', path: `/students/${id}` },
-        { key: 'registrations', label: 'Registrations', path: `/students/${id}/registrations` },
-        { key: 'grades', label: 'Grades', path: `/students/${id}/grades` },
-      ].map((tab) => (
-        <Link
-          key={tab.key}
-          to={tab.path}
-          className={`icon-button compact ${activeSection === tab.key ? 'accent' : ''}`}
-        >
-          {tab.label}
-        </Link>
-      ))}
-    </div>
-  );
-
-  const closeRegistrationModal = () => {
-    setEditingRegistrationId(null);
-    setRegistrationForm(emptyRegistration);
-  };
-
-  const closeGradeModal = () => {
-    setEditingGradeId(null);
-    setGradeForm(emptyGrade);
-  };
-
-  const openRegistrationEditor = (registration?: Registration) => {
-    if (registration) {
-      setRegistrationForm({ id: registration.id, moduleId: registration.module?.id?.toString() ?? '' });
-      setEditingRegistrationId(registration.id ?? null);
-    } else {
-      setRegistrationForm(emptyRegistration);
-      setEditingRegistrationId('new');
-    }
-  };
-
-  const openGradeEditor = (grade?: Grade) => {
-    if (grade) {
-      setGradeForm({
-        id: grade.id,
-        moduleId: grade.module?.id?.toString() ?? '',
-        score: grade.score?.toString() ?? '',
-      });
-      setEditingGradeId(grade.id ?? null);
-    } else {
-      setGradeForm(emptyGrade);
-      setEditingGradeId('new');
-    }
-  };
-
-  const renderRegistrationModal = () =>
-    editingRegistrationId !== null && (
-      <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="modal-card w-full max-w-lg space-y-4 rounded-3xl p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] opacity-70">{registrationForm.id ? 'Edit registration' : 'New registration'}</p>
-              <h3 className="text-lg font-semibold">Assign this student to a module</h3>
-            </div>
-            <button type="button" onClick={closeRegistrationModal} className="icon-button compact text-[10px] px-2 py-1" aria-label="Close registration editor">
-              <span aria-hidden>✖️</span>
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-sm opacity-80" htmlFor="moduleId">Module</label>
-            <select
-              id="moduleId"
-              value={registrationForm.moduleId}
-              onChange={(e) => setRegistrationForm({ ...registrationForm, moduleId: e.target.value })}
-              className="field"
-            >
-              <option value="">Select a module</option>
-              {modules.map((module) => (
-                <option key={module.id} value={module.id}>
-                  {module.code} — {module.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => requireAuth(saveRegistration)}
-              disabled={submitting}
-              className="icon-button accent"
-              aria-label={registrationForm.id ? 'Update registration' : 'Save registration'}
-            >
-              <span aria-hidden>💾</span>
-              <span className="hidden sm:inline">Save</span>
-            </button>
-            {registrationForm.id && (
-              <button
-                type="button"
-                onClick={() => requireAuth(() => deleteRegistration(registrationForm.id))}
-                className="icon-button danger"
-                aria-label="Delete registration"
-              >
-                <span aria-hidden>🗑️</span>
-                <span className="hidden sm:inline">Delete</span>
-              </button>
-            )}
-            <button type="button" onClick={closeRegistrationModal} className="icon-button text-xs">
-              Cancel
-            </button>
-          </div>
-        </div>
+  if (!id) {
+    return (
+      <div className="glass-panel">
+        <div className="p-8 text-white">No student ID provided.</div>
       </div>
     );
+  }
 
-  const renderGradeModal = () =>
-    editingGradeId !== null && (
-      <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="modal-card w-full max-w-lg space-y-4 rounded-3xl p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] opacity-70">{gradeForm.id ? 'Edit grade' : 'New grade'}</p>
-              <h3 className="text-lg font-semibold">Update this student score</h3>
-            </div>
-            <button type="button" onClick={closeGradeModal} className="icon-button compact text-[10px] px-2 py-1" aria-label="Close grade editor">
-              <span aria-hidden>✖️</span>
-            </button>
+  return (
+    <div className="glass-panel">
+      <div className="flex flex-col gap-8 p-8 sm:p-10">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Student detail</p>
+            <h1 className="text-3xl font-semibold text-white sm:text-4xl">Profile and records</h1>
+            <p className="text-slate-200/80">Update this student, manage registrations, and maintain grades.</p>
           </div>
-
-          <div className="space-y-3">
-            <label className="text-sm opacity-80" htmlFor="gradeModule">Module</label>
-            <select
-              id="gradeModule"
-              value={gradeForm.moduleId}
-              onChange={(e) => setGradeForm({ ...gradeForm, moduleId: e.target.value })}
-              className="field"
-            >
-              <option value="">Select a module</option>
-              {modules.map((module) => (
-                <option key={module.id} value={module.id}>
-                  {module.code} — {module.name}
-                </option>
-              ))}
-            </select>
-            <div className="space-y-2">
-              <label className="text-sm opacity-80" htmlFor="score">Score</label>
-              <input
-                id="score"
-                type="number"
-                value={gradeForm.score}
-                onChange={(e) => setGradeForm({ ...gradeForm, score: e.target.value })}
-                className="field"
-                placeholder="75"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => requireAuth(saveGrade)}
-              disabled={submitting}
-              className="icon-button accent"
-              aria-label={gradeForm.id ? 'Update grade' : 'Save grade'}
-            >
-              <span aria-hidden>💾</span>
-              <span className="hidden sm:inline">Save</span>
-            </button>
-            {gradeForm.id && (
-              <button
-                type="button"
-                onClick={() => requireAuth(() => deleteGrade(gradeForm.id))}
-                className="icon-button danger"
-                aria-label="Delete grade"
-              >
-                <span aria-hidden>🗑️</span>
-                <span className="hidden sm:inline">Delete</span>
-              </button>
-            )}
-            <button type="button" onClick={closeGradeModal} className="icon-button text-xs">
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-
-  const renderOverview = () => (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Student profile</p>
-            <h2 className="text-xl font-semibold text-white">Personal details</h2>
-          </div>
-          <button
-            type="button"
-            className="icon-button accent px-4 py-2 text-sm"
-            onClick={() =>
-              requireAuth(() => {
-                setStudentForm(student ?? emptyStudent);
-                setEditingStudent((prev) => !prev);
-              })
-            }
-            aria-label="Edit student"
+          <Link
+            to="/explorer"
+            className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-slate-200 ring-1 ring-white/20 hover:bg-white/20"
           >
-            <span aria-hidden>{editingStudent ? '✖️' : '✏️'}</span>
-            <span>{editingStudent ? 'Close' : 'Edit'}</span>
-          </button>
+            Back to explorer
+          </Link>
         </div>
 
-        <div className="space-y-3">
-          <div className="info-row">
-            <span className="info-label">First name</span>
-            {editingStudent ? (
-              <input
-                id="firstName"
-                value={studentForm.firstName}
-                onChange={(e) => setStudentForm({ ...studentForm, firstName: e.target.value })}
-                className="field max-w-sm"
-              />
-            ) : (
-              <span className="info-value">{student?.firstName}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Last name</span>
-            {editingStudent ? (
-              <input
-                id="lastName"
-                value={studentForm.lastName}
-                onChange={(e) => setStudentForm({ ...studentForm, lastName: e.target.value })}
-                className="field max-w-sm"
-              />
-            ) : (
-              <span className="info-value">{student?.lastName}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Username</span>
-            {editingStudent ? (
-              <input
-                id="userName"
-                value={studentForm.userName}
-                onChange={(e) => setStudentForm({ ...studentForm, userName: e.target.value })}
-                className="field max-w-sm"
-              />
-            ) : (
-              <span className="info-value">{student?.userName}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Email</span>
-            {editingStudent ? (
-              <input
-                id="email"
-                type="email"
-                value={studentForm.email}
-                onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
-                className="field max-w-sm"
-              />
-            ) : (
-              <span className="info-value">{student?.email}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Major</span>
-            {editingStudent ? (
-              <input
-                id="major"
-                value={studentForm.major ?? ''}
-                onChange={(e) => setStudentForm({ ...studentForm, major: e.target.value })}
-                className="field max-w-sm"
-              />
-            ) : (
-              <span className="info-value">{student?.major || '—'}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Entry year</span>
-            {editingStudent ? (
-              <input
-                id="entryYear"
-                type="number"
-                value={studentForm.entryYear ?? ''}
-                onChange={(e) => setStudentForm({ ...studentForm, entryYear: toNumberOrNull(e.target.value) })}
-                className="field max-w-xs"
-              />
-            ) : (
-              <span className="info-value">{student?.entryYear ?? '—'}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Graduate year</span>
-            {editingStudent ? (
-              <input
-                id="graduateYear"
-                type="number"
-                value={studentForm.graduateYear ?? ''}
-                onChange={(e) => setStudentForm({ ...studentForm, graduateYear: toNumberOrNull(e.target.value) })}
-                className="field max-w-xs"
-              />
-            ) : (
-              <span className="info-value">{student?.graduateYear ?? '—'}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Birth date</span>
-            {editingStudent ? (
-              <input
-                id="birthDate"
-                type="date"
-                value={studentForm.birthDate ?? ''}
-                onChange={(e) => setStudentForm({ ...studentForm, birthDate: e.target.value || null })}
-                className="field max-w-xs"
-              />
-            ) : (
-              <span className="info-value">{student?.birthDate || '—'}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Sex</span>
-            {editingStudent ? (
-              <input
-                id="sex"
-                value={studentForm.sex ?? ''}
-                onChange={(e) => setStudentForm({ ...studentForm, sex: e.target.value })}
-                className="field max-w-xs"
-              />
-            ) : (
-              <span className="info-value">{student?.sex || '—'}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Residency</span>
-            {editingStudent ? (
-              <select
-                id="homeStudent"
-                value={studentForm.homeStudent == null ? '' : String(studentForm.homeStudent)}
-                onChange={(e) => setStudentForm({ ...studentForm, homeStudent: toBooleanOrNull(e.target.value) })}
-                className="field max-w-xs"
-              >
-                <option value="">Select</option>
-                <option value="true">Home student</option>
-                <option value="false">International</option>
-              </select>
-            ) : (
-              <span className="info-value">
-                {student?.homeStudent == null ? '—' : student.homeStudent ? 'Home student' : 'International'}
-              </span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Tuition fee</span>
-            {editingStudent ? (
-              <input
-                id="tuitionFee"
-                type="number"
-                step="0.01"
-                value={studentForm.tuitionFee ?? ''}
-                onChange={(e) => setStudentForm({ ...studentForm, tuitionFee: toNumberOrNull(e.target.value) })}
-                className="field max-w-xs"
-              />
-            ) : (
-              <span className="info-value">{formatCurrency(student?.tuitionFee)}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Paid tuition</span>
-            {editingStudent ? (
-              <input
-                id="paidTuitionFee"
-                type="number"
-                step="0.01"
-                value={studentForm.paidTuitionFee ?? ''}
-                onChange={(e) => setStudentForm({ ...studentForm, paidTuitionFee: toNumberOrNull(e.target.value) })}
-                className="field max-w-xs"
-              />
-            ) : (
-              <span className="info-value">{formatCurrency(student?.paidTuitionFee)}</span>
-            )}
-          </div>
-          <div className="info-row">
-            <span className="info-label">Student ID</span>
-            <span className="info-value">{student?.id}</span>
-          </div>
-        </div>
+        {loading && <p className="text-slate-200">Loading…</p>}
+        {error && <p className="text-sm text-rose-300">{error}</p>}
+        {message && <p className="text-sm text-emerald-300">{message}</p>}
 
-        {editingStudent && (
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => requireAuth(handleSaveStudent)}
-              disabled={submitting}
-              className="icon-button accent"
-              aria-label="Save student"
-            >
-              <span aria-hidden>💾</span>
-              <span className="sr-only">Save student</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setEditingStudent(false);
-                setStudentForm(student ?? emptyStudent);
-              }}
-              className="icon-button text-xs"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => requireAuth(handleDeleteStudent)}
-              className="icon-button danger"
-              aria-label="Delete student"
-            >
-              <span aria-hidden>🗑️</span>
-              <span className="sr-only">Delete student</span>
-            </button>
-          </div>
-        )}
-
-        {!editingStudent && (
-          <div className="mt-5 grid items-stretch gap-4 sm:grid-cols-3">
-            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Average</p>
-              <p className="text-2xl font-semibold text-white break-words leading-snug">{averageScore}</p>
-              <p className="text-sm text-slate-300 leading-relaxed break-words">Across {grades.length || 'no'} recorded grades.</p>
-            </div>
-            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Outstanding</p>
-              <p className="text-2xl font-semibold text-white break-words leading-snug">{formatCurrency(outstandingTuition)}</p>
-              <p className="text-sm text-slate-300 leading-relaxed break-words">Remaining from total tuition.</p>
-            </div>
-            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Residency</p>
-              <p className="text-2xl font-semibold text-white break-words leading-snug">{residencyLabel}</p>
-              <p className="text-sm text-slate-300 leading-relaxed break-words">Used for fee calculations.</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-6">
-        <div className="rounded-3xl border border-white/5 bg-white/5 p-6 ring-1 ring-white/10">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-lg font-semibold text-white">Registrations</h3>
-            <div className="flex flex-wrap gap-2">
-              <Link to={`/students/${id}/registrations`} className="icon-button text-xs">
-                Read more
-              </Link>
+        {student && (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="relative rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
               <button
                 type="button"
-                onClick={() => requireAuth(() => openRegistrationEditor())}
-                className="icon-button text-xs"
-                aria-label="Add registration"
+                className="icon-button text-xs absolute right-5 top-5"
+                onClick={() => {
+                  setStudentForm(student);
+                  setEditingStudent((prev) => !prev);
+                }}
+                aria-label="Edit student"
               >
-                <span aria-hidden>{editingRegistrationId === 'new' ? '—' : '➕'}</span>
+                <span aria-hidden>{editingStudent ? '✖️' : '✏️'}</span>
               </button>
-            </div>
-          </div>
-          <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
-            {registrations.map((registration) => (
-              <div
-                key={registration.id}
-                className="flex items-center justify-between rounded-2xl bg-black/30 p-3 ring-1 ring-white/10"
-              >
-                <div>
-                  <p className="text-sm text-slate-200">{registration.module?.code ?? 'Module'}</p>
-                  <p className="text-xs text-slate-400">{registration.module?.name}</p>
+
+              <div className="space-y-3">
+                <div className="info-row">
+                  <span className="info-label">First name</span>
+                  {editingStudent ? (
+                    <input
+                      id="firstName"
+                      value={studentForm.firstName}
+                      onChange={(e) => setStudentForm({ ...studentForm, firstName: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{student.firstName}</span>
+                  )}
                 </div>
-                <div className="flex items-start gap-2 text-xs">
+                <div className="info-row">
+                  <span className="info-label">Last name</span>
+                  {editingStudent ? (
+                    <input
+                      id="lastName"
+                      value={studentForm.lastName}
+                      onChange={(e) => setStudentForm({ ...studentForm, lastName: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{student.lastName}</span>
+                  )}
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Username</span>
+                  {editingStudent ? (
+                    <input
+                      id="userName"
+                      value={studentForm.userName}
+                      onChange={(e) => setStudentForm({ ...studentForm, userName: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{student.userName}</span>
+                  )}
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Email</span>
+                  {editingStudent ? (
+                    <input
+                      id="email"
+                      type="email"
+                      value={studentForm.email}
+                      onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
+                      className="field max-w-sm"
+                    />
+                  ) : (
+                    <span className="info-value">{student.email}</span>
+                  )}
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Student ID</span>
+                  <span className="info-value">{student.id}</span>
+                </div>
+              </div>
+
+              {editingStudent && (
+                <div className="mt-5 flex flex-wrap gap-3">
                   <button
                     type="button"
-                    onClick={() => requireAuth(() => openRegistrationEditor(registration))}
-                    className="icon-button compact text-[10px] px-2 py-1"
-                    aria-label="Edit registration"
+                    onClick={handleSaveStudent}
+                    disabled={submitting}
+                    className="icon-button accent"
+                    aria-label="Save student"
                   >
-                    <span aria-hidden>✏️</span>
+                    <span aria-hidden>💾</span>
+                    <span className="sr-only">Save student</span>
                   </button>
-                </div>
-              </div>
-            ))}
-            {!registrations.length && <p className="text-sm text-slate-300">No registrations yet.</p>}
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-white/5 bg-white/5 p-6 ring-1 ring-white/10">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-3">
-              <h3 className="text-lg font-semibold text-white">Grades</h3>
-              <span className="pill bg-white/10 text-xs">Avg grade: {averageScore}</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link to={`/students/${id}/grades`} className="icon-button text-xs">
-                Read more
-              </Link>
-              <button
-                type="button"
-                onClick={() => requireAuth(() => openGradeEditor())}
-                className="icon-button text-xs"
-                aria-label="Add grade"
-              >
-                <span aria-hidden>{editingGradeId === 'new' ? '—' : '➕'}</span>
-              </button>
-            </div>
-          </div>
-          <div className="mt-3 max-h-48 space-y-2 overflow-auto pr-1">
-            {grades.map((grade) => (
-              <div
-                key={grade.id}
-                className="flex items-center justify-between rounded-2xl bg-black/30 p-3 ring-1 ring-white/10"
-              >
-                <div>
-                  <p className="text-sm text-slate-200">{grade.module?.code ?? 'Module'} — {grade.score ?? '—'}</p>
-                  <p className="text-xs text-slate-400">{grade.module?.name}</p>
-                </div>
-                <div className="flex items-start gap-2 text-xs">
                   <button
                     type="button"
-                    onClick={() => requireAuth(() => openGradeEditor(grade))}
-                    className="icon-button compact text-[10px] px-2 py-1"
-                    aria-label="Edit grade"
+                    onClick={() => {
+                      setEditingStudent(false);
+                      setStudentForm(student);
+                    }}
+                    className="icon-button text-xs"
                   >
-                    <span aria-hidden>✏️</span>
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteStudent}
+                    className="icon-button danger"
+                    aria-label="Delete student"
+                  >
+                    <span aria-hidden>🗑️</span>
+                    <span className="sr-only">Delete student</span>
                   </button>
                 </div>
+              )}
+            </div>
+
+            <div className="space-y-6">
+              <div className="rounded-3xl border border-white/5 bg-white/5 p-6 ring-1 ring-white/10">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-lg font-semibold text-white">Registrations</h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRegistrationForm(emptyRegistration);
+                      setEditingRegistrationId((prev) => (prev === 'new' ? null : 'new'));
+                    }}
+                    className="icon-button text-xs"
+                    aria-label="Add registration"
+                  >
+                    <span aria-hidden>{editingRegistrationId === 'new' ? '—' : '➕'}</span>
+                  </button>
+                </div>
+                {editingRegistrationId !== null && (
+                  <div className="mt-3 space-y-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+                    <div className="space-y-2">
+                      <label className="text-sm text-slate-200" htmlFor="moduleId">Module</label>
+                      <select
+                        id="moduleId"
+                        value={registrationForm.moduleId}
+                        onChange={(e) => setRegistrationForm({ ...registrationForm, moduleId: e.target.value })}
+                        className="field"
+                      >
+                        <option value="">Select a module</option>
+                        {modules.map((module) => (
+                          <option key={module.id} value={module.id}>{module.code} — {module.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={saveRegistration}
+                        disabled={submitting}
+                        className="icon-button accent"
+                        aria-label={registrationForm.id ? 'Update registration' : 'Create registration'}
+                      >
+                        <span aria-hidden>💾</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingRegistrationId(null);
+                          setRegistrationForm(emptyRegistration);
+                        }}
+                        className="icon-button text-xs"
+                      >
+                        Cancel
+                      </button>
+                      {registrationForm.id && (
+                        <button
+                          type="button"
+                          onClick={() => deleteRegistration(registrationForm.id)}
+                          className="icon-button danger"
+                          aria-label="Delete registration"
+                        >
+                          <span aria-hidden>🗑️</span>
+                          <span className="sr-only">Delete registration</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
+                  {registrations.map((registration) => (
+                    <div
+                      key={registration.id}
+                      className="flex items-center justify-between rounded-2xl bg-black/30 p-3 ring-1 ring-white/10"
+                    >
+                      <div>
+                        <p className="text-sm text-slate-200">{registration.module?.code ?? 'Module'}</p>
+                        <p className="text-xs text-slate-400">{registration.module?.name}</p>
+                      </div>
+                      <div className="flex gap-2 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRegistrationForm({
+                              id: registration.id,
+                              moduleId: registration.module?.id?.toString() ?? '',
+                            });
+                            setEditingRegistrationId(registration.id ?? null);
+                          }}
+                          className="icon-button px-3 py-2"
+                          aria-label="Edit registration"
+                        >
+                          <span aria-hidden>✏️</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {!registrations.length && <p className="text-sm text-slate-300">No registrations recorded yet.</p>}
+                </div>
               </div>
-            ))}
-            {!grades.length && <p className="text-sm text-slate-300">No grades recorded yet.</p>}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
-  const renderRegistrationsPage = () => (
-    <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-300">All registrations</p>
-          <h2 className="text-xl font-semibold text-white">Modules this student attends</h2>
-          <p className="text-sm text-slate-300">Filter, edit, or remove module registrations in one place.</p>
-        </div>
-        <div className="flex flex-wrap justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => requireAuth(() => openRegistrationEditor())}
-            className="icon-button accent text-xs"
-            aria-label="Add registration"
-          >
-            <span aria-hidden>{editingRegistrationId === 'new' ? '—' : '➕'}</span>
-            <span className="hidden sm:inline">Add registration</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
-        <input
-          className="field"
-          placeholder="Search by module name or code"
-          value={registrationQuery}
-          onChange={(e) => setRegistrationQuery(e.target.value)}
-        />
-        <select
-          value={registrationSort}
-          onChange={(e) => setRegistrationSort(e.target.value as typeof registrationSort)}
-          className="rounded-full bg-black/40 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10"
-        >
-          <option value="code">Module code</option>
-          <option value="name">Module name</option>
-          <option value="id">Registration ID</option>
-        </select>
-      </div>
-
-      <div className="mt-4 grid gap-3 explorer-grid">
-        {filteredRegistrations.map((registration) => (
-          <div key={registration.id} className="surface-card explorer-card flex flex-col gap-3 p-5">
-            <div className="grid grid-cols-[1fr_auto] items-start gap-2">
-              <div className="min-w-0 space-y-1 break-words">
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-300">{registration.module?.code ?? 'Module'}</p>
-                <p className="text-lg font-semibold text-white">{registration.module?.name ?? 'Unknown module'}</p>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="pill text-xs break-words">ID: {registration.id ?? '—'}</span>
-                <button
-                  type="button"
-                  onClick={() => requireAuth(() => openRegistrationEditor(registration))}
-                  className="icon-button compact text-[10px] px-2 py-1"
-                  aria-label="Edit registration"
-                >
-                  <span aria-hidden>✏️</span>
-                  <span className="hidden sm:inline">Edit</span>
-                </button>
+              <div className="rounded-3xl border border-white/5 bg-white/5 p-6 ring-1 ring-white/10">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-semibold text-white">Grades</h3>
+                    <span className="pill bg-white/10 text-xs">Avg grade: {averageScore}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGradeForm(emptyGrade);
+                      setEditingGradeId((prev) => (prev === 'new' ? null : 'new'));
+                    }}
+                    className="icon-button text-xs"
+                    aria-label="Add grade"
+                  >
+                    <span aria-hidden>{editingGradeId === 'new' ? '—' : '➕'}</span>
+                  </button>
+                </div>
+                {editingGradeId !== null && (
+                  <div className="mt-3 space-y-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2 sm:col-span-2">
+                        <label className="text-sm text-slate-200" htmlFor="gradeModule">Module</label>
+                        <select
+                          id="gradeModule"
+                          value={gradeForm.moduleId}
+                          onChange={(e) => setGradeForm({ ...gradeForm, moduleId: e.target.value })}
+                          className="field"
+                        >
+                          <option value="">Select a module</option>
+                          {modules.map((module) => (
+                            <option key={module.id} value={module.id}>{module.code} — {module.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm text-slate-200" htmlFor="score">Score</label>
+                        <input
+                          id="score"
+                          type="number"
+                          value={gradeForm.score}
+                          onChange={(e) => setGradeForm({ ...gradeForm, score: e.target.value })}
+                          className="field"
+                          placeholder="75"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={saveGrade}
+                        disabled={submitting}
+                        className="icon-button accent"
+                        aria-label={gradeForm.id ? 'Update grade' : 'Save grade'}
+                      >
+                        <span aria-hidden>💾</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingGradeId(null);
+                          setGradeForm(emptyGrade);
+                        }}
+                        className="icon-button text-xs"
+                      >
+                        Cancel
+                      </button>
+                      {gradeForm.id && (
+                        <button
+                          type="button"
+                          onClick={() => deleteGrade(gradeForm.id)}
+                          className="icon-button danger"
+                          aria-label="Delete grade"
+                        >
+                          <span aria-hidden>🗑️</span>
+                          <span className="sr-only">Delete grade</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-3 space-y-2 max-h-48 overflow-auto pr-1">
+                  {grades.map((grade) => (
+                    <div
+                      key={grade.id}
+                      className="flex items-center justify-between rounded-2xl bg-black/30 p-3 ring-1 ring-white/10"
+                    >
+                      <div>
+                        <p className="text-sm text-slate-200">{grade.module?.code ?? 'Module'} — {grade.score ?? '—'}</p>
+                        <p className="text-xs text-slate-400">{grade.module?.name}</p>
+                      </div>
+                      <div className="flex gap-2 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGradeForm({
+                              id: grade.id,
+                              moduleId: grade.module?.id?.toString() ?? '',
+                              score: grade.score?.toString() ?? '',
+                            });
+                            setEditingGradeId(grade.id ?? null);
+                          }}
+                          className="icon-button px-3 py-2"
+                          aria-label="Edit grade"
+                        >
+                          <span aria-hidden>✏️</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {!grades.length && <p className="text-sm text-slate-300">No grades recorded yet.</p>}
+                </div>
               </div>
             </div>
           </div>
-        ))}
-        {!filteredRegistrations.length && (
-          <p className="text-sm text-slate-300">No registrations match your search.</p>
         )}
       </div>
     </div>
