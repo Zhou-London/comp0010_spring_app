@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.ac.ucl.comp0010.config.AuthTokenFilter;
+import uk.ac.ucl.comp0010.config.RequestLoggingInterceptor;
 import uk.ac.ucl.comp0010.config.SecurityConfig;
 import uk.ac.ucl.comp0010.config.WebConfig;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
@@ -284,7 +285,7 @@ class SystemTest {
 
   @Test
   void testWebConfigCorsMapping() {
-    WebConfig webConfig = new WebConfig();
+    WebConfig webConfig = new WebConfig(new RequestLoggingInterceptor());
     CorsRegistrySpy spyRegistry = new CorsRegistrySpy();
     webConfig.addCorsMappings(spyRegistry);
 
