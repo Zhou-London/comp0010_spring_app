@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
 import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Module, type Registration, type Student } from '../types';
 
@@ -802,7 +803,17 @@ const ModuleDetail = () => {
         </div>
 
         {loading && <p className="text-slate-200">Loading…</p>}
-        {error && <p className="text-sm text-rose-300">{error}</p>}
+        {error && (
+          <ErrorMessage
+            message={error}
+            title="Module could not load"
+            tips={[
+              'Confirm the module still exists or return to the modules list.',
+              'Refresh the page and try again if the connection was interrupted.',
+              'If you recently changed permissions, sign back in before retrying.',
+            ]}
+          />
+        )}
         {message && <p className="text-sm text-emerald-300">{message}</p>}
 
         {module && activeSection === 'overview' && renderOverview()}
