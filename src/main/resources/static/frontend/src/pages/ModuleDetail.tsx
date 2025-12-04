@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
+import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Module, type Registration, type Student } from '../types';
 
 interface RegistrationFormState {
@@ -34,6 +36,14 @@ const ModuleDetail = () => {
   const navigate = useNavigate();
   const id = Number(moduleId);
 
+  const { moduleId, section } = useParams();
+  const navigate = useNavigate();
+  const { requireAuth } = useAuth();
+  const id = Number(moduleId);
+
+  const activeSection: 'overview' | 'registrations' | 'grades' =
+    section === 'registrations' ? 'registrations' : section === 'grades' ? 'grades' : 'overview';
+
   const [module, setModule] = useState<Module | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -50,6 +60,11 @@ const ModuleDetail = () => {
   const [editingModule, setEditingModule] = useState(false);
   const [editingRegistrationId, setEditingRegistrationId] = useState<number | 'new' | null>(null);
   const [editingGradeId, setEditingGradeId] = useState<number | 'new' | null>(null);
+
+  const [registrationQuery, setRegistrationQuery] = useState('');
+  const [registrationSort, setRegistrationSort] = useState<'name' | 'email' | 'id'>('name');
+  const [gradeQuery, setGradeQuery] = useState('');
+  const [gradeSort, setGradeSort] = useState<'name' | 'scoreDesc' | 'scoreAsc'>('name');
 
   const fetchData = async () => {
     if (!id) return;
@@ -81,11 +96,51 @@ const ModuleDetail = () => {
     void fetchData();
   }, [moduleId]);
 
+  useEffect(() => {
+    setEditingRegistrationId(null);
+    setEditingGradeId(null);
+    setRegistrationForm(emptyRegistration);
+    setGradeForm(emptyGrade);
+  }, [activeSection]);
+
   const averageGrade = useMemo(() => {
     if (!grades.length) return '–';
     const total = grades.reduce((acc, grade) => acc + (grade.score ?? 0), 0);
     return (total / grades.length).toFixed(1);
   }, [grades]);
+
+  const filteredRegistrations = useMemo(() => {
+    const query = registrationQuery.trim().toLowerCase();
+    const sorted = [...registrations].sort((a, b) => {
+      if (registrationSort === 'id') return (a.id ?? 0) - (b.id ?? 0);
+      if (registrationSort === 'email')
+        return (a.student?.email ?? '').localeCompare(b.student?.email ?? '');
+      return (a.student?.userName ?? '').localeCompare(b.student?.userName ?? '');
+    });
+
+    if (!query) return sorted;
+    return sorted.filter((registration) => {
+      const name = registration.student?.userName?.toLowerCase() ?? '';
+      const email = registration.student?.email?.toLowerCase() ?? '';
+      return name.includes(query) || email.includes(query) || `${registration.id ?? ''}`.includes(query);
+    });
+  }, [registrationQuery, registrationSort, registrations]);
+
+  const filteredGrades = useMemo(() => {
+    const query = gradeQuery.trim().toLowerCase();
+    const sorted = [...grades].sort((a, b) => {
+      if (gradeSort === 'scoreAsc') return (a.score ?? 0) - (b.score ?? 0);
+      if (gradeSort === 'scoreDesc') return (b.score ?? 0) - (a.score ?? 0);
+      return (a.student?.userName ?? '').localeCompare(b.student?.userName ?? '');
+    });
+
+    if (!query) return sorted;
+    return sorted.filter((grade) => {
+      const name = grade.student?.userName?.toLowerCase() ?? '';
+      const email = grade.student?.email?.toLowerCase() ?? '';
+      return name.includes(query) || email.includes(query) || `${grade.score ?? ''}`.includes(query);
+    });
+  }, [gradeQuery, gradeSort, grades]);
 
   const handleSaveModule = async () => {
     if (!id) return;
@@ -110,7 +165,7 @@ const ModuleDetail = () => {
     setError('');
     try {
       await apiFetch(`/modules/${id}`, { method: 'DELETE' });
-      navigate('/explorer');
+      navigate('/modules');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete module');
     } finally {

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.ac.ucl.comp0010.controllers.responses.StudentStatisticsResponse;
 import uk.ac.ucl.comp0010.exceptions.NoGradeAvailableException;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.exceptions.ResourceConflictException;
@@ -101,10 +102,7 @@ public class StudentService {
       throw new ResourceConflictException("Email already registered: " + updated.getEmail());
     }
 
-    existing.setFirstName(updated.getFirstName());
-    existing.setLastName(updated.getLastName());
-    existing.setUserName(updated.getUserName());
-    existing.setEmail(updated.getEmail());
+    applyUpdatedFields(existing, updated);
     return studentRepository.save(existing);
   }
 
@@ -216,6 +214,71 @@ public class StudentService {
       throw new NoGradeAvailableException("Student has no grades recorded");
     }
     return grades.stream().mapToInt(Grade::getScore).average().orElse(0.0);
+  }
+
+  /**
+   * Computes the GPA for a student on a 4.0 scale using common UK bands.
+   * 70+ -> 4.0, 60-69 -> 3.3, 50-59 -> 2.7, 40-49 -> 2.0, else 0.0.
+   *
+   * @param studentId student identifier
+   * @return GPA between 0.0 and 4.0
+   * @throws NoGradeAvailableException if the student has no grades
+   */
+  @Transactional(readOnly = true)
+  public double computeGpa(Long studentId) throws NoGradeAvailableException {
+    List<Grade> grades = getGradesForStudent(studentId);
+    if (grades.isEmpty()) {
+      throw new NoGradeAvailableException("Student has no grades recorded");
+    }
+
+    double totalPoints = grades.stream()
+        .mapToDouble(grade -> {
+          int score = grade.getScore();
+          if (score >= 70) {
+            return 4.0;
+          } else if (score >= 60) {
+            return 3.3;
+          } else if (score >= 50) {
+            return 2.7;
+          } else if (score >= 40) {
+            return 2.0;
+          }
+          return 0.0;
+        })
+        .sum();
+
+    return totalPoints / grades.size();
+  }
+
+  /**
+   * Builds a statistics view for the given student including personal data and average score.
+   *
+   * @param studentId student identifier
+   * @return StudentStatisticsResponse containing profile and average score information
+   */
+  @Transactional(readOnly = true)
+  public StudentStatisticsResponse getStudentStatistics(Long studentId) {
+    Student student = getStudent(studentId);
+    List<Grade> grades = gradeRepository.findAllByStudent(student);
+    Double average = grades.isEmpty()
+        ? null
+        : grades.stream().mapToInt(Grade::getScore).average().orElse(0.0);
+    return StudentStatisticsResponse.fromStudent(student, average);
+  }
+
+  private void applyUpdatedFields(Student target, Student source) {
+    target.setFirstName(source.getFirstName());
+    target.setLastName(source.getLastName());
+    target.setUserName(source.getUserName());
+    target.setEmail(source.getEmail());
+    target.setEntryYear(source.getEntryYear());
+    target.setGraduateYear(source.getGraduateYear());
+    target.setMajor(source.getMajor());
+    target.setTuitionFee(source.getTuitionFee());
+    target.setPaidTuitionFee(source.getPaidTuitionFee());
+    target.setBirthDate(source.getBirthDate());
+    target.setHomeStudent(source.getHomeStudent());
+    target.setSex(source.getSex());
   }
 
   private void validateUniqueness(Student student) {

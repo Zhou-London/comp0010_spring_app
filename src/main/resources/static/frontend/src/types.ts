@@ -4,6 +4,14 @@ export interface Student {
   lastName: string;
   userName: string;
   email: string;
+  entryYear?: number | null;
+  graduateYear?: number | null;
+  major?: string;
+  tuitionFee?: number | null;
+  paidTuitionFee?: number | null;
+  birthDate?: string | null;
+  homeStudent?: boolean | null;
+  sex?: string;
 }
 
 export interface Module {

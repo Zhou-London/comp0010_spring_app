@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
 import { type Grade, type Module, type Registration, type Student } from '../types';
 
 const Summary = () => {
@@ -76,7 +77,17 @@ const Summary = () => {
           </div>
         </div>
 
-        {error && <p className="text-sm text-rose-300">{error}</p>}
+        {error && (
+          <ErrorMessage
+            message={error}
+            title="Summary unavailable"
+            tips={[
+              'Check that the API server is reachable and responsive.',
+              'Reload the page to retry fetching the consolidated data.',
+              'Sign back in if your session may have expired.',
+            ]}
+          />
+        )}
         {loading && <p className="text-slate-300">Loading consolidated view…</p>}
 
         {!loading && (

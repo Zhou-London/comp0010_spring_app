@@ -1,27 +1,46 @@
-import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
-import { type Module } from '../types';
+import ErrorMessage from '../components/ErrorMessage';
+import { useAuth } from '../contexts/AuthContext';
+import { type Grade, type Module } from '../types';
 
-const emptyForm: Module = {
+const emptyModule: Module = {
   code: '',
   name: '',
   mnc: false,
 };
 
 const Modules = () => {
+  const navigate = useNavigate();
+  const { requireAuth } = useAuth();
+
   const [modules, setModules] = useState<Module[]>([]);
-  const [form, setForm] = useState<Module>(emptyForm);
+  const [grades, setGrades] = useState<Grade[]>([]);
+
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+
+  const [moduleQuery, setModuleQuery] = useState('');
+  const [moduleSort, setModuleSort] = useState<'codeAsc' | 'codeDesc' | 'nameAsc'>('codeAsc');
+
+  const [moduleFormOpen, setModuleFormOpen] = useState(false);
+  const [moduleForm, setModuleForm] = useState<Module>(emptyModule);
+  const [submitting, setSubmitting] = useState(false);
+  const [savingError, setSavingError] = useState('');
+  const [savingMessage, setSavingMessage] = useState('');
 
   const fetchModules = async () => {
     setLoading(true);
     setError('');
     try {
-      const response = await apiFetch<CollectionResponse<Module>>('/modules');
-      setModules(unwrapCollection(response, 'modules'));
+      const [modulesResponse, gradesResponse] = await Promise.all([
+        apiFetch<CollectionResponse<Module>>('/modules'),
+        apiFetch<CollectionResponse<Grade>>('/grades'),
+      ]);
+
+      setModules(unwrapCollection(modulesResponse, 'modules'));
+      setGrades(unwrapCollection(gradesResponse, 'grades'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load modules');
     } finally {
@@ -30,127 +49,205 @@ const Modules = () => {
   };
 
   useEffect(() => {
-    fetchModules();
+    void fetchModules();
   }, []);
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setSubmitting(true);
-    setError('');
-    setMessage('');
+  const moduleAverages = useMemo(() => {
+    const totals = new Map<number, { sum: number; count: number }>();
+    grades.forEach((grade) => {
+      const moduleId = grade.module?.id;
+      if (!moduleId || grade.score == null) return;
+      const current = totals.get(moduleId) ?? { sum: 0, count: 0 };
+      totals.set(moduleId, { sum: current.sum + grade.score, count: current.count + 1 });
+    });
+    return totals;
+  }, [grades]);
 
+  const filteredModules = useMemo(() => {
+    const query = moduleQuery.trim().toLowerCase();
+    const sorted = [...modules].sort((a, b) => {
+      if (moduleSort === 'nameAsc') return a.name.localeCompare(b.name);
+      if (moduleSort === 'codeDesc') return b.code.localeCompare(a.code);
+      return a.code.localeCompare(b.code);
+    });
+
+    if (!query) return sorted;
+    return sorted.filter((module) => module.code.toLowerCase().includes(query) || module.name.toLowerCase().includes(query));
+  }, [moduleQuery, modules, moduleSort]);
+
+  const openModuleModal = () => {
+    setModuleForm(emptyModule);
+    setSavingError('');
+    setSavingMessage('');
+    setModuleFormOpen(true);
+  };
+
+  const saveModule = async () => {
+    setSubmitting(true);
+    setSavingError('');
+    setSavingMessage('');
     try {
-      await apiFetch('/modules', {
-        method: 'POST',
-        body: form,
-      });
-      setForm(emptyForm);
-      setMessage('Module saved successfully.');
+      await apiFetch('/modules', { method: 'POST', body: moduleForm });
+      setSavingMessage('Module created.');
+      setModuleFormOpen(false);
+      setModuleForm(emptyModule);
       await fetchModules();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to save module');
+      setSavingError(err instanceof Error ? err.message : 'Unable to save module');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const total = useMemo(() => modules.length, [modules]);
+  const renderModuleCard = (module: Module) => {
+    const stats = module.id ? moduleAverages.get(module.id) : undefined;
+    const average = stats ? (stats.sum / stats.count).toFixed(1) : '–';
+
+    return (
+      <button
+        key={`${module.code}-${module.name}`}
+        type="button"
+        onClick={() => module.id && navigate(`/modules/${module.id}`)}
+        className="surface-card explorer-card group flex h-full flex-col gap-3 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-5 text-left"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-300/80">{module.code}</p>
+          <span className="pill shrink-0 whitespace-nowrap">ID: {module.id ?? '–'}</span>
+        </div>
+        <div className="space-y-1">
+          <p className="text-xl font-semibold text-white">{module.name}</p>
+          <p className="text-sm text-slate-300">Average grade · {average}</p>
+        </div>
+      </button>
+    );
+  };
 
   return (
     <div className="glass-panel">
       <div className="flex flex-col gap-8 p-8 sm:p-10">
         <div className="flex flex-col gap-2">
           <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Modules</p>
-          <h1 className="text-3xl font-semibold text-white sm:text-4xl">Module library</h1>
-          <p className="text-slate-200/80">Store module codes, friendly names, and whether they are mandatory.</p>
-          <div className="pill inline-flex w-fit items-center gap-2 bg-white/10 text-xs font-semibold text-slate-200">
-            <span className="inline-block h-2 w-2 rounded-full bg-sky-300"></span>
-            {total} curated modules
-          </div>
+          <h1 className="text-3xl font-semibold text-white sm:text-4xl">Search, sort, and open modules</h1>
+          <p className="text-slate-200/80">
+            View the catalogue with filters and sorting, jump into detail pages, and add new modules from one focused space.
+          </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/40 ring-1 ring-white/10">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-white">Current set</h2>
-              <button
-                type="button"
-                onClick={fetchModules}
-                className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/20 transition hover:bg-white/20"
-              >
-                Refresh
-              </button>
-            </div>
-            {loading ? (
-              <p className="mt-4 text-slate-300">Loading modules…</p>
-            ) : (
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                {modules.map((module) => (
-                  <div
-                    key={`${module.code}-${module.name}`}
-                    className="rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10 shadow-sm shadow-black/40"
-                  >
-                    <p className="text-sm uppercase tracking-[0.2em] text-slate-300/70">{module.code}</p>
-                    <p className="text-lg font-semibold text-white">{module.name}</p>
-                    <p className="text-sm text-slate-300">{module.mnc ? 'Mandatory' : 'Elective'}</p>
-                  </div>
-                ))}
-                {modules.length === 0 && (
-                  <p className="text-slate-300">No modules added yet.</p>
-                )}
-              </div>
-            )}
-          </div>
+        {error && (
+          <ErrorMessage
+            message={error}
+            title="Unable to load modules"
+            tips={[
+              'Check your network connection and refresh the page.',
+              'Confirm the server is running and reachable.',
+              'If the problem continues, try signing in again before retrying.',
+            ]}
+          />
+        )}
 
-          <div className="rounded-3xl border border-white/5 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
-            <h2 className="text-lg font-semibold text-white">Add a module</h2>
-            <p className="text-sm text-slate-300">Mirrors the Module model. Password travels automatically.</p>
-            <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-200" htmlFor="code">Module code</label>
+        <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-white">Modules</h2>
+              <p className="text-sm text-slate-300">Scroll, search, and open module records.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => requireAuth(() => {
+                if (!moduleFormOpen) openModuleModal();
+                else setModuleFormOpen(false);
+              })}
+              className="icon-button accent text-xs"
+              aria-label="Add module"
+            >
+              <span aria-hidden>{moduleFormOpen ? '—' : '➕'}</span>
+            </button>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <input
+              className="field flex-1 min-w-[12rem]"
+              placeholder="Search by code or name"
+              value={moduleQuery}
+              onChange={(e) => setModuleQuery(e.target.value)}
+            />
+            <select
+              value={moduleSort}
+              onChange={(e) => setModuleSort(e.target.value as typeof moduleSort)}
+              className="rounded-full bg-black/40 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10"
+            >
+              <option value="codeAsc">Code: A to Z</option>
+              <option value="codeDesc">Code: Z to A</option>
+              <option value="nameAsc">Name: A to Z</option>
+            </select>
+          </div>
+          {moduleFormOpen && (
+            <div className="mt-4 space-y-3 rounded-2xl bg-black/30 p-4 ring-1 ring-white/10">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <input
-                  id="code"
-                  value={form.code}
-                  onChange={(e) => setForm({ ...form, code: e.target.value })}
-                  required
+                  value={moduleForm.code}
+                  onChange={(e) => setModuleForm({ ...moduleForm, code: e.target.value })}
                   className="field"
-                  placeholder="COMP0010"
+                  placeholder="Module code"
                 />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-200" htmlFor="name">Module name</label>
                 <input
-                  id="name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
+                  value={moduleForm.name}
+                  onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })}
                   className="field"
-                  placeholder="Software Engineering"
+                  placeholder="Module name"
                 />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-slate-200" htmlFor="mnc">Mandatory?</label>
-                <div className="flex items-center gap-3 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10">
+                <label className="flex items-center gap-3 sm:col-span-2 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10">
                   <input
-                    id="mnc"
                     type="checkbox"
-                    checked={form.mnc}
-                    onChange={(e) => setForm({ ...form, mnc: e.target.checked })}
+                    checked={moduleForm.mnc}
+                    onChange={(e) => setModuleForm({ ...moduleForm, mnc: e.target.checked })}
                     className="h-5 w-5 rounded border-white/30 bg-white/10 text-sky-400 focus:ring-white/40"
                   />
-                  <span className="text-slate-200">Toggle if core to the programme.</span>
-                </div>
+                  <span className="text-slate-200">Mandatory module</span>
+                </label>
               </div>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full rounded-2xl bg-white px-4 py-3 text-center text-sm font-semibold text-slate-900 shadow-lg shadow-white/30 transition hover:-translate-y-[1px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {submitting ? 'Saving…' : 'Save module'}
-              </button>
-              {message && <p className="text-sm text-emerald-300">{message}</p>}
-              {error && <p className="text-sm text-rose-300">{error}</p>}
-            </form>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => requireAuth(saveModule)}
+                  disabled={submitting}
+                  className="icon-button accent"
+                  aria-label="Save module"
+                >
+                  <span aria-hidden>💾</span>
+                  <span className="sr-only">Save module</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModuleFormOpen(false);
+                    setModuleForm(emptyModule);
+                    setSavingError('');
+                    setSavingMessage('');
+                  }}
+                  className="icon-button text-xs"
+                >
+                  Cancel
+                </button>
+              </div>
+              {savingMessage && <span className="text-sm text-emerald-300">{savingMessage}</span>}
+          {savingError && (
+            <ErrorMessage
+              message={savingError}
+              title="Module save failed"
+              tips={[
+                'Ensure the module code and name are filled in without duplicates.',
+                'Verify you are signed in with permission to create modules.',
+                'Try saving again after refreshing if the issue persists.',
+              ]}
+              floating
+            />
+          )}
+            </div>
+          )}
+
+          <div className="mt-4 grid max-h-[32rem] gap-3 overflow-auto pr-2 explorer-grid">
+            {filteredModules.map(renderModuleCard)}
+            {!loading && !filteredModules.length && <p className="text-slate-300">No modules match that search.</p>}
           </div>
         </div>
       </div>

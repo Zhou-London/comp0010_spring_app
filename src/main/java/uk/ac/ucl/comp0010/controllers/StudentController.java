@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ucl.comp0010.controllers.requests.StudentGradeRequest;
+import uk.ac.ucl.comp0010.controllers.responses.StudentStatisticsResponse;
 import uk.ac.ucl.comp0010.exceptions.NoGradeAvailableException;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.models.Grade;
@@ -25,7 +26,7 @@ import uk.ac.ucl.comp0010.services.StudentService;
  * REST controller for student operations.
  */
 @RestController
-@RequestMapping("/students")
+@RequestMapping("/api/students")
 public class StudentController {
   private final StudentService studentService;
 
@@ -107,6 +108,32 @@ public class StudentController {
     double average = studentService.computeAverage(id);
     Map<String, Double> response = new HashMap<>();
     response.put("average", average);
+    return response;
+  }
+
+  /**
+   * Retrieve detailed statistics for a student.
+   *
+   * @param id student identity
+   * @return StudentStatisticsResponse containing profile and computed values
+   */
+  @GetMapping("/{id}/stats")
+  public StudentStatisticsResponse getStatistics(@PathVariable Long id) {
+    return studentService.getStudentStatistics(id);
+  }
+
+  /**
+   * Evaluate the GPA of an existing student on a 4.0 scale.
+   *
+   * @param id student identity
+   * @return GPA
+   * @throws NoGradeAvailableException if the student got no grade
+   */
+  @GetMapping("/{id}/gpa")
+  public Map<String, Double> getGpa(@PathVariable Long id) throws NoGradeAvailableException {
+    double gpa = studentService.computeGpa(id);
+    Map<String, Double> response = new HashMap<>();
+    response.put("gpa", gpa);
     return response;
   }
 }

@@ -9,14 +9,7 @@
 target
 
 # Env file
-*.env
-
-.idea/
-
-/workspace.xml
-/frontend/node_modules/
-/.editorconfig.ini
-/.idea/
+*.env.*
 
 # Node deps file
 **/node_modules

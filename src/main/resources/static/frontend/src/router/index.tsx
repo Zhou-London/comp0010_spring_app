@@ -5,9 +5,9 @@ const App = React.lazy(() => import('../App'));
 const Home = React.lazy(() => import('../pages/Home'));
 const Students = React.lazy(() => import('../pages/Students'));
 const Modules = React.lazy(() => import('../pages/Modules'));
-const Grades = React.lazy(() => import('../pages/Grades'));
-const Registrations = React.lazy(() => import('../pages/Registrations'));
-const Profile = React.lazy(() => import('../pages/Profile'));
+const Api = React.lazy(() => import('../pages/Api'));
+const StudentDetail = React.lazy(() => import('../pages/StudentDetail'));
+const ModuleDetail = React.lazy(() => import('../pages/ModuleDetail'));
 
 const Loading = () => <div className="p-6 text-center text-slate-200">Loading...</div>;
 
@@ -45,26 +45,26 @@ const routes: RouteObject[] = [
         ),
       },
       {
-        path: 'grades',
+        path: 'doc-api',
         element: (
           <Suspense fallback={<Loading />}>
-            <Grades />
+            <Api />
           </Suspense>
         ),
       },
       {
-        path: 'registrations',
+        path: 'students/:studentId/:section?',
         element: (
           <Suspense fallback={<Loading />}>
-            <Registrations />
+            <StudentDetail />
           </Suspense>
         ),
       },
       {
-        path: 'profile',
+        path: 'modules/:moduleId/:section?',
         element: (
           <Suspense fallback={<Loading />}>
-            <Profile />
+            <ModuleDetail />
           </Suspense>
         ),
       },

@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
 import { type Module, type Registration, type Student } from '../types';
 
 const emptyForm = {
@@ -20,6 +21,10 @@ const Registrations = () => {
   const [modulesLoading, setModulesLoading] = useState(true);
   const [studentQuery, setStudentQuery] = useState('');
   const [moduleQuery, setModuleQuery] = useState('');
+  const [studentSearchTerm, setStudentSearchTerm] = useState('');
+  const [moduleSearchTerm, setModuleSearchTerm] = useState('');
+  const [studentSuggestionsOpen, setStudentSuggestionsOpen] = useState(false);
+  const [moduleSuggestionsOpen, setModuleSuggestionsOpen] = useState(false);
   const [manualEntryVisible, setManualEntryVisible] = useState(false);
 
   const fetchStudents = async () => {
@@ -60,6 +65,7 @@ const Registrations = () => {
     void fetchStudents();
     void fetchModules();
   }, []);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setSubmitting(true);
@@ -105,6 +111,19 @@ const Registrations = () => {
     });
   }, [studentQuery, students]);
 
+  const suggestionsStudents = useMemo(() => {
+    const query = studentSearchTerm.trim().toLowerCase();
+    if (!query) return [];
+    return students.filter((student) => {
+      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+      return (
+        fullName.includes(query) ||
+        student.userName.toLowerCase().includes(query) ||
+        student.id?.toString().includes(query)
+      );
+    });
+  }, [studentSearchTerm, students]);
+
   const filteredModules = useMemo(() => {
     const query = moduleQuery.trim().toLowerCase();
     if (!query) return modules;
@@ -116,6 +135,18 @@ const Registrations = () => {
       );
     });
   }, [moduleQuery, modules]);
+
+  const suggestionsModules = useMemo(() => {
+    const query = moduleSearchTerm.trim().toLowerCase();
+    if (!query) return [];
+    return modules.filter((module) => {
+      return (
+        module.code.toLowerCase().includes(query) ||
+        module.name.toLowerCase().includes(query) ||
+        module.id?.toString().includes(query)
+      );
+    });
+  }, [moduleSearchTerm, modules]);
 
   const handleStudentSelect = (student: Student) => {
     setForm((current) => ({ ...current, studentId: student.id?.toString() ?? '' }));
@@ -161,6 +192,80 @@ const Registrations = () => {
             </div>
 
             <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="relative space-y-2">
+                  <label className="text-sm text-slate-200" htmlFor="studentSearch">Find student</label>
+                  <input
+                    id="studentSearch"
+                    value={studentSearchTerm}
+                    onFocus={() => setStudentSuggestionsOpen(true)}
+                    onChange={(e) => {
+                      setStudentSearchTerm(e.target.value);
+                      setStudentSuggestionsOpen(true);
+                    }}
+                    className="field"
+                    placeholder="Type name, username, or ID"
+                  />
+                  {studentSuggestionsOpen && suggestionsStudents.length > 0 && (
+                    <div className="absolute z-20 mt-1 max-h-40 w-full overflow-y-auto rounded-2xl border border-white/15 bg-black/60 p-2 shadow-lg backdrop-blur">
+                      {suggestionsStudents.map((student) => (
+                        <button
+                          key={`suggest-${student.id ?? student.userName}`}
+                          type="button"
+                          onClick={() => {
+                            setForm((current) => ({ ...current, studentId: student.id?.toString() ?? '' }));
+                            setStudentSearchTerm(`${student.firstName} ${student.lastName}`);
+                            setStudentQuery(''); // collapse suggestion list
+                            setStudentSuggestionsOpen(false);
+                          }}
+                          className="flex w-full flex-col items-start gap-0.5 rounded-xl px-3 py-2 text-left hover:bg-white/10"
+                        >
+                          <span className="text-xs uppercase tracking-[0.2em] text-slate-300">ID: {student.id ?? '–'}</span>
+                          <span className="text-sm font-semibold text-white">{student.firstName} {student.lastName}</span>
+                          <span className="text-xs text-slate-300">{student.userName}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="relative space-y-2">
+                  <label className="text-sm text-slate-200" htmlFor="moduleSearch">Find module</label>
+                  <input
+                    id="moduleSearch"
+                    value={moduleSearchTerm}
+                    onFocus={() => setModuleSuggestionsOpen(true)}
+                    onChange={(e) => {
+                      setModuleSearchTerm(e.target.value);
+                      setModuleSuggestionsOpen(true);
+                    }}
+                    className="field"
+                    placeholder="Type code, name, or ID"
+                  />
+                  {moduleSuggestionsOpen && suggestionsModules.length > 0 && (
+                    <div className="absolute z-20 mt-1 max-h-40 w-full overflow-y-auto rounded-2xl border border-white/15 bg-black/60 p-2 shadow-lg backdrop-blur">
+                      {suggestionsModules.map((module) => (
+                        <button
+                          key={`suggest-${module.id ?? module.code}`}
+                          type="button"
+                          onClick={() => {
+                            setForm((current) => ({ ...current, moduleId: module.id?.toString() ?? '' }));
+                            setModuleSearchTerm(module.code);
+                            setModuleQuery(''); // collapse suggestion list
+                            setModuleSuggestionsOpen(false);
+                          }}
+                          className="flex w-full flex-col items-start gap-0.5 rounded-xl px-3 py-2 text-left hover:bg-white/10"
+                        >
+                          <span className="text-xs uppercase tracking-[0.2em] text-slate-300">ID: {module.id ?? '–'}</span>
+                          <span className="text-sm font-semibold text-white">{module.code}</span>
+                          <span className="text-xs text-slate-300">{module.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {manualEntryVisible && (
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-2">
@@ -194,7 +299,18 @@ const Registrations = () => {
                 {submitting ? 'Saving…' : 'Save registration'}
               </button>
               {message && <p className="text-sm text-emerald-300">{message}</p>}
-              {error && <p className="text-sm text-rose-300">{error}</p>}
+          {error && (
+            <ErrorMessage
+              message={error}
+              title="Registration error"
+              tips={[
+                'Pick both a student and module before saving.',
+                'Confirm the selected records still exist and are visible.',
+                'Retry after a refresh if the session may have expired.',
+              ]}
+              floating
+            />
+          )}
             </form>
 
             <div className="mt-6 space-y-6">

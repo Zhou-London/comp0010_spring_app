@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import ErrorMessage from '../components/ErrorMessage';
+import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Module, type Registration, type Student } from '../types';
 
 interface RegistrationFormState {
@@ -19,6 +21,14 @@ const emptyStudent: Student = {
   lastName: '',
   userName: '',
   email: '',
+  entryYear: null,
+  graduateYear: null,
+  major: '',
+  tuitionFee: null,
+  paidTuitionFee: null,
+  birthDate: null,
+  homeStudent: null,
+  sex: '',
 };
 
 const emptyRegistration: RegistrationFormState = {
@@ -31,9 +41,13 @@ const emptyGrade: GradeFormState = {
 };
 
 const StudentDetail = () => {
-  const { studentId } = useParams();
+  const { studentId, section } = useParams();
   const navigate = useNavigate();
+  const { requireAuth } = useAuth();
   const id = Number(studentId);
+
+  const activeSection: 'overview' | 'registrations' | 'grades' =
+    section === 'registrations' ? 'registrations' : section === 'grades' ? 'grades' : 'overview';
 
   const [student, setStudent] = useState<Student | null>(null);
   const [modules, setModules] = useState<Module[]>([]);
@@ -51,6 +65,21 @@ const StudentDetail = () => {
   const [editingStudent, setEditingStudent] = useState(false);
   const [editingRegistrationId, setEditingRegistrationId] = useState<number | 'new' | null>(null);
   const [editingGradeId, setEditingGradeId] = useState<number | 'new' | null>(null);
+
+  const [registrationQuery, setRegistrationQuery] = useState('');
+  const [registrationSort, setRegistrationSort] = useState<'code' | 'name' | 'id'>('code');
+  const [gradeQuery, setGradeQuery] = useState('');
+  const [gradeSort, setGradeSort] = useState<'module' | 'scoreDesc' | 'scoreAsc'>('module');
+
+  const toNumberOrNull = (value: string) => (value ? Number(value) : null);
+  const toBooleanOrNull = (value: string) => {
+    if (value === '') return null;
+    return value === 'true';
+  };
+  const formatCurrency = (value?: number | null) => {
+    if (value == null) return '—';
+    return `£${value.toFixed(2)}`;
+  };
 
   const fetchData = async () => {
     if (!id) return;
@@ -82,11 +111,61 @@ const StudentDetail = () => {
     void fetchData();
   }, [studentId]);
 
+  useEffect(() => {
+    setEditingRegistrationId(null);
+    setEditingGradeId(null);
+    setRegistrationForm(emptyRegistration);
+    setGradeForm(emptyGrade);
+  }, [activeSection]);
+
   const averageScore = useMemo(() => {
     if (!grades.length) return '–';
     const total = grades.reduce((acc, grade) => acc + (grade.score ?? 0), 0);
     return (total / grades.length).toFixed(1);
   }, [grades]);
+
+  const outstandingTuition = useMemo(() => {
+    if (student?.tuitionFee == null) return null;
+    const paid = student.paidTuitionFee ?? 0;
+    return Number((student.tuitionFee - paid).toFixed(2));
+  }, [student]);
+
+  const residencyLabel = useMemo(() => {
+    if (student?.homeStudent == null) return '—';
+    return student.homeStudent ? 'Home student' : 'International';
+  }, [student]);
+
+  const filteredRegistrations = useMemo(() => {
+    const query = registrationQuery.trim().toLowerCase();
+    const sorted = [...registrations].sort((a, b) => {
+      if (registrationSort === 'id') return (a.id ?? 0) - (b.id ?? 0);
+      if (registrationSort === 'name') return (a.module?.name ?? '').localeCompare(b.module?.name ?? '');
+      return (a.module?.code ?? '').localeCompare(b.module?.code ?? '');
+    });
+
+    if (!query) return sorted;
+    return sorted.filter((registration) => {
+      const code = registration.module?.code?.toLowerCase() ?? '';
+      const name = registration.module?.name?.toLowerCase() ?? '';
+      return code.includes(query) || name.includes(query) || `${registration.id ?? ''}`.includes(query);
+    });
+  }, [registrationQuery, registrationSort, registrations]);
+
+  const filteredGrades = useMemo(() => {
+    const query = gradeQuery.trim().toLowerCase();
+    const sorted = [...grades].sort((a, b) => {
+      if (gradeSort === 'scoreAsc') return (a.score ?? 0) - (b.score ?? 0);
+      if (gradeSort === 'scoreDesc') return (b.score ?? 0) - (a.score ?? 0);
+      return (a.module?.code ?? '').localeCompare(b.module?.code ?? '');
+    });
+
+    if (!query) return sorted;
+    return sorted.filter((grade) => {
+      const code = grade.module?.code?.toLowerCase() ?? '';
+      const name = grade.module?.name?.toLowerCase() ?? '';
+      return code.includes(query) || name.includes(query) || `${grade.score ?? ''}`.includes(query);
+    });
+  }, [gradeQuery, gradeSort, grades]);
 
   const handleSaveStudent = async () => {
     if (!id) return;
@@ -111,7 +190,7 @@ const StudentDetail = () => {
     setError('');
     try {
       await apiFetch(`/students/${id}`, { method: 'DELETE' });
-      navigate('/explorer');
+      navigate('/students');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete student');
     } finally {
@@ -560,6 +639,124 @@ const StudentDetail = () => {
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+
+  const renderGradesPage = () => (
+    <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-300">All grades</p>
+          <h2 className="text-xl font-semibold text-white">Assessments for this student</h2>
+          <p className="text-sm text-slate-300">Review every module score, adjust them, or add new marks.</p>
+        </div>
+        <div className="flex flex-wrap justify-end gap-2">
+          <span className="pill bg-white/10 text-xs">Average {averageScore}</span>
+          <button
+            type="button"
+            onClick={() => requireAuth(() => openGradeEditor())}
+            className="icon-button accent text-xs"
+            aria-label="Add grade"
+          >
+            <span aria-hidden>{editingGradeId === 'new' ? '—' : '➕'}</span>
+            <span className="hidden sm:inline">Add grade</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+        <input
+          className="field"
+          placeholder="Search by module or score"
+          value={gradeQuery}
+          onChange={(e) => setGradeQuery(e.target.value)}
+        />
+        <select
+          value={gradeSort}
+          onChange={(e) => setGradeSort(e.target.value as typeof gradeSort)}
+          className="rounded-full bg-black/40 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10"
+        >
+          <option value="module">Module code</option>
+          <option value="scoreDesc">Score: high to low</option>
+          <option value="scoreAsc">Score: low to high</option>
+        </select>
+      </div>
+
+      <div className="mt-4 grid gap-3 explorer-grid">
+        {filteredGrades.map((grade) => (
+          <div key={grade.id} className="surface-card explorer-card flex flex-col gap-3 p-5">
+            <div className="grid grid-cols-[1fr_auto] items-start gap-2">
+              <div className="min-w-0 space-y-1 break-words">
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-300">{grade.module?.code ?? 'Module'}</p>
+                <p className="text-lg font-semibold text-white">{grade.module?.name ?? 'Unknown module'}</p>
+                <p className="text-2xl font-semibold text-white">Score: {grade.score ?? '—'}</p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="pill text-xs break-words">ID: {grade.id ?? '—'}</span>
+                <button
+                  type="button"
+                  onClick={() => requireAuth(() => openGradeEditor(grade))}
+                  className="icon-button compact text-[10px] px-2 py-1"
+                  aria-label="Edit grade"
+                >
+                  <span aria-hidden>✏️</span>
+                  <span className="hidden sm:inline">Edit</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {!filteredGrades.length && <p className="text-sm text-slate-300">No grades match your search.</p>}
+      </div>
+    </div>
+  );
+
+  if (!id) {
+    return (
+      <div className="glass-panel">
+        <div className="p-8 text-white">No student ID provided.</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="glass-panel">
+      <div className="flex flex-col gap-6 p-6 sm:gap-8 sm:p-10">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Student detail</p>
+            <h1 className="text-3xl font-semibold text-white sm:text-4xl">Profile and records</h1>
+            <p className="text-slate-200/80">Update this student, manage registrations, and maintain grades.</p>
+            {renderSectionTabs()}
+          </div>
+          <Link
+            to="/students"
+            className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-slate-200 ring-1 ring-white/20 hover:bg-white/20"
+          >
+            Back to students
+          </Link>
+        </div>
+
+        {loading && <p className="text-slate-200">Loading…</p>}
+        {error && (
+          <ErrorMessage
+            message={error}
+            title="Student data error"
+            tips={[
+              'Ensure the student still exists or return to the student list.',
+              'Refresh the page if your session timed out while editing.',
+              'Retry after signing back in if you recently changed access.',
+            ]}
+          />
+        )}
+        {message && <p className="text-sm text-emerald-300">{message}</p>}
+
+        {student && activeSection === 'overview' && renderOverview()}
+        {student && activeSection === 'registrations' && renderRegistrationsPage()}
+        {student && activeSection === 'grades' && renderGradesPage()}
+        {renderRegistrationModal()}
+        {renderGradeModal()}
       </div>
     </div>
   );
