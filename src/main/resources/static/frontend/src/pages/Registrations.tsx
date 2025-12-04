@@ -299,18 +299,17 @@ const Registrations = () => {
                 {submitting ? 'Saving…' : 'Save registration'}
               </button>
               {message && <p className="text-sm text-emerald-300">{message}</p>}
-          {error && (
-            <ErrorMessage
-              message={error}
-              title="Registration error"
-              tips={[
-                'Pick both a student and module before saving.',
-                'Confirm the selected records still exist and are visible.',
-                'Retry after a refresh if the session may have expired.',
-              ]}
-              floating
-            />
-          )}
+              {error && (
+                <ErrorMessage
+                  message={error}
+                  title="Registration error"
+                  tips={[
+                    'Pick both a student and module before saving.',
+                    'Confirm the selected records still exist and are visible.',
+                    'Retry after a refresh if the session may have expired.',
+                  ]}
+                />
+              )}
             </form>
 
             <div className="mt-6 space-y-6">
