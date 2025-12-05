@@ -24,7 +24,7 @@ jobs:
         run: mvn clean package -DskipTests
 
       - name: Run tests
-        run: mvn test
+        run: mvn compile test checkstyle:check spotbugs:check verify site
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
