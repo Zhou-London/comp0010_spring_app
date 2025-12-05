@@ -20,11 +20,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Maven
-        run: mvn clean package -DskipTests
-
       - name: Run tests
-        run: mvn test
+        run: mvn compile test checkstyle:check spotbugs:check verify site
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
