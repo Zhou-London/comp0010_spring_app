@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.HashSet;
@@ -38,6 +40,17 @@ public class Module {
   @Column(nullable = false)
   @Schema(description = "Is module mandatory", example = "true", type = "boolean")
   private Boolean mnc;
+
+  @Column(name = "required_year")
+  @Schema(description = "Minimum academic year required to take this module", example = "2",
+      type = "integer")
+  private Integer requiredYear;
+
+  @ManyToOne
+  @JoinColumn(name = "prerequisite_id")
+  @JsonIgnoreProperties({"registrations", "grades", "prerequisite"})
+  @Schema(description = "Optional prerequisite module that must be completed first")
+  private Module prerequisite;
 
   @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonIgnore
@@ -82,6 +95,14 @@ public class Module {
     return mnc;
   }
 
+  public Integer getRequiredYear() {
+    return requiredYear;
+  }
+
+  public Module getPrerequisite() {
+    return prerequisite;
+  }
+
   public void setId(Long id) {
     this.id = id;
   }
@@ -96,6 +117,14 @@ public class Module {
 
   public void setMnc(Boolean mnc) {
     this.mnc = mnc;
+  }
+
+  public void setRequiredYear(Integer requiredYear) {
+    this.requiredYear = requiredYear;
+  }
+
+  public void setPrerequisite(Module prerequisite) {
+    this.prerequisite = prerequisite;
   }
 
   public Set<Registration> getRegistrations() {

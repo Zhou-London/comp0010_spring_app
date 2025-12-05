@@ -19,6 +19,8 @@ export interface Module {
   code: string;
   name: string;
   mnc: boolean;
+  requiredYear?: number | null;
+  prerequisite?: Module | null;
 }
 
 export interface Grade {

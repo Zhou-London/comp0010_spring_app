@@ -6,12 +6,16 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.exceptions.ResourceConflictException;
 import uk.ac.ucl.comp0010.exceptions.ResourceNotFoundException;
+import uk.ac.ucl.comp0010.models.Grade;
 import uk.ac.ucl.comp0010.models.Module;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.models.Student;
+import uk.ac.ucl.comp0010.repositories.GradeRepository;
 import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 import uk.ac.ucl.comp0010.repositories.RegistrationRepository;
 import uk.ac.ucl.comp0010.repositories.StudentRepository;
+import java.time.LocalDate;
+import java.util.Optional;
 
 /**
  * Registration specific service logic.
@@ -22,6 +26,7 @@ public class RegistrationService {
   private final RegistrationRepository registrationRepository;
   private final StudentRepository studentRepository;
   private final ModuleRepository moduleRepository;
+  private final GradeRepository gradeRepository;
 
   /**
    * CTR for Registration Service.
@@ -31,10 +36,12 @@ public class RegistrationService {
    * @param moduleRepository Deps inj
    */
   public RegistrationService(RegistrationRepository registrationRepository,
-      StudentRepository studentRepository, ModuleRepository moduleRepository) {
+      StudentRepository studentRepository, ModuleRepository moduleRepository,
+      GradeRepository gradeRepository) {
     this.registrationRepository = registrationRepository;
     this.studentRepository = studentRepository;
     this.moduleRepository = moduleRepository;
+    this.gradeRepository = gradeRepository;
   }
 
   /**
@@ -79,6 +86,8 @@ public class RegistrationService {
     if (registrationRepository.existsByStudentAndModule(student, module)) {
       throw new ResourceConflictException("Student already registered for module");
     }
+
+    enforceModuleEligibility(student, module);
 
     return registrationRepository.save(new Registration(student, module));
   }
@@ -126,5 +135,34 @@ public class RegistrationService {
     Module module = moduleRepository.findById(moduleId)
         .orElseThrow(() -> new ResourceNotFoundException("Module not found with id " + moduleId));
     return registrationRepository.findAllByModule(module);
+  }
+
+  private void enforceModuleEligibility(Student student, Module module) {
+    if (module.getRequiredYear() != null) {
+      int studentYear = resolveStudentYear(student);
+      if (studentYear < module.getRequiredYear()) {
+        throw new ResourceConflictException(
+            "Student year " + studentYear + " is below required year " + module.getRequiredYear());
+      }
+    }
+
+    if (module.getPrerequisite() != null) {
+      Module prerequisite = module.getPrerequisite();
+      Optional<Grade> prereqGrade =
+          gradeRepository.findByStudentAndModule(student, prerequisite);
+      if (prereqGrade.isEmpty() || prereqGrade.get().getScore() < 40) {
+        throw new ResourceConflictException("Student must complete prerequisite module "
+            + prerequisite.getCode() + " with a passing grade");
+      }
+    }
+  }
+
+  private int resolveStudentYear(Student student) {
+    if (student.getEntryYear() == null) {
+      throw new ResourceConflictException("Student entry year is missing for year validation");
+    }
+    int currentYear = LocalDate.now().getYear();
+    int studentYear = currentYear - student.getEntryYear() + 1;
+    return Math.max(studentYear, 1);
   }
 }
