@@ -51,6 +51,8 @@ public class ModuleService {
     if (moduleRepository.existsByCode(module.getCode())) {
       throw new ResourceConflictException("Module code already exists: " + module.getCode());
     }
+    normalizeYearRange(module);
+    module.setPrerequisite(resolvePrerequisite(module));
     return moduleRepository.save(module);
   }
 
@@ -71,11 +73,43 @@ public class ModuleService {
     existing.setCode(updated.getCode());
     existing.setName(updated.getName());
     existing.setMnc(updated.getMnc());
+    existing.setRequiredYear(updated.getRequiredYear());
+    existing.setMinAllowedYear(updated.getMinAllowedYear());
+    existing.setMaxAllowedYear(updated.getMaxAllowedYear());
+    normalizeYearRange(existing);
+    existing.setPrerequisite(resolvePrerequisite(updated));
     return moduleRepository.save(existing);
   }
 
   public void deleteModule(Long id) {
     Module module = getModule(id);
     moduleRepository.delete(module);
+  }
+
+  private Module resolvePrerequisite(Module module) {
+    if (module.getPrerequisite() == null || module.getPrerequisite().getId() == null) {
+      return null;
+    }
+    Long prereqId = module.getPrerequisite().getId();
+    if (module.getId() != null && module.getId().equals(prereqId)) {
+      throw new ResourceConflictException("Module cannot depend on itself");
+    }
+    return moduleRepository.findById(prereqId)
+        .orElseThrow(() -> new ResourceNotFoundException("Prerequisite module not found with id "
+            + prereqId));
+  }
+
+  private void normalizeYearRange(Module module) {
+    Integer min = module.getMinAllowedYear();
+    Integer max = module.getMaxAllowedYear();
+    if (min != null && min < 1) {
+      throw new ResourceConflictException("Minimum allowed year must be >= 1");
+    }
+    if (max != null && max < 1) {
+      throw new ResourceConflictException("Maximum allowed year must be >= 1");
+    }
+    if (min != null && max != null && min > max) {
+      throw new ResourceConflictException("Minimum allowed year cannot exceed maximum allowed year");
+    }
   }
 }
