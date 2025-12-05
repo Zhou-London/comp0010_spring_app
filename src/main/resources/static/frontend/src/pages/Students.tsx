@@ -318,17 +318,18 @@ const Students = () => {
                 </button>
               </div>
               {savingMessage && <span className="text-sm text-emerald-300">{savingMessage}</span>}
-              {savingError && (
-                <ErrorMessage
-                  message={savingError}
-                  title="Student save failed"
-                  tips={[
-                    'Ensure all required name and contact fields are filled in.',
-                    'Confirm the username or email is unique before saving.',
-                    'Try again after refreshing if you recently signed in or changed roles.',
-                  ]}
-                />
-              )}
+          {savingError && (
+            <ErrorMessage
+              message={savingError}
+              title="Student save failed"
+              tips={[
+                'Ensure all required name and contact fields are filled in.',
+                'Confirm the username or email is unique before saving.',
+                'Try again after refreshing if you recently signed in or changed roles.',
+              ]}
+              floating
+            />
+          )}
             </div>
           )}
 

@@ -117,17 +117,8 @@ const ModuleDetail = () => {
     if (!query) return sorted;
     return sorted.filter((registration) => {
       const name = registration.student?.userName?.toLowerCase() ?? '';
-      const fullName = `${registration.student?.firstName ?? ''} ${registration.student?.lastName ?? ''}`
-        .trim()
-        .toLowerCase();
       const email = registration.student?.email?.toLowerCase() ?? '';
-      const idString = `${registration.id ?? ''}`;
-      return (
-        name.includes(query) ||
-        fullName.includes(query) ||
-        email.includes(query) ||
-        idString.includes(query)
-      );
+      return name.includes(query) || email.includes(query) || `${registration.id ?? ''}`.includes(query);
     });
   }, [registrationQuery, registrationSort, registrations]);
 
@@ -693,15 +684,8 @@ const ModuleDetail = () => {
           <div key={registration.id} className="surface-card explorer-card flex flex-col gap-3 p-5">
             <div className="grid grid-cols-[1fr_auto] items-start gap-2">
               <div className="min-w-0 space-y-1 break-words">
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-300">
-                  {registration.student?.userName ?? 'Student'}
-                </p>
-                <p className="text-lg font-semibold text-white">
-                  {registration.student
-                    ? `${registration.student.firstName ?? ''} ${registration.student.lastName ?? ''}`.trim() || registration.student.userName
-                    : 'Unknown'}
-                </p>
-                <p className="text-sm text-slate-300">{registration.student?.email ?? 'Unknown email'}</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-300">{registration.student?.userName ?? 'Student'}</p>
+                <p className="text-lg font-semibold text-white">{registration.student?.email ?? 'Unknown email'}</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="pill text-xs break-words">ID: {registration.id ?? '—'}</span>
