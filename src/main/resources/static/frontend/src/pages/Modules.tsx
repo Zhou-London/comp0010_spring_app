@@ -303,17 +303,18 @@ const Modules = () => {
                 </button>
               </div>
               {savingMessage && <span className="text-sm text-emerald-300">{savingMessage}</span>}
-              {savingError && (
-                <ErrorMessage
-                  message={savingError}
-                  title="Module save failed"
-                  tips={[
-                    'Ensure the module code and name are filled in without duplicates.',
-                    'Verify you are signed in with permission to create modules.',
-                    'Try saving again after refreshing if the issue persists.',
-                  ]}
-                />
-              )}
+          {savingError && (
+            <ErrorMessage
+              message={savingError}
+              title="Module save failed"
+              tips={[
+                'Ensure the module code and name are filled in without duplicates.',
+                'Verify you are signed in with permission to create modules.',
+                'Try saving again after refreshing if the issue persists.',
+              ]}
+              floating
+            />
+          )}
             </div>
           )}
 
