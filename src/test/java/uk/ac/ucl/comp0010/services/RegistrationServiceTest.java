@@ -1,25 +1,24 @@
 package uk.ac.ucl.comp0010.services;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.exceptions.ResourceConflictException;
-import uk.ac.ucl.comp0010.models.Grade;
+import uk.ac.ucl.comp0010.exceptions.ResourceNotFoundException;
 import uk.ac.ucl.comp0010.models.Module;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.models.Student;
-import uk.ac.ucl.comp0010.repositories.GradeRepository;
 import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 import uk.ac.ucl.comp0010.repositories.RegistrationRepository;
 import uk.ac.ucl.comp0010.repositories.StudentRepository;
@@ -29,91 +28,101 @@ class RegistrationServiceTest {
 
   @Mock
   private RegistrationRepository registrationRepository;
+
   @Mock
   private StudentRepository studentRepository;
+
   @Mock
   private ModuleRepository moduleRepository;
-  @Mock
-  private GradeRepository gradeRepository;
 
   private RegistrationService registrationService;
 
   @BeforeEach
   void setUp() {
     registrationService = new RegistrationService(registrationRepository, studentRepository,
-        moduleRepository, gradeRepository);
+        moduleRepository);
   }
 
   @Test
-  void registerRejectsInsufficientYear() {
-    int currentYear = LocalDate.now().getYear();
-    Student student = new Student();
-    student.setId(1L);
-    student.setEntryYear(currentYear); // year 1
+  void getRegistrationThrowsWhenMissing() {
+    when(registrationRepository.findById(1L)).thenReturn(Optional.empty());
 
-    Module module = new Module();
-    module.setId(2L);
-    module.setRequiredYear(2);
-
-    when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
-    when(moduleRepository.findById(2L)).thenReturn(Optional.of(module));
-
-    assertThrows(ResourceConflictException.class, () -> registrationService.register(1L, 2L));
-    verify(registrationRepository, never()).save(any());
+    assertThatThrownBy(() -> registrationService.getRegistration(1L))
+        .isInstanceOf(ResourceNotFoundException.class);
   }
 
   @Test
-  void registerRejectsMissingPrerequisiteGrade() {
-    int currentYear = LocalDate.now().getYear();
+  void registerValidatesInputsAndDuplicates() {
     Student student = new Student();
-    student.setId(1L);
-    student.setEntryYear(currentYear - 1); // year 2
-
-    Module prerequisite = new Module();
-    prerequisite.setId(10L);
-    prerequisite.setCode("PRE101");
-
     Module module = new Module();
-    module.setId(2L);
-    module.setRequiredYear(2);
-    module.setPrerequisite(prerequisite);
+    Registration saved = new Registration(student, module);
 
     when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
     when(moduleRepository.findById(2L)).thenReturn(Optional.of(module));
     when(registrationRepository.existsByStudentAndModule(student, module)).thenReturn(false);
-    when(gradeRepository.findByStudentAndModule(student, prerequisite)).thenReturn(Optional.empty());
+    when(registrationRepository.save(any(Registration.class))).thenReturn(saved);
 
-    assertThrows(ResourceConflictException.class, () -> registrationService.register(1L, 2L));
-    verify(registrationRepository, never()).save(any());
+    assertThat(registrationService.register(1L, 2L)).isEqualTo(saved);
+
+    when(registrationRepository.existsByStudentAndModule(student, module)).thenReturn(true);
+    assertThatThrownBy(() -> registrationService.register(1L, 2L))
+        .isInstanceOf(ResourceConflictException.class);
   }
 
   @Test
-  void registerSucceedsWhenEligible() {
-    int currentYear = LocalDate.now().getYear();
+  void registerThrowsWhenIdsMissingOrEntitiesNotFound() {
+    assertThatThrownBy(() -> registrationService.register(null, 2L))
+        .isInstanceOf(ResourceNotFoundException.class);
+
+    when(studentRepository.findById(1L)).thenReturn(Optional.empty());
+    assertThatThrownBy(() -> registrationService.register(1L, 2L))
+        .isInstanceOf(ResourceNotFoundException.class);
+  }
+
+  @Test
+  void unregisterDeletesExistingRegistration() throws NoRegistrationException {
     Student student = new Student();
-    student.setId(1L);
-    student.setEntryYear(currentYear - 1); // year 2
-
-    Module prerequisite = new Module();
-    prerequisite.setId(10L);
-    prerequisite.setCode("PRE101");
-
     Module module = new Module();
-    module.setId(2L);
-    module.setRequiredYear(2);
-    module.setPrerequisite(prerequisite);
-
-    Grade prereqGrade = new Grade(student, prerequisite, 70);
-
+    Registration registration = new Registration(student, module);
     when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
     when(moduleRepository.findById(2L)).thenReturn(Optional.of(module));
-    when(registrationRepository.existsByStudentAndModule(student, module)).thenReturn(false);
-    when(gradeRepository.findByStudentAndModule(student, prerequisite))
-        .thenReturn(Optional.of(prereqGrade));
-    when(registrationRepository.save(any(Registration.class)))
-        .thenReturn(new Registration(student, module));
+    when(registrationRepository.findByStudentAndModule(student, module))
+        .thenReturn(Optional.of(registration));
 
-    Registration registration = registrationService.register(1L, 2L);
-    assertNotNull(registration);
+    registrationService.unregister(1L, 2L);
+
+    verify(registrationRepository).delete(registration);
+  }
+
+  @Test
+  void unregisterThrowsWhenNoRegistration() {
+    Student student = new Student();
+    Module module = new Module();
+    when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+    when(moduleRepository.findById(2L)).thenReturn(Optional.of(module));
+    when(registrationRepository.findByStudentAndModule(student, module))
+        .thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> registrationService.unregister(1L, 2L))
+        .isInstanceOf(NoRegistrationException.class);
+  }
+
+  @Test
+  void queriesDelegateToRepositories() {
+    Student student = new Student();
+    Module module = new Module();
+    when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+    when(moduleRepository.findById(2L)).thenReturn(Optional.of(module));
+    when(registrationRepository.findAllByStudent(student)).thenReturn(List.of());
+    when(registrationRepository.findAllByModule(module)).thenReturn(List.of());
+    when(registrationRepository.findAll()).thenReturn(List.of());
+
+    assertThat(registrationService.getRegistrationsForStudent(1L)).isEmpty();
+    assertThat(registrationService.getRegistrationsForModule(2L)).isEmpty();
+    assertThat(registrationService.getAllRegistrations()).isEmpty();
+
+    verify(registrationRepository).findAllByStudent(student);
+    verify(registrationRepository).findAllByModule(module);
+    verify(registrationRepository).findAll();
   }
 }
