@@ -27,6 +27,7 @@ public class WebConfig implements WebMvcConfigurer {
         .allowedHeaders("*");
   }
 
+  @SuppressWarnings("null")
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(requestLoggingInterceptor);
