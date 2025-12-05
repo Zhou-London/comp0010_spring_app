@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { API_BASE, apiFetch, unwrapCollection, type CollectionResponse } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
 import {
   type Grade,
@@ -34,6 +34,8 @@ const Home = () => {
   const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [serverStatus, setServerStatus] = useState<'checking' | 'up' | 'down'>('checking');
+  const [serverDetail, setServerDetail] = useState('');
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -59,11 +61,41 @@ const Home = () => {
     void fetchAll();
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    const checkServer = async () => {
+      try {
+        setServerStatus('checking');
+        setServerDetail('');
+        const response = await fetch(API_BASE, { signal: controller.signal });
+        if (!response.ok) {
+          const message = await response.text();
+          throw new Error(message || `${response.status} ${response.statusText}`);
+        }
+        setServerStatus('up');
+        setServerDetail('Backend reachable');
+      } catch (err) {
+        setServerStatus('down');
+        setServerDetail(err instanceof Error ? err.message : 'Unknown error');
+      }
+    };
+
+    void checkServer();
+    return () => controller.abort();
+  }, []);
+
   const avgGrade = useMemo(() => {
     if (!grades.length) return '–';
     const total = grades.reduce((acc, grade) => acc + (grade.score ?? 0), 0);
     return (total / grades.length).toFixed(1);
   }, [grades]);
+
+  const serverEmoji = serverStatus === 'up' ? '✅' : serverStatus === 'down' ? '⚠️' : '⏳';
+  const apiTarget = useMemo(() => new URL(API_BASE, window.location.origin).href, []);
+  const serverHelp =
+    serverStatus === 'down'
+      ? 'Start the Spring Boot service (e.g. ./mvnw spring-boot:run) and confirm it is reachable.'
+      : 'Backend is responding normally.';
 
   return (
     <div className="glass-panel">
@@ -83,6 +115,28 @@ const Home = () => {
             <span className="pill">Zero-install UI</span>
             <span className="pill">HAL-friendly API</span>
             <span className="pill">Upsert-ready grades</span>
+          </div>
+          <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-inner shadow-black/30 backdrop-blur-xl ring-1 ring-white/15">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3 text-lg font-semibold text-white">
+                <span className="text-xl" aria-hidden>
+                  {serverEmoji}
+                </span>
+                <span>
+                  {serverStatus === 'up'
+                    ? 'Server is live'
+                    : serverStatus === 'down'
+                      ? 'Server unreachable'
+                      : 'Checking server...'}
+                </span>
+              </div>
+              <div className="rounded-full bg-black/30 px-3 py-1 text-xs font-medium text-slate-200 ring-1 ring-white/10">
+                API target: {apiTarget}
+              </div>
+            </div>
+            <p className="mt-2 text-sm text-slate-300">
+              {serverDetail || serverHelp}
+            </p>
           </div>
         </section>
 
