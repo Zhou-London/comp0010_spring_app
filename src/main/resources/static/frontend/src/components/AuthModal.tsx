@@ -71,6 +71,7 @@ const AuthModal = () => {
                 'If you just registered, try signing in again or resetting your password.',
                 'Reach out to an administrator if you believe your account should work.',
               ]}
+              floating
             />
           )}
           <div className="flex flex-wrap items-center gap-3">
