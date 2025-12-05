@@ -46,6 +46,14 @@ public class Module {
       type = "integer")
   private Integer requiredYear;
 
+  @Column(name = "min_allowed_year")
+  @Schema(description = "Lowest academic year allowed to enroll", example = "2", type = "integer")
+  private Integer minAllowedYear;
+
+  @Column(name = "max_allowed_year")
+  @Schema(description = "Highest academic year allowed to enroll", example = "3", type = "integer")
+  private Integer maxAllowedYear;
+
   @ManyToOne
   @JoinColumn(name = "prerequisite_id")
   @JsonIgnoreProperties({"registrations", "grades", "prerequisite"})
@@ -99,6 +107,14 @@ public class Module {
     return requiredYear;
   }
 
+  public Integer getMinAllowedYear() {
+    return minAllowedYear;
+  }
+
+  public Integer getMaxAllowedYear() {
+    return maxAllowedYear;
+  }
+
   public Module getPrerequisite() {
     return prerequisite;
   }
@@ -121,6 +137,14 @@ public class Module {
 
   public void setRequiredYear(Integer requiredYear) {
     this.requiredYear = requiredYear;
+  }
+
+  public void setMinAllowedYear(Integer minAllowedYear) {
+    this.minAllowedYear = minAllowedYear;
+  }
+
+  public void setMaxAllowedYear(Integer maxAllowedYear) {
+    this.maxAllowedYear = maxAllowedYear;
   }
 
   public void setPrerequisite(Module prerequisite) {

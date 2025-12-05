@@ -138,12 +138,23 @@ public class RegistrationService {
   }
 
   private void enforceModuleEligibility(Student student, Module module) {
-    if (module.getRequiredYear() != null) {
-      int studentYear = resolveStudentYear(student);
-      if (studentYear < module.getRequiredYear()) {
-        throw new ResourceConflictException(
-            "Student year " + studentYear + " is below required year " + module.getRequiredYear());
-      }
+    int studentYear = resolveStudentYear(student);
+
+    if (module.getRequiredYear() != null && studentYear < module.getRequiredYear()) {
+      throw new ResourceConflictException(
+          "Student year " + studentYear + " is below required year " + module.getRequiredYear());
+    }
+
+    if (module.getMinAllowedYear() != null && studentYear < module.getMinAllowedYear()) {
+      throw new ResourceConflictException(
+          "Student year " + studentYear + " is below minimum allowed year "
+              + module.getMinAllowedYear());
+    }
+
+    if (module.getMaxAllowedYear() != null && studentYear > module.getMaxAllowedYear()) {
+      throw new ResourceConflictException(
+          "Student year " + studentYear + " exceeds maximum allowed year "
+              + module.getMaxAllowedYear());
     }
 
     if (module.getPrerequisite() != null) {

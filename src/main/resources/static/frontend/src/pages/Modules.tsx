@@ -92,6 +92,8 @@ const Modules = () => {
       const payload = {
         ...moduleForm,
         requiredYear: moduleForm.requiredYear ?? null,
+        minAllowedYear: moduleForm.minAllowedYear ?? null,
+        maxAllowedYear: moduleForm.maxAllowedYear ?? null,
         prerequisite:
           moduleForm.prerequisite && moduleForm.prerequisite.id
             ? { id: moduleForm.prerequisite.id }
@@ -115,6 +117,12 @@ const Modules = () => {
     const prereqLabel = module.prerequisite?.code
       ? `Prereq: ${module.prerequisite.code}`
       : 'No prerequisite';
+    const yearRange =
+      module.minAllowedYear || module.maxAllowedYear
+        ? `${module.minAllowedYear ?? 1} - ${module.maxAllowedYear ?? '∞'}`
+        : module.requiredYear
+          ? `Year ${module.requiredYear}+`
+          : 'All years';
 
     return (
       <button
@@ -131,7 +139,7 @@ const Modules = () => {
           <p className="text-xl font-semibold text-white">{module.name}</p>
           <p className="text-sm text-slate-300">Average grade · {average}</p>
           <p className="text-xs text-slate-400">
-            {prereqLabel} · {module.requiredYear ? `Year ${module.requiredYear}+` : 'All years'}
+            {prereqLabel} · {yearRange}
           </p>
         </div>
       </button>
@@ -238,6 +246,28 @@ const Modules = () => {
                     </option>
                   ))}
                 </select>
+                <input
+                  type="number"
+                  min={1}
+                  value={moduleForm.minAllowedYear ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setModuleForm({ ...moduleForm, minAllowedYear: val ? Number(val) : null });
+                  }}
+                  className="field"
+                  placeholder="Min allowed year (optional)"
+                />
+                <input
+                  type="number"
+                  min={1}
+                  value={moduleForm.maxAllowedYear ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setModuleForm({ ...moduleForm, maxAllowedYear: val ? Number(val) : null });
+                  }}
+                  className="field"
+                  placeholder="Max allowed year (optional)"
+                />
                 <label className="flex items-center gap-3 sm:col-span-2 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10">
                   <input
                     type="checkbox"

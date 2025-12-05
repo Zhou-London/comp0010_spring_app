@@ -21,6 +21,8 @@ export interface Module {
   mnc: boolean;
   requiredYear?: number | null;
   prerequisite?: Module | null;
+  minAllowedYear?: number | null;
+  maxAllowedYear?: number | null;
 }
 
 export interface Grade {
