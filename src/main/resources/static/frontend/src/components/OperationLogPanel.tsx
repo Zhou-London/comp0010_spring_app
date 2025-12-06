@@ -52,20 +52,20 @@ const OperationLogPanel = ({ refreshToken, onReverted }: OperationLogPanelProps)
   if (!latestLog && !loading) return null;
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-inner shadow-black/20 ring-1 ring-white/10">
+    <div className="glass-panel p-4 flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-end gap-2">
       </div>
 
       {latestLog && (
         <div
           key={latestLog.id}
-          className="flex items-start justify-between gap-3 rounded-2xl bg-black/30 px-3 py-2 ring-1 ring-white/10"
+          className="surface-card px-4 py-3 flex items-center justify-between gap-4"
         >
           <div className="min-w-0 space-y-1">
-            <p className="text-sm font-semibold text-[color:var(--text-primary)]">
+            <p className="text-sm font-semibold text-primary">
               {latestLog.description || `${latestLog.operationType} ${latestLog.entityType}`}
             </p>
-            <p className="text-xs text-[color:var(--text-muted)]">
+            <p className="text-xs text-secondary">
               {formatTimestamp(latestLog.timestamp)}
               {latestLog.username ? ` · by ${latestLog.username}` : ''}
             </p>
@@ -73,7 +73,7 @@ const OperationLogPanel = ({ refreshToken, onReverted }: OperationLogPanelProps)
           {latestLog.operationType !== 'REVERT' && (
             <button
               type="button"
-              className="text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-full px-3 py-1 text-xs font-semibold"
+              className="icon-button danger compact px-3 py-1 text-xs"
               onClick={() => void revertOperation(latestLog.id)}
               disabled={revertingId === latestLog.id}
               aria-label="Revert operation"

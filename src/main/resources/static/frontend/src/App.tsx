@@ -55,24 +55,26 @@ const App = () => {
   return (
     <div className={`app-shell ${theme === 'light' ? 'theme-light' : 'theme-dark'}`}>
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-14">
-        <header className="relative z-20 flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-white/5 px-6 py-3 shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl ring-1 ring-white/10">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-sky-300 via-blue-500 to-indigo-700 shadow-inner"></div>
+        <header className="glass-panel relative z-20 flex flex-wrap items-center justify-between gap-3 px-6 py-4">
+          <div className="flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30 text-white text-lg font-bold">
+              U
+            </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-300">UCL COMP0010</p>
-              <p className="text-lg font-semibold">Management Centre</p>
+              <p className="text-[0.65rem] uppercase tracking-[0.2em] font-bold text-secondary">UCL COMP0010</p>
+              <p className="text-lg font-bold tracking-tight text-primary">Management Centre</p>
             </div>
           </div>
-          <nav className="order-3 flex w-full flex-wrap items-center justify-center gap-2 rounded-2xl bg-white/5 px-2 py-1 text-sm font-medium text-slate-200 shadow-inner shadow-black/30 ring-1 ring-white/10 sm:order-none sm:w-auto">
+          <nav className="order-3 flex w-full flex-wrap items-center justify-center gap-1 rounded-full bg-black/20 p-1.5 backdrop-blur-md sm:order-none sm:w-auto border border-white/10">
             {navigation.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-full transition duration-200 ${
+                  `rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-300 ${
                     isActive
-                      ? 'bg-white text-slate-900 shadow-lg shadow-white/20'
-                      : 'hover:bg-white/10 hover:text-white'
+                      ? 'bg-white text-black shadow-md scale-105'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
                   }`
                 }
                 end={item.path === '/'}
@@ -81,14 +83,14 @@ const App = () => {
               </NavLink>
             ))}
           </nav>
-          <div className="flex flex-1 items-center justify-end gap-2" ref={menuRef}>
+          <div className="flex flex-1 items-center justify-end gap-3" ref={menuRef}>
             {user ? (
-              <div className="hidden rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 shadow-inner shadow-black/30 sm:block">
-                Signed in as <span className="text-white">{user.username}</span>
+              <div className="hidden rounded-full bg-black/20 px-3 py-1.5 text-xs font-medium text-slate-300 border border-white/5 sm:block backdrop-blur-sm">
+                Signed in as <span className="text-white font-semibold">{user.username}</span>
               </div>
             ) : (
-              <div className="hidden rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 ring-1 ring-white/10 shadow-inner shadow-black/30 sm:block">
-                Read-only · sign in to edit
+              <div className="hidden rounded-full bg-black/20 px-3 py-1.5 text-xs font-medium text-slate-300 border border-white/5 sm:block backdrop-blur-sm">
+                Read-only
               </div>
             )}
             <div className="relative">
@@ -105,7 +107,7 @@ const App = () => {
                 <div className="absolute right-0 z-30 mt-2 w-48 rounded-2xl menu-surface p-2 text-sm">
                   <button
                     type="button"
-                    className="w-full rounded-xl px-3 py-2 text-left hover:bg-white/10"
+                    className="w-full rounded-xl px-3 py-2 text-left hover:bg-white/10 transition-colors"
                     onClick={() => {
                       setMenuOpen(false);
                       openAuth('login');
@@ -116,7 +118,7 @@ const App = () => {
                   {user && (
                     <button
                       type="button"
-                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-white/10"
+                      className="w-full rounded-xl px-3 py-2 text-left hover:bg-white/10 transition-colors text-red-400 hover:text-red-300"
                       onClick={() => {
                         setMenuOpen(false);
                         logout();
@@ -130,7 +132,6 @@ const App = () => {
             </div>
             <button type="button" onClick={toggleTheme} className="icon-button compact" aria-label={themeLabel}>
               {themeIcon}
-              <span className="hidden sm:inline">{themeLabel}</span>
             </button>
           </div>
         </header>

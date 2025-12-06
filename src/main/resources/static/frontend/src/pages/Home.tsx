@@ -9,6 +9,8 @@ import {
   type Student,
 } from '../types';
 
+import ServerStatus from '../components/ServerStatus';
+
 const spotlightCards = [
   {
     title: 'Students',
@@ -72,6 +74,9 @@ const Home = () => {
           <p className="text-xs uppercase tracking-[0.3em] text-slate-300">
             Spring Boot • React • Tailwind
           </p>
+          <div className="my-4">
+            <ServerStatus />
+          </div>
           <h1 className="text-4xl font-semibold leading-tight text-gradient sm:text-5xl">
             Mission-ready student intelligence,
             <br /> TEAM 007 Presents
@@ -110,7 +115,6 @@ const Home = () => {
             </Link>
           ))}
         </section>
-
         <section className="rounded-3xl border border-white/5 bg-gradient-to-br from-white/10 via-white/5 to-white/0 p-6 shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -163,7 +167,6 @@ const Home = () => {
             ))}
           </div>
         </section>
-
         {error && (
           <ErrorMessage
             message={error}
@@ -175,7 +178,6 @@ const Home = () => {
             ]}
           />
         )}
-
         <section className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
             <div className="flex items-center justify-between">
@@ -198,7 +200,6 @@ const Home = () => {
               {!students.length && !loading && <p className="text-slate-300">No students yet.</p>}
             </div>
           </div>
-
           <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
             <div className="flex items-center justify-between">
               <div>
@@ -220,7 +221,6 @@ const Home = () => {
               {!modules.length && !loading && <p className="text-slate-300">No modules yet.</p>}
             </div>
           </div>
-
           <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
             <div className="flex items-center justify-between">
               <div>
@@ -242,7 +242,6 @@ const Home = () => {
               {!registrations.length && !loading && <p className="text-slate-300">No registrations yet.</p>}
             </div>
           </div>
-
           <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
             <div className="flex items-center justify-between">
               <div>

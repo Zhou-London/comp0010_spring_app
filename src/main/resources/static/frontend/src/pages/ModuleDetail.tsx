@@ -86,9 +86,9 @@ const ModuleDetail = () => {
       setModuleForm(moduleResponse);
       setStudents(unwrapCollection(studentsResponse, 'students'));
       const allRegistrations = unwrapCollection(registrationsResponse, 'registrations');
-      setRegistrations(allRegistrations.filter((registration) => registration.module?.id === id));
+      setRegistrations(allRegistrations.filter((registration: Registration) => registration.module?.id === id));
       const allGrades = unwrapCollection(gradesResponse, 'grades');
-      setGrades(allGrades.filter((grade) => grade.module?.id === id));
+      setGrades(allGrades.filter((grade: Grade) => grade.module?.id === id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load module');
     } finally {
@@ -482,11 +482,11 @@ const ModuleDetail = () => {
 
   const renderOverview = () => (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+      <div className="glass-panel p-6">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Module profile</p>
-            <h2 className="text-xl font-semibold text-white">Module details</h2>
+            <p className="text-xs uppercase tracking-[0.3em] text-secondary">Module profile</p>
+            <h2 className="text-xl font-semibold text-primary">Module details</h2>
           </div>
           <button
             type="button"
@@ -555,7 +555,7 @@ const ModuleDetail = () => {
                   onChange={(e) => setModuleForm({ ...moduleForm, mnc: e.target.checked })}
                   className="h-5 w-5 rounded border-white/30 bg-white/10 text-sky-400 focus:ring-white/40"
                 />
-                <span className="text-slate-200">Mandatory module</span>
+                <span className="text-secondary">Mandatory module</span>
               </label>
             ) : (
               <span className="info-value">{module?.mnc ? 'Mandatory' : 'Elective'}</span>
@@ -611,9 +611,9 @@ const ModuleDetail = () => {
       </div>
 
       <div className="space-y-6">
-        <div className="rounded-3xl border border-white/5 bg-white/5 p-6 ring-1 ring-white/10">
+        <div className="glass-panel p-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-lg font-semibold text-white">Registrations</h3>
+            <h3 className="text-lg font-semibold text-primary">Registrations</h3>
             <div className="flex flex-wrap gap-2">
               <Link to={`/modules/${id}/registrations`} className="icon-button text-xs">
                 Read more
@@ -632,11 +632,11 @@ const ModuleDetail = () => {
             {registrations.map((registration) => (
               <div
                 key={registration.id}
-                className="flex items-center justify-between rounded-2xl bg-black/30 p-3 ring-1 ring-white/10"
+                className="surface-card flex items-center justify-between p-3"
               >
                 <div>
-                  <p className="text-sm text-slate-200">{registration.student?.userName ?? 'Student'}</p>
-                  <p className="text-xs text-slate-400">{registration.student?.email}</p>
+                  <p className="text-sm text-primary">{registration.student?.userName ?? 'Student'}</p>
+                  <p className="text-xs text-secondary">{registration.student?.email}</p>
                 </div>
                 <div className="flex items-start gap-2 text-xs">
                   <button
@@ -650,16 +650,16 @@ const ModuleDetail = () => {
                 </div>
               </div>
             ))}
-            {!registrations.length && <p className="text-sm text-slate-300">No registrations recorded yet.</p>}
+            {!registrations.length && <p className="text-sm text-secondary">No registrations recorded yet.</p>}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-white/5 bg-white/5 p-6 ring-1 ring-white/10">
+        <div className="glass-panel p-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-semibold text-white">Grades</h3>
-              <span className="pill bg-white/10 text-xs">Avg grade: {averageGrade}</span>
-              <span className="pill bg-white/10 text-xs">Pass rate: {passRate}</span>
+              <h3 className="text-lg font-semibold text-primary">Grades</h3>
+              <span className="pill text-xs">Avg grade: {averageGrade}</span>
+              <span className="pill text-xs">Pass rate: {passRate}</span>
             </div>
             <div className="flex flex-wrap gap-2">
               <Link to={`/modules/${id}/grades`} className="icon-button text-xs">
@@ -679,11 +679,11 @@ const ModuleDetail = () => {
             {grades.map((grade) => (
               <div
                 key={grade.id}
-                className="flex items-center justify-between rounded-2xl bg-black/30 p-3 ring-1 ring-white/10"
+                className="surface-card flex items-center justify-between p-3"
               >
                 <div>
-                  <p className="text-sm text-slate-200">{grade.student?.userName ?? 'Student'} — {grade.score ?? '—'}</p>
-                  <p className="text-xs text-slate-400">{grade.student?.email}</p>
+                  <p className="text-sm text-primary">{grade.student?.userName ?? 'Student'} — {grade.score ?? '—'}</p>
+                  <p className="text-xs text-secondary">{grade.student?.email}</p>
                 </div>
                 <div className="flex items-start gap-2 text-xs">
                   <button
@@ -697,7 +697,7 @@ const ModuleDetail = () => {
                 </div>
               </div>
             ))}
-            {!grades.length && <p className="text-sm text-slate-300">No grades recorded yet.</p>}
+            {!grades.length && <p className="text-sm text-secondary">No grades recorded yet.</p>}
           </div>
         </div>
       </div>
@@ -705,12 +705,12 @@ const ModuleDetail = () => {
   );
 
   const renderRegistrationsPage = () => (
-    <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+    <div className="glass-panel p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-300">All registrations</p>
-          <h2 className="text-xl font-semibold text-white">Students attending this module</h2>
-          <p className="text-sm text-slate-300">Filter, edit, or remove module registrations in one place.</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-secondary">All registrations</p>
+          <h2 className="text-xl font-semibold text-primary">Students attending this module</h2>
+          <p className="text-sm text-secondary">Filter, edit, or remove module registrations in one place.</p>
         </div>
         <div className="flex flex-wrap justify-end gap-2">
           <button
@@ -735,7 +735,7 @@ const ModuleDetail = () => {
         <select
           value={registrationSort}
           onChange={(e) => setRegistrationSort(e.target.value as typeof registrationSort)}
-          className="rounded-full bg-black/40 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10"
+          className="field text-sm"
         >
           <option value="name">Student name</option>
           <option value="email">Email</option>
@@ -748,8 +748,8 @@ const ModuleDetail = () => {
           <div key={registration.id} className="surface-card explorer-card flex flex-col gap-3 p-5">
             <div className="grid grid-cols-[1fr_auto] items-start gap-2">
               <div className="min-w-0 space-y-1 break-words">
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-300">{registration.student?.userName ?? 'Student'}</p>
-                <p className="text-lg font-semibold text-white">{registration.student?.email ?? 'Unknown email'}</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-secondary">{registration.student?.userName ?? 'Student'}</p>
+                <p className="text-lg font-semibold text-primary">{registration.student?.email ?? 'Unknown email'}</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="pill text-xs break-words">ID: {registration.id ?? '—'}</span>
@@ -766,21 +766,21 @@ const ModuleDetail = () => {
             </div>
           </div>
         ))}
-        {!filteredRegistrations.length && <p className="text-sm text-slate-300">No registrations match your search.</p>}
+        {!filteredRegistrations.length && <p className="text-sm text-secondary">No registrations match your search.</p>}
       </div>
     </div>
   );
 
   const renderGradesPage = () => (
-    <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+    <div className="glass-panel p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-300">All grades</p>
-          <h2 className="text-xl font-semibold text-white">Assessment results for this module</h2>
-          <p className="text-sm text-slate-300">Review every student score, adjust them, or add new marks.</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-secondary">All grades</p>
+          <h2 className="text-xl font-semibold text-primary">Assessment results for this module</h2>
+          <p className="text-sm text-secondary">Review every student score, adjust them, or add new marks.</p>
         </div>
         <div className="flex flex-wrap justify-end gap-2">
-          <span className="pill bg-white/10 text-xs">Average {averageGrade}</span>
+          <span className="pill text-xs">Average {averageGrade}</span>
           <button
             type="button"
             onClick={() => requireAuth(() => openGradeEditor())}
@@ -803,7 +803,7 @@ const ModuleDetail = () => {
         <select
           value={gradeSort}
           onChange={(e) => setGradeSort(e.target.value as typeof gradeSort)}
-          className="rounded-full bg-black/40 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10"
+          className="field text-sm"
         >
           <option value="name">Student name</option>
           <option value="scoreDesc">Score: high to low</option>
@@ -816,9 +816,9 @@ const ModuleDetail = () => {
           <div key={grade.id} className="surface-card explorer-card flex flex-col gap-3 p-5">
             <div className="grid grid-cols-[1fr_auto] items-start gap-2">
               <div className="min-w-0 space-y-1 break-words">
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-300">{grade.student?.userName ?? 'Student'}</p>
-                <p className="text-lg font-semibold text-white">{grade.student?.email ?? 'Unknown email'}</p>
-                <p className="text-2xl font-semibold text-white">Score: {grade.score ?? '—'}</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-secondary">{grade.student?.userName ?? 'Student'}</p>
+                <p className="text-lg font-semibold text-primary">{grade.student?.email ?? 'Unknown email'}</p>
+                <p className="text-2xl font-semibold text-primary">Score: {grade.score ?? '—'}</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="pill text-xs break-words">ID: {grade.id ?? '—'}</span>
@@ -835,7 +835,7 @@ const ModuleDetail = () => {
             </div>
           </div>
         ))}
-        {!filteredGrades.length && <p className="text-sm text-slate-300">No grades match your search.</p>}
+        {!filteredGrades.length && <p className="text-sm text-secondary">No grades match your search.</p>}
       </div>
     </div>
   );
