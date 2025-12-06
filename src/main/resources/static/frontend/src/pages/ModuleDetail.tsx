@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
 import { useAuth } from '../contexts/AuthContext';
-import { type Grade, type Module, type Registration, type Student } from '../types';
+import { type Grade, type Module, type ModuleStatistics, type Registration, type Student } from '../types';
 
 interface RegistrationFormState {
   id?: number;
@@ -20,6 +20,7 @@ const emptyModule: Module = {
   code: '',
   name: '',
   mnc: false,
+  department: '',
 };
 
 const emptyRegistration: RegistrationFormState = {
@@ -41,6 +42,7 @@ const ModuleDetail = () => {
     section === 'registrations' ? 'registrations' : section === 'grades' ? 'grades' : 'overview';
 
   const [module, setModule] = useState<Module | null>(null);
+  const [moduleStats, setModuleStats] = useState<ModuleStatistics | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [grades, setGrades] = useState<Grade[]>([]);
@@ -67,14 +69,16 @@ const ModuleDetail = () => {
     setLoading(true);
     setError('');
     try {
-      const [moduleResponse, studentsResponse, registrationsResponse, gradesResponse] = await Promise.all([
+      const [moduleResponse, statsResponse, studentsResponse, registrationsResponse, gradesResponse] = await Promise.all([
         apiFetch<Module>(`/modules/${id}`),
+        apiFetch<ModuleStatistics>(`/modules/${id}/statistics`),
         apiFetch<CollectionResponse<Student>>('/students'),
         apiFetch<CollectionResponse<Registration>>('/registrations'),
         apiFetch<CollectionResponse<Grade>>('/grades'),
       ]);
 
       setModule(moduleResponse);
+      setModuleStats(statsResponse);
       setModuleForm(moduleResponse);
       setStudents(unwrapCollection(studentsResponse, 'students'));
       const allRegistrations = unwrapCollection(registrationsResponse, 'registrations');
@@ -100,10 +104,23 @@ const ModuleDetail = () => {
   }, [activeSection]);
 
   const averageGrade = useMemo(() => {
+    if (moduleStats?.averageGrade != null) return moduleStats.averageGrade.toFixed(1);
     if (!grades.length) return '–';
     const total = grades.reduce((acc, grade) => acc + (grade.score ?? 0), 0);
     return (total / grades.length).toFixed(1);
-  }, [grades]);
+  }, [grades, moduleStats]);
+
+  const selectionRate = useMemo(() => {
+    if (!moduleStats) return '–';
+    const percent = (moduleStats.selectionRate * 100).toFixed(1);
+    return `${percent}% of ${moduleStats.totalStudents} students`;
+  }, [moduleStats]);
+
+  const passRate = useMemo(() => {
+    if (moduleStats?.passRate == null) return '–';
+    const percent = (moduleStats.passRate * 100).toFixed(1);
+    return `${percent}% (${moduleStats.passingGrades}/${moduleStats.totalGrades})`;
+  }, [moduleStats]);
 
   const filteredRegistrations = useMemo(() => {
     const query = registrationQuery.trim().toLowerCase();
@@ -490,6 +507,19 @@ const ModuleDetail = () => {
             )}
           </div>
           <div className="info-row">
+            <span className="info-label">Department</span>
+            {editingModule ? (
+              <input
+                id="department"
+                value={moduleForm.department}
+                onChange={(e) => setModuleForm({ ...moduleForm, department: e.target.value })}
+                className="field max-w-sm"
+              />
+            ) : (
+              <span className="info-value">{module?.department}</span>
+            )}
+          </div>
+          <div className="info-row">
             <span className="info-label">Mandatory</span>
             {editingModule ? (
               <label className="flex items-center gap-3">
@@ -509,6 +539,14 @@ const ModuleDetail = () => {
           <div className="info-row">
             <span className="info-label">Module ID</span>
             <span className="info-value">{module?.id}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Selection rate</span>
+            <span className="info-value">{selectionRate}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Pass rate</span>
+            <span className="info-value">{passRate}</span>
           </div>
         </div>
 
@@ -596,6 +634,7 @@ const ModuleDetail = () => {
             <div className="flex items-center gap-3">
               <h3 className="text-lg font-semibold text-white">Grades</h3>
               <span className="pill bg-white/10 text-xs">Avg grade: {averageGrade}</span>
+              <span className="pill bg-white/10 text-xs">Pass rate: {passRate}</span>
             </div>
             <div className="flex flex-wrap gap-2">
               <Link to={`/modules/${id}/grades`} className="icon-button text-xs">

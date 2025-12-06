@@ -1,22 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
+import { apiFetch } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
 import { useAuth } from '../contexts/AuthContext';
-import { type Grade, type Module } from '../types';
+import { type Module, type ModuleStatistics } from '../types';
 
 const emptyModule: Module = {
   code: '',
   name: '',
   mnc: false,
+  department: '',
 };
 
 const Modules = () => {
   const navigate = useNavigate();
   const { requireAuth } = useAuth();
 
-  const [modules, setModules] = useState<Module[]>([]);
-  const [grades, setGrades] = useState<Grade[]>([]);
+  const [moduleStats, setModuleStats] = useState<ModuleStatistics[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,13 +34,8 @@ const Modules = () => {
     setLoading(true);
     setError('');
     try {
-      const [modulesResponse, gradesResponse] = await Promise.all([
-        apiFetch<CollectionResponse<Module>>('/modules'),
-        apiFetch<CollectionResponse<Grade>>('/grades'),
-      ]);
-
-      setModules(unwrapCollection(modulesResponse, 'modules'));
-      setGrades(unwrapCollection(gradesResponse, 'grades'));
+      const statsResponse = await apiFetch<ModuleStatistics[]>('/modules/statistics');
+      setModuleStats(statsResponse);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load modules');
     } finally {
@@ -52,20 +47,9 @@ const Modules = () => {
     void fetchModules();
   }, []);
 
-  const moduleAverages = useMemo(() => {
-    const totals = new Map<number, { sum: number; count: number }>();
-    grades.forEach((grade) => {
-      const moduleId = grade.module?.id;
-      if (!moduleId || grade.score == null) return;
-      const current = totals.get(moduleId) ?? { sum: 0, count: 0 };
-      totals.set(moduleId, { sum: current.sum + grade.score, count: current.count + 1 });
-    });
-    return totals;
-  }, [grades]);
-
   const filteredModules = useMemo(() => {
     const query = moduleQuery.trim().toLowerCase();
-    const sorted = [...modules].sort((a, b) => {
+    const sorted = [...moduleStats].sort((a, b) => {
       if (moduleSort === 'nameAsc') return a.name.localeCompare(b.name);
       if (moduleSort === 'codeDesc') return b.code.localeCompare(a.code);
       return a.code.localeCompare(b.code);
@@ -73,7 +57,7 @@ const Modules = () => {
 
     if (!query) return sorted;
     return sorted.filter((module) => module.code.toLowerCase().includes(query) || module.name.toLowerCase().includes(query));
-  }, [moduleQuery, modules, moduleSort]);
+  }, [moduleQuery, moduleStats, moduleSort]);
 
   const openModuleModal = () => {
     setModuleForm(emptyModule);
@@ -99,9 +83,11 @@ const Modules = () => {
     }
   };
 
-  const renderModuleCard = (module: Module) => {
-    const stats = module.id ? moduleAverages.get(module.id) : undefined;
-    const average = stats ? (stats.sum / stats.count).toFixed(1) : '–';
+  const renderModuleCard = (module: ModuleStatistics) => {
+    const average = module.averageGrade != null ? module.averageGrade.toFixed(1) : '–';
+    const selectionRate = `${(module.selectionRate * 100).toFixed(1)}%`;
+    const passRate =
+      module.passRate == null ? '–' : `${module.passRate > 0 ? (module.passRate * 100).toFixed(1) : '0.0'}%`;
 
     return (
       <button
@@ -111,12 +97,19 @@ const Modules = () => {
         className="surface-card explorer-card group flex h-full flex-col gap-3 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-5 text-left"
       >
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-300/80">{module.code}</p>
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-300/80">{module.code}</p>
+            <p className="text-sm text-[color:var(--text-secondary)]">{module.department}</p>
+          </div>
           <span className="pill shrink-0 whitespace-nowrap">ID: {module.id ?? '–'}</span>
         </div>
         <div className="space-y-1">
-          <p className="text-xl font-semibold text-white">{module.name}</p>
-          <p className="text-sm text-slate-300">Average grade · {average}</p>
+          <p className="text-xl font-semibold text-[color:var(--text-primary)]">{module.name}</p>
+          <div className="flex flex-wrap gap-2 text-sm text-[color:var(--text-secondary)]">
+            <span className="pill bg-white/10 text-xs">Average grade · {average}</span>
+            <span className="pill bg-white/10 text-xs">Chosen by {selectionRate}</span>
+            <span className="pill bg-white/10 text-xs">Pass rate {passRate}</span>
+          </div>
         </div>
       </button>
     );
@@ -194,6 +187,12 @@ const Modules = () => {
                   onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })}
                   className="field"
                   placeholder="Module name"
+                />
+                <input
+                  value={moduleForm.department}
+                  onChange={(e) => setModuleForm({ ...moduleForm, department: e.target.value })}
+                  className="field"
+                  placeholder="Department"
                 />
                 <label className="flex items-center gap-3 sm:col-span-2 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10">
                   <input

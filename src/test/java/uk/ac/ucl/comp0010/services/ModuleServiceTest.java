@@ -40,7 +40,7 @@ class ModuleServiceTest {
 
   @Test
   void createModuleValidatesIdAndUniqueness() {
-    Module module = new Module("CS", "Computer Science", true);
+    Module module = new Module("CS", "Computer Science", true, "Engineering");
     module.setId(null);
     when(moduleRepository.existsByCode("CS")).thenReturn(false);
     when(moduleRepository.save(module)).thenReturn(module);
@@ -54,7 +54,7 @@ class ModuleServiceTest {
 
   @Test
   void createModuleThrowsOnDuplicateCode() {
-    Module module = new Module("CS", "Computer Science", true);
+    Module module = new Module("CS", "Computer Science", true, "Engineering");
     when(moduleRepository.existsByCode("CS")).thenReturn(true);
 
     assertThatThrownBy(() -> moduleService.createModule(module))
@@ -62,12 +62,22 @@ class ModuleServiceTest {
   }
 
   @Test
-  void updateModulePersistsChanges() {
-    Module existing = new Module("CS", "Computer Science", true);
-    Module updated = new Module("CS2", "Advanced", false);
+  void createModuleRequiresDepartment() {
+    Module module = new Module("CS", "Computer Science", true, "");
+    when(moduleRepository.existsByCode("CS")).thenReturn(false);
 
-    when(moduleRepository.findById(1L))
-        .thenReturn(Optional.of(existing), Optional.of(new Module("CS", "Computer Science", true)));
+    assertThatThrownBy(() -> moduleService.createModule(module))
+        .isInstanceOf(ResourceConflictException.class)
+        .hasMessageContaining("department");
+  }
+
+  @Test
+  void updateModulePersistsChanges() {
+    Module existing = new Module("CS", "Computer Science", true, "Engineering");
+    Module updated = new Module("CS2", "Advanced", false, "Mathematics");
+
+    when(moduleRepository.findById(1L)).thenReturn(Optional.of(existing),
+        Optional.of(new Module("CS", "Computer Science", true, "Engineering")));
     when(moduleRepository.existsByCode("CS2")).thenReturn(false);
     when(moduleRepository.save(existing)).thenReturn(existing);
 

@@ -77,6 +77,7 @@ class ModelAccessorTests {
     module.setCode("CS101");
     module.setName("Computer Science");
     module.setMnc(Boolean.TRUE);
+    module.setDepartment("Engineering");
 
     module.setRegistrations(new HashSet<Registration>());
     module.setGrades(new HashSet<Grade>());
@@ -85,6 +86,7 @@ class ModelAccessorTests {
     assertThat(module.getCode()).isEqualTo("CS101");
     assertThat(module.getName()).isEqualTo("Computer Science");
     assertThat(module.getMnc()).isTrue();
+    assertThat(module.getDepartment()).isEqualTo("Engineering");
     assertThat(module.getRegistrations()).isEmpty();
     assertThat(module.getGrades()).isEmpty();
   }

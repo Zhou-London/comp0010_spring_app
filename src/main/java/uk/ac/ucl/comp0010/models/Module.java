@@ -39,6 +39,10 @@ public class Module {
   @Schema(description = "Is module mandatory", example = "true", type = "boolean")
   private Boolean mnc;
 
+  @Column(nullable = false)
+  @Schema(description = "Module's home department", example = "Computer Science", type = "string")
+  private String department = "Undeclared";
+
   @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonIgnore
   private Set<Registration> registrations = new HashSet<>();
@@ -60,9 +64,22 @@ public class Module {
    * @param mnc Is module mandatory
    */
   public Module(String code, String name, Boolean mnc) {
+    this(code, name, mnc, "Undeclared");
+  }
+
+  /**
+   * Constructor for Class Module.
+   *
+   * @param code Module's code
+   * @param name Module's name
+   * @param mnc Is module mandatory
+   * @param department Module's department
+   */
+  public Module(String code, String name, Boolean mnc, String department) {
     this.code = code;
     this.name = name;
     this.mnc = mnc;
+    this.department = department;
   }
 
   // --- Getters and Setters ---
@@ -82,6 +99,10 @@ public class Module {
     return mnc;
   }
 
+  public String getDepartment() {
+    return department;
+  }
+
   public void setId(Long id) {
     this.id = id;
   }
@@ -96,6 +117,10 @@ public class Module {
 
   public void setMnc(Boolean mnc) {
     this.mnc = mnc;
+  }
+
+  public void setDepartment(String department) {
+    this.department = department;
   }
 
   public Set<Registration> getRegistrations() {
