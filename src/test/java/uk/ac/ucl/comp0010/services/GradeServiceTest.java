@@ -23,6 +23,7 @@ import uk.ac.ucl.comp0010.repositories.GradeRepository;
 import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 import uk.ac.ucl.comp0010.repositories.RegistrationRepository;
 import uk.ac.ucl.comp0010.repositories.StudentRepository;
+import uk.ac.ucl.comp0010.services.OperationLogService;
 
 @ExtendWith(MockitoExtension.class)
 class GradeServiceTest {
@@ -39,12 +40,15 @@ class GradeServiceTest {
   @Mock
   private RegistrationRepository registrationRepository;
 
+  @Mock
+  private OperationLogService operationLogService;
+
   private GradeService gradeService;
 
   @BeforeEach
   void setUp() {
     gradeService = new GradeService(gradeRepository, studentRepository, moduleRepository,
-        registrationRepository);
+        registrationRepository, operationLogService);
   }
 
   @Test
