@@ -3,13 +3,19 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { MoonIcon, SunIcon } from './components/Icons';
 import AuthModal from './components/AuthModal';
 import { useAuth } from './contexts/AuthContext';
+import OperationLogPanel from './components/OperationLogPanel';
 
 const navigation = [
   { label: 'Home', path: '/' },
   { label: 'Students', path: '/students' },
   { label: 'Modules', path: '/modules' },
+  { label: 'History', path: '/history' },
   { label: 'APIs hub', path: '/doc-api/' },
 ];
+
+type AppContext = {
+  refreshOps: () => void;
+};
 
 const App = () => {
   const { user, openAuth, logout } = useAuth();
@@ -21,6 +27,7 @@ const App = () => {
 
   const [theme, setTheme] = useState<'light' | 'dark'>(preferredTheme);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [operationRefresh, setOperationRefresh] = useState(0);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -40,6 +47,7 @@ const App = () => {
   }, []);
 
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  const refreshOps = () => setOperationRefresh((prev) => prev + 1);
 
   const themeIcon = theme === 'light' ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />;
   const themeLabel = theme === 'light' ? 'Dark mode' : 'Light mode';
@@ -127,7 +135,8 @@ const App = () => {
           </div>
         </header>
 
-        <Outlet />
+        <OperationLogPanel refreshToken={operationRefresh} onReverted={refreshOps} />
+        <Outlet context={{ refreshOps } satisfies AppContext} />
         <AuthModal />
       </div>
     </div>
@@ -135,3 +144,4 @@ const App = () => {
 };
 
 export default App;
+

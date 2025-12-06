@@ -68,19 +68,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const token = getStoredToken();
-    if (!user && token) {
+    if (token) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
         .then(async (res) => {
-          if (!res.ok) return;
+          if (!res.ok) {
+            logout();
+            return;
+          }
           const body = await res.json();
           setUser(body as AuthUser);
         })
         .catch(() => {
-          localStorage.removeItem(STORAGE_KEY);
+          logout();
         });
     }
-  }, [user]);
+  }, []);
 
   const closeAuth = () => {
     setAuthOpen(false);
@@ -95,7 +98,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const completeAuth = (nextUser: AuthUser) => {
     setUser(nextUser);
     setAuthOpen(false);
-    setAuthError('');
     const action = pendingAction;
     setPendingAction(null);
     if (action) {

@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
-import OperationLogPanel from '../components/OperationLogPanel';
 import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Student } from '../types';
 
@@ -21,9 +20,14 @@ const emptyStudent: Student = {
   sex: '',
 };
 
+type AppContext = {
+  refreshOps: () => void;
+};
+
 const Students = () => {
   const navigate = useNavigate();
   const { requireAuth } = useAuth();
+  const { refreshOps } = useOutletContext() as AppContext;
 
   const [students, setStudents] = useState<Student[]>([]);
   const [grades, setGrades] = useState<Grade[]>([]);
@@ -38,7 +42,6 @@ const Students = () => {
   const [submitting, setSubmitting] = useState(false);
   const [savingError, setSavingError] = useState('');
   const [savingMessage, setSavingMessage] = useState('');
-  const [operationRefresh, setOperationRefresh] = useState(0);
 
   const toNumberOrNull = (value: string) => (value ? Number(value) : null);
   const toBooleanOrNull = (value: string) => {
@@ -112,7 +115,7 @@ const Students = () => {
       setStudentFormOpen(false);
       setStudentForm(emptyStudent);
       await fetchStudents();
-      setOperationRefresh((previous) => previous + 1);
+      refreshOps();
     } catch (err) {
       setSavingError(err instanceof Error ? err.message : 'Unable to save student');
     } finally {
@@ -342,8 +345,6 @@ const Students = () => {
           </div>
         </div>
       </div>
-
-      <OperationLogPanel refreshToken={operationRefresh} onReverted={() => void fetchStudents()} />
     </div>
   );
 };

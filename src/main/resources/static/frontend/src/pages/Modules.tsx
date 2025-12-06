@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { apiFetch } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
-import OperationLogPanel from '../components/OperationLogPanel';
 import { useAuth } from '../contexts/AuthContext';
 import { type Module, type ModuleStatistics } from '../types';
 
@@ -13,9 +12,14 @@ const emptyModule: Module = {
   department: '',
 };
 
+type AppContext = {
+  refreshOps: () => void;
+};
+
 const Modules = () => {
   const navigate = useNavigate();
   const { requireAuth } = useAuth();
+  const { refreshOps } = useOutletContext() as AppContext;
 
   const [moduleStats, setModuleStats] = useState<ModuleStatistics[]>([]);
 
@@ -30,7 +34,6 @@ const Modules = () => {
   const [submitting, setSubmitting] = useState(false);
   const [savingError, setSavingError] = useState('');
   const [savingMessage, setSavingMessage] = useState('');
-  const [operationRefresh, setOperationRefresh] = useState(0);
 
   const fetchModules = async () => {
     setLoading(true);
@@ -78,7 +81,7 @@ const Modules = () => {
       setModuleFormOpen(false);
       setModuleForm(emptyModule);
       await fetchModules();
-      setOperationRefresh((previous) => previous + 1);
+      refreshOps();
     } catch (err) {
       setSavingError(err instanceof Error ? err.message : 'Unable to save module');
     } finally {
@@ -252,8 +255,6 @@ const Modules = () => {
             {!loading && !filteredModules.length && <p className="text-slate-300">No modules match that search.</p>}
           </div>
         </div>
-
-        <OperationLogPanel refreshToken={operationRefresh} onReverted={() => void fetchModules()} />
       </div>
     </div>
   );
