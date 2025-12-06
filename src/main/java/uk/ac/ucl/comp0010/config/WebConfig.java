@@ -10,9 +10,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-  public WebConfig(RequestLoggingInterceptor requestLoggingInterceptor) {
-  }
-
   @SuppressWarnings("null")
   @Override
   public void addCorsMappings(CorsRegistry registry) {
