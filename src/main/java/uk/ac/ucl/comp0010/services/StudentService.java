@@ -11,12 +11,15 @@ import uk.ac.ucl.comp0010.exceptions.ResourceConflictException;
 import uk.ac.ucl.comp0010.exceptions.ResourceNotFoundException;
 import uk.ac.ucl.comp0010.models.Grade;
 import uk.ac.ucl.comp0010.models.Module;
+import uk.ac.ucl.comp0010.models.OperationEntityType;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.models.Student;
 import uk.ac.ucl.comp0010.repositories.GradeRepository;
 import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 import uk.ac.ucl.comp0010.repositories.RegistrationRepository;
 import uk.ac.ucl.comp0010.repositories.StudentRepository;
+import uk.ac.ucl.comp0010.services.OperationLogService.GradeSnapshot;
+import uk.ac.ucl.comp0010.services.OperationLogService.RegistrationSnapshot;
 
 /**
  * Encapsulates student focused business operations.
@@ -28,6 +31,7 @@ public class StudentService {
   private final ModuleRepository moduleRepository;
   private final RegistrationRepository registrationRepository;
   private final GradeRepository gradeRepository;
+  private final OperationLogService operationLogService;
 
   /**
    * CTR for Student Service.
@@ -38,11 +42,13 @@ public class StudentService {
    * @param gradeRepository repository for grades
    */
   public StudentService(StudentRepository studentRepository, ModuleRepository moduleRepository,
-      RegistrationRepository registrationRepository, GradeRepository gradeRepository) {
+      RegistrationRepository registrationRepository, GradeRepository gradeRepository,
+      OperationLogService operationLogService) {
     this.studentRepository = studentRepository;
     this.moduleRepository = moduleRepository;
     this.registrationRepository = registrationRepository;
     this.gradeRepository = gradeRepository;
+    this.operationLogService = operationLogService;
   }
 
   /**
@@ -79,7 +85,10 @@ public class StudentService {
     }
 
     validateUniqueness(student);
-    return studentRepository.save(student);
+    Student saved = studentRepository.save(student);
+    operationLogService.logCreation(OperationEntityType.STUDENT, saved.getId(), saved,
+        String.format("Created student %s %s", saved.getFirstName(), saved.getLastName()));
+    return saved;
   }
 
   /**
@@ -102,8 +111,12 @@ public class StudentService {
       throw new ResourceConflictException("Email already registered: " + updated.getEmail());
     }
 
+    Student beforeUpdate = operationLogService.copyOf(existing, Student.class);
     applyUpdatedFields(existing, updated);
-    return studentRepository.save(existing);
+    Student saved = studentRepository.save(existing);
+    operationLogService.logUpdate(OperationEntityType.STUDENT, saved.getId(), beforeUpdate, saved,
+        String.format("Updated student %s", saved.getUserName()));
+    return saved;
   }
 
   /**
@@ -113,7 +126,10 @@ public class StudentService {
    */
   public void deleteStudent(Long id) {
     Student student = getStudent(id);
+    Student snapshot = operationLogService.copyOf(student, Student.class);
     studentRepository.delete(student);
+    operationLogService.logDeletion(OperationEntityType.STUDENT, id, snapshot,
+        String.format("Deleted student %s", student.getUserName()));
   }
 
   /**
@@ -133,7 +149,11 @@ public class StudentService {
     }
 
     Registration registration = new Registration(student, module);
-    return registrationRepository.save(registration);
+    Registration saved = registrationRepository.save(registration);
+    operationLogService.logCreation(OperationEntityType.REGISTRATION, saved.getId(),
+        new OperationLogService.RegistrationSnapshot(saved.getId(), studentId, moduleId),
+        String.format("Registered %s to %s", student.getUserName(), module.getCode()));
+    return saved;
   }
 
   /**
@@ -152,7 +172,12 @@ public class StudentService {
     Registration registration = registrationRepository.findByStudentAndModule(student, module)
         .orElseThrow(() -> new NoRegistrationException("Student is not registered for module"));
 
+    RegistrationSnapshot snapshot = new RegistrationSnapshot(registration.getId(), studentId,
+        moduleId);
     registrationRepository.delete(registration);
+    operationLogService.logDeletion(OperationEntityType.REGISTRATION, registration.getId(),
+        snapshot,
+        String.format("Unregistered %s from %s", student.getUserName(), module.getCode()));
   }
 
   /**
@@ -185,10 +210,23 @@ public class StudentService {
       throw new NoRegistrationException("Student must be registered before receiving a grade");
     }
 
-    Grade grade = gradeRepository.findByStudentAndModule(student, module)
-        .orElse(new Grade(student, module, score));
-    grade.setScore(score);
-    return gradeRepository.save(grade);
+    Grade grade = gradeRepository.findByStudentAndModule(student, module).orElse(null);
+    GradeSnapshot previous = grade == null
+        ? null
+        : new GradeSnapshot(grade.getId(), studentId, moduleId, grade.getScore());
+    Grade target = grade == null ? new Grade(student, module, score) : grade;
+    target.setScore(score);
+    Grade saved = gradeRepository.save(target);
+    if (previous == null) {
+      operationLogService.logCreation(OperationEntityType.GRADE, saved.getId(),
+          new GradeSnapshot(saved.getId(), studentId, moduleId, saved.getScore()),
+          String.format("Created grade for %s in %s", student.getUserName(), module.getCode()));
+    } else {
+      operationLogService.logUpdate(OperationEntityType.GRADE, saved.getId(), previous,
+          new GradeSnapshot(saved.getId(), studentId, moduleId, saved.getScore()),
+          String.format("Updated grade for %s in %s", student.getUserName(), module.getCode()));
+    }
+    return saved;
   }
 
   /**

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
+import OperationLogPanel from '../components/OperationLogPanel';
 import { useAuth } from '../contexts/AuthContext';
 import { type Grade, type Student } from '../types';
 
@@ -37,6 +38,7 @@ const Students = () => {
   const [submitting, setSubmitting] = useState(false);
   const [savingError, setSavingError] = useState('');
   const [savingMessage, setSavingMessage] = useState('');
+  const [operationRefresh, setOperationRefresh] = useState(0);
 
   const toNumberOrNull = (value: string) => (value ? Number(value) : null);
   const toBooleanOrNull = (value: string) => {
@@ -110,6 +112,7 @@ const Students = () => {
       setStudentFormOpen(false);
       setStudentForm(emptyStudent);
       await fetchStudents();
+      setOperationRefresh((previous) => previous + 1);
     } catch (err) {
       setSavingError(err instanceof Error ? err.message : 'Unable to save student');
     } finally {
@@ -171,7 +174,7 @@ const Students = () => {
           />
         )}
 
-        <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
+      <div className="rounded-3xl border border-white/5 bg-white/5 p-6 shadow-inner shadow-black/30 ring-1 ring-white/10">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-white">Students</h2>
@@ -339,6 +342,8 @@ const Students = () => {
           </div>
         </div>
       </div>
+
+      <OperationLogPanel refreshToken={operationRefresh} onReverted={() => void fetchStudents()} />
     </div>
   );
 };

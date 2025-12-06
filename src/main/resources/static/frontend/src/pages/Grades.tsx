@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
+import OperationLogPanel from '../components/OperationLogPanel';
 import { type Grade, type Module, type Student } from '../types';
 
 const emptyForm = {
@@ -16,6 +17,7 @@ const Grades = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [operationRefresh, setOperationRefresh] = useState(0);
   const [students, setStudents] = useState<Student[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
@@ -92,6 +94,7 @@ const Grades = () => {
       setForm(emptyForm);
       setMessage('Grade upserted successfully.');
       await fetchGrades();
+      setOperationRefresh((previous) => previous + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to upsert grade');
     } finally {
@@ -483,6 +486,7 @@ const Grades = () => {
             )}
           </div>
         </div>
+        <OperationLogPanel refreshToken={operationRefresh} onReverted={() => void fetchGrades()} />
       </div>
     </div>
   );

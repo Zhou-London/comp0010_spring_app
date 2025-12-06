@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
+import OperationLogPanel from '../components/OperationLogPanel';
 import { useAuth } from '../contexts/AuthContext';
 import { useErrorOverlay } from '../contexts/ErrorContext';
 import { type Grade, type Module, type ModuleStatistics, type Registration, type Student } from '../types';
@@ -56,6 +57,7 @@ const ModuleDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [operationRefresh, setOperationRefresh] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [editingModule, setEditingModule] = useState(false);
   const [editingRegistrationId, setEditingRegistrationId] = useState<number | 'new' | null>(null);
@@ -167,6 +169,7 @@ const ModuleDetail = () => {
       setMessage('Module updated.');
       setEditingModule(false);
       await fetchData();
+      setOperationRefresh((prev) => prev + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save module');
     } finally {
@@ -180,6 +183,7 @@ const ModuleDetail = () => {
     setError('');
     try {
       await apiFetch(`/modules/${id}`, { method: 'DELETE' });
+      setOperationRefresh((prev) => prev + 1);
       navigate('/modules');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete module');
@@ -213,6 +217,7 @@ const ModuleDetail = () => {
       setRegistrationForm(emptyRegistration);
       setEditingRegistrationId(null);
       await fetchData();
+      setOperationRefresh((prev) => prev + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save registration');
     } finally {
@@ -227,6 +232,7 @@ const ModuleDetail = () => {
     try {
       await apiFetch(`/registrations/${registrationId}`, { method: 'DELETE' });
       await fetchData();
+      setOperationRefresh((prev) => prev + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete registration');
     } finally {
@@ -255,6 +261,7 @@ const ModuleDetail = () => {
       setGradeForm(emptyGrade);
       setEditingGradeId(null);
       await fetchData();
+      setOperationRefresh((prev) => prev + 1);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to save grade';
       showGradeError(message);
@@ -270,6 +277,7 @@ const ModuleDetail = () => {
     try {
       await apiFetch(`/grades/${gradeId}`, { method: 'DELETE' });
       await fetchData();
+      setOperationRefresh((prev) => prev + 1);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to delete grade';
       showGradeError(message);
@@ -875,6 +883,7 @@ const ModuleDetail = () => {
         {module && activeSection === 'overview' && renderOverview()}
         {module && activeSection === 'registrations' && renderRegistrationsPage()}
         {module && activeSection === 'grades' && renderGradesPage()}
+        <OperationLogPanel refreshToken={operationRefresh} onReverted={() => void fetchData()} />
         {renderRegistrationModal()}
         {renderGradeModal()}
       </div>

@@ -7,11 +7,13 @@ import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.exceptions.ResourceConflictException;
 import uk.ac.ucl.comp0010.exceptions.ResourceNotFoundException;
 import uk.ac.ucl.comp0010.models.Module;
+import uk.ac.ucl.comp0010.models.OperationEntityType;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.models.Student;
 import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 import uk.ac.ucl.comp0010.repositories.RegistrationRepository;
 import uk.ac.ucl.comp0010.repositories.StudentRepository;
+import uk.ac.ucl.comp0010.services.OperationLogService.RegistrationSnapshot;
 
 /**
  * Registration specific service logic.
@@ -22,6 +24,7 @@ public class RegistrationService {
   private final RegistrationRepository registrationRepository;
   private final StudentRepository studentRepository;
   private final ModuleRepository moduleRepository;
+  private final OperationLogService operationLogService;
 
   /**
    * CTR for Registration Service.
@@ -31,10 +34,12 @@ public class RegistrationService {
    * @param moduleRepository Deps inj
    */
   public RegistrationService(RegistrationRepository registrationRepository,
-      StudentRepository studentRepository, ModuleRepository moduleRepository) {
+      StudentRepository studentRepository, ModuleRepository moduleRepository,
+      OperationLogService operationLogService) {
     this.registrationRepository = registrationRepository;
     this.studentRepository = studentRepository;
     this.moduleRepository = moduleRepository;
+    this.operationLogService = operationLogService;
   }
 
   /**
@@ -80,7 +85,11 @@ public class RegistrationService {
       throw new ResourceConflictException("Student already registered for module");
     }
 
-    return registrationRepository.save(new Registration(student, module));
+    Registration saved = registrationRepository.save(new Registration(student, module));
+    operationLogService.logCreation(OperationEntityType.REGISTRATION, saved.getId(),
+        new OperationLogService.RegistrationSnapshot(saved.getId(), studentId, moduleId),
+        String.format("Registered %s to %s", student.getUserName(), module.getCode()));
+    return saved;
   }
 
   /**
@@ -99,7 +108,12 @@ public class RegistrationService {
     Registration registration = registrationRepository.findByStudentAndModule(student, module)
         .orElseThrow(() -> new NoRegistrationException("Student is not registered for module"));
 
+    RegistrationSnapshot snapshot = new RegistrationSnapshot(registration.getId(), studentId,
+        moduleId);
     registrationRepository.delete(registration);
+    operationLogService.logDeletion(OperationEntityType.REGISTRATION, registration.getId(),
+        snapshot,
+        String.format("Unregistered %s from %s", student.getUserName(), module.getCode()));
   }
 
   /**

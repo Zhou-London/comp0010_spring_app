@@ -16,6 +16,7 @@ import uk.ac.ucl.comp0010.exceptions.ResourceConflictException;
 import uk.ac.ucl.comp0010.exceptions.ResourceNotFoundException;
 import uk.ac.ucl.comp0010.models.Module;
 import uk.ac.ucl.comp0010.repositories.ModuleRepository;
+import uk.ac.ucl.comp0010.services.OperationLogService;
 
 @ExtendWith(MockitoExtension.class)
 class ModuleServiceTest {
@@ -23,11 +24,14 @@ class ModuleServiceTest {
   @Mock
   private ModuleRepository moduleRepository;
 
+  @Mock
+  private OperationLogService operationLogService;
+
   private ModuleService moduleService;
 
   @BeforeEach
   void setUp() {
-    moduleService = new ModuleService(moduleRepository);
+    moduleService = new ModuleService(moduleRepository, operationLogService);
   }
 
   @Test
