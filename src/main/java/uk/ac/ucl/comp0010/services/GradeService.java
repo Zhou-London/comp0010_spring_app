@@ -7,11 +7,13 @@ import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.exceptions.ResourceNotFoundException;
 import uk.ac.ucl.comp0010.models.Grade;
 import uk.ac.ucl.comp0010.models.Module;
+import uk.ac.ucl.comp0010.models.OperationEntityType;
 import uk.ac.ucl.comp0010.models.Student;
 import uk.ac.ucl.comp0010.repositories.GradeRepository;
 import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 import uk.ac.ucl.comp0010.repositories.RegistrationRepository;
 import uk.ac.ucl.comp0010.repositories.StudentRepository;
+import uk.ac.ucl.comp0010.services.OperationLogService.GradeSnapshot;
 
 /**
  * Coordinates business behaviour around grades.
@@ -23,6 +25,7 @@ public class GradeService {
   private final StudentRepository studentRepository;
   private final ModuleRepository moduleRepository;
   private final RegistrationRepository registrationRepository;
+  private final OperationLogService operationLogService;
 
   /**
    * CTR for Grade Service.
@@ -33,11 +36,13 @@ public class GradeService {
    * @param registrationRepository deps inj
    */
   public GradeService(GradeRepository gradeRepository, StudentRepository studentRepository,
-      ModuleRepository moduleRepository, RegistrationRepository registrationRepository) {
+      ModuleRepository moduleRepository, RegistrationRepository registrationRepository,
+      OperationLogService operationLogService) {
     this.gradeRepository = gradeRepository;
     this.studentRepository = studentRepository;
     this.moduleRepository = moduleRepository;
     this.registrationRepository = registrationRepository;
+    this.operationLogService = operationLogService;
   }
 
   @Transactional(readOnly = true)
@@ -83,7 +88,11 @@ public class GradeService {
     }
 
     Grade grade = new Grade(student, module, score);
-    return gradeRepository.save(grade);
+    Grade saved = gradeRepository.save(grade);
+    operationLogService.logCreation(OperationEntityType.GRADE, saved.getId(),
+        new GradeSnapshot(saved.getId(), studentId, moduleId, saved.getScore()),
+        String.format("Created grade for %s in %s", student.getUserName(), module.getCode()));
+    return saved;
   }
 
   /**
@@ -95,13 +104,28 @@ public class GradeService {
    */
   public Grade updateGrade(Long id, int score) {
     Grade grade = getGrade(id);
+    GradeSnapshot snapshot = new GradeSnapshot(grade.getId(), grade.getStudent().getId(),
+        grade.getModule().getId(), grade.getScore());
     grade.setScore(score);
-    return gradeRepository.save(grade);
+    Grade saved = gradeRepository.save(grade);
+    operationLogService.logUpdate(OperationEntityType.GRADE, saved.getId(), snapshot,
+        new GradeSnapshot(saved.getId(), grade.getStudent().getId(), grade.getModule().getId(),
+            saved.getScore()), String.format("Updated grade %d", saved.getId()));
+    return saved;
   }
 
+  /**
+   * Deletes a grade entry and records the operation.
+   *
+   * @param id grade identifier
+   */
   public void deleteGrade(Long id) {
     Grade grade = getGrade(id);
+    GradeSnapshot snapshot = new GradeSnapshot(grade.getId(), grade.getStudent().getId(),
+        grade.getModule().getId(), grade.getScore());
     gradeRepository.delete(grade);
+    operationLogService.logDeletion(OperationEntityType.GRADE, id, snapshot,
+        String.format("Deleted grade %d", id));
   }
 
   /**
@@ -154,9 +178,22 @@ public class GradeService {
       throw new NoRegistrationException("Student must be registered before receiving a grade");
     }
 
-    Grade grade = gradeRepository.findByStudentAndModule(student, module)
-        .orElse(new Grade(student, module, score));
-    grade.setScore(score);
-    return gradeRepository.save(grade);
+    Grade grade = gradeRepository.findByStudentAndModule(student, module).orElse(null);
+    GradeSnapshot previous = grade == null
+        ? null
+        : new GradeSnapshot(grade.getId(), studentId, moduleId, grade.getScore());
+    Grade target = grade == null ? new Grade(student, module, score) : grade;
+    target.setScore(score);
+    Grade saved = gradeRepository.save(target);
+    if (previous == null) {
+      operationLogService.logCreation(OperationEntityType.GRADE, saved.getId(),
+          new GradeSnapshot(saved.getId(), studentId, moduleId, saved.getScore()),
+          String.format("Created grade for %s in %s", student.getUserName(), module.getCode()));
+    } else {
+      operationLogService.logUpdate(OperationEntityType.GRADE, saved.getId(), previous,
+          new GradeSnapshot(saved.getId(), studentId, moduleId, saved.getScore()),
+          String.format("Updated grade for %s in %s", student.getUserName(), module.getCode()));
+    }
+    return saved;
   }
 }

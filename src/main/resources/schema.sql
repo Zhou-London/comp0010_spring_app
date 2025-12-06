@@ -1,5 +1,6 @@
 -- Database schema for COMP0010 Spring application
 
+DROP TABLE IF EXISTS operation_logs CASCADE;
 DROP TABLE IF EXISTS grades CASCADE;
 DROP TABLE IF EXISTS registrations CASCADE;
 DROP TABLE IF EXISTS modules CASCADE;
@@ -57,4 +58,16 @@ CREATE TABLE users (
   username VARCHAR(255) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
   auth_token VARCHAR(255) UNIQUE
+);
+
+CREATE TABLE operation_logs (
+  id BIGSERIAL PRIMARY KEY,
+  operation_type VARCHAR(50) NOT NULL,
+  entity_type VARCHAR(50) NOT NULL,
+  entity_id BIGINT,
+  timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+  username VARCHAR(255),
+  description TEXT,
+  previous_state TEXT,
+  new_state TEXT
 );
