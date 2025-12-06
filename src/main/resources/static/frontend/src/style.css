@@ -25,14 +25,6 @@
   --accent: #0ea5e9;
   --accent-strong: #2563eb;
   --overlay-scrim: rgba(5, 6, 11, 0.65);
-  --error-bg: linear-gradient(120deg, rgba(248, 113, 113, 0.2), rgba(239, 68, 68, 0.12));
-  --error-border: rgba(248, 113, 113, 0.4);
-  --error-text: #fecdd3;
-  --error-text-strong: #ffe4e6;
-  --error-icon-bg: rgba(248, 113, 113, 0.2);
-  --error-icon-border: rgba(248, 113, 113, 0.45);
-  --error-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
-  --error-tip-marker: #fca5a5;
 }
 
 :root[data-theme='light'] {
@@ -59,14 +51,6 @@
   --accent: #2563eb;
   --accent-strong: #1d4ed8;
   --overlay-scrim: rgba(15, 23, 42, 0.35);
-  --error-bg: linear-gradient(130deg, #fff1f2 0%, #ffe4e6 45%, #fecdd3 100%);
-  --error-border: rgba(190, 24, 93, 0.7);
-  --error-text: #7f1d1d;
-  --error-text-strong: #450a0a;
-  --error-icon-bg: rgba(244, 63, 94, 0.2);
-  --error-icon-border: rgba(190, 24, 93, 0.55);
-  --error-shadow: 0 18px 46px rgba(190, 24, 93, 0.28);
-  --error-tip-marker: #9f1239;
 }
 
 body {
@@ -170,11 +154,6 @@ a {
 
 .explorer-grid > * {
   height: 100%;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
 
 .icon-button {
@@ -291,11 +270,10 @@ a {
   align-items: start;
   padding: 1rem 1.1rem;
   border-radius: 18px;
-  background: var(--error-bg);
-  border: 1px solid var(--error-border);
-  box-shadow: var(--error-shadow);
-  color: var(--error-text);
-  backdrop-filter: blur(6px);
+  background: linear-gradient(120deg, rgba(248, 113, 113, 0.15), rgba(239, 68, 68, 0.08));
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+  color: #fecdd3;
 }
 
 .error-pop--floating {
@@ -316,8 +294,8 @@ a {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--error-icon-bg);
-  border: 1px solid var(--error-icon-border);
+  background: rgba(248, 113, 113, 0.2);
+  border: 1px solid rgba(248, 113, 113, 0.35);
   font-size: 1.1rem;
 }
 
@@ -332,11 +310,11 @@ a {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.85rem;
-  color: var(--error-text);
+  color: #fecdd3;
 }
 
 .error-pop__message {
-  color: var(--error-text-strong);
+  color: #ffe4e6;
   line-height: 1.5;
   word-break: break-word;
 }
@@ -346,13 +324,13 @@ a {
   padding-left: 1.1rem;
   display: grid;
   gap: 0.3rem;
-  color: var(--error-text);
+  color: #fecdd3;
   opacity: 0.95;
   font-size: 0.9rem;
 }
 
 .error-pop__tips li::marker {
-  color: var(--error-tip-marker);
+  color: #fca5a5;
 }
 
 @keyframes error-pop-in {

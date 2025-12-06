@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 
 interface ErrorMessageProps {
@@ -17,7 +18,7 @@ const defaultTips = [
 const ErrorMessage = ({ message, title = 'Error', tips = defaultTips, children, floating = false }: ErrorMessageProps) => {
   if (!message) return null;
 
-  return (
+  const content = (
     <div className={`error-pop${floating ? ' error-pop--floating' : ''}`} role="alert" aria-live="assertive">
       <div className="error-pop__icon" aria-hidden>
         ⚠️
@@ -36,6 +37,12 @@ const ErrorMessage = ({ message, title = 'Error', tips = defaultTips, children, 
       </div>
     </div>
   );
+
+  if (floating) {
+    return createPortal(content, document.body);
+  }
+
+  return content;
 };
 
 export default ErrorMessage;
