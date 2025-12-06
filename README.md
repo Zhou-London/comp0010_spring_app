@@ -1,10 +1,10 @@
 # COMP0010 Student Management Centre
 
-A Spring Boot + React monorepo for managing students, modules, registrations, and grades. The backend exposes a documented REST API with token-based authentication, while the frontend (Vite + React + Tailwind CSS) consumes the same endpoints for a modern UI experience.
+Spring-Boot && React && TailwindCss Web Application.
 
-Presented by **Team 007**. The clock is ticking and so are your grades.
+Presented by UCL COMP0010 **Team 007**. 
 
-![Project Poster](assets/poster.png)
+![alt text](assets/preview.png)
 
 ## Table of Contents
 - [COMP0010 Student Management Centre](#comp0010-student-management-centre)
@@ -22,6 +22,7 @@ Presented by **Team 007**. The clock is ticking and so are your grades.
   - [License](#license)
 
 ## Features
+- **Ready To Deploy**: Reverse Proxy Enabled. Exposing frontend server leads to a simple producation environment.
 - **Student lifecycle management**: CRUD endpoints for students, modules, registrations, and grades, including GPA and average calculations.
 - **Token authentication**: Register, log in, and validate bearer tokens before hitting protected endpoints.
 - **Interactive docs**: OpenAPI/Swagger UI for exploring and trying out APIs during development.
