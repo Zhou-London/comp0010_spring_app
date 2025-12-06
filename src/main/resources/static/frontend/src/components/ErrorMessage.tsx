@@ -7,6 +7,7 @@ interface ErrorMessageProps {
   tips?: string[];
   children?: ReactNode;
   floating?: boolean;
+  onDismiss?: () => void;
 }
 
 const defaultTips = [
@@ -15,7 +16,7 @@ const defaultTips = [
   'If the issue persists, refresh the page and try again.',
 ];
 
-const ErrorMessage = ({ message, title = 'Error', tips = defaultTips, children, floating = false }: ErrorMessageProps) => {
+const ErrorMessage = ({ message, title = 'Error', tips = defaultTips, children, floating = false, onDismiss }: ErrorMessageProps) => {
   if (!message) return null;
 
   const content = (
@@ -34,12 +35,22 @@ const ErrorMessage = ({ message, title = 'Error', tips = defaultTips, children, 
             ))}
           </ul>
         )}
+        {onDismiss && (
+          <button type="button" className="error-pop__dismiss" onClick={onDismiss} aria-label="Dismiss error message">
+            Close
+          </button>
+        )}
       </div>
     </div>
   );
 
   if (floating) {
-    return createPortal(content, document.body);
+    return createPortal(
+      <div className="error-pop__overlay" role="presentation">
+        {content}
+      </div>,
+      document.body,
+    );
   }
 
   return content;

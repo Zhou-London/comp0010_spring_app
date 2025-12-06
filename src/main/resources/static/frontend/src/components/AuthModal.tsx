@@ -1,9 +1,10 @@
 import { type FormEvent, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import ErrorMessage from './ErrorMessage';
+import { useErrorOverlay } from '../contexts/ErrorContext';
 
 const AuthModal = () => {
-  const { authOpen, closeAuth, authMode, setAuthMode, login, register, authError, clearError, setAuthError } = useAuth();
+  const { authOpen, closeAuth, authMode, setAuthMode, login, register } = useAuth();
+  const { showError, clearError } = useErrorOverlay();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -25,9 +26,17 @@ const AuthModal = () => {
       setPassword('');
     } catch (err) {
       if (err instanceof Error) {
-        clearError();
+        closeAuth();
         const friendly = err.message.includes('Invalid') ? 'Check your username/password and try again.' : err.message;
-        setAuthError(friendly);
+        showError({
+          title: 'Sign-in error',
+          message: friendly,
+          tips: [
+            'Confirm your username and password are correct.',
+            'If you just registered, try signing in again or resetting your password.',
+            'Reach out to an administrator if you believe your account should work.',
+          ],
+        });
       }
     } finally {
       setSubmitting(false);
@@ -62,18 +71,6 @@ const AuthModal = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {authError && (
-            <ErrorMessage
-              message={authError}
-              title="Sign-in error"
-              tips={[
-                'Confirm your username and password are correct.',
-                'If you just registered, try signing in again or resetting your password.',
-                'Reach out to an administrator if you believe your account should work.',
-              ]}
-              floating
-            />
-          )}
           <div className="flex flex-wrap items-center gap-3">
             <button type="submit" className="icon-button accent px-5" disabled={submitting}>
               <span aria-hidden>{authMode === 'login' ? '🔒' : '✨'}</span>
