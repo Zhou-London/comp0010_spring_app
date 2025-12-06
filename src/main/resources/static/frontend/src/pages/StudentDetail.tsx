@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
 import { useAuth } from '../contexts/AuthContext';
+import { useErrorOverlay } from '../contexts/ErrorContext';
 import { type Grade, type Module, type Registration, type Student } from '../types';
 
 interface RegistrationFormState {
@@ -44,6 +45,7 @@ const StudentDetail = () => {
   const { studentId, section } = useParams();
   const navigate = useNavigate();
   const { requireAuth } = useAuth();
+  const { showError } = useErrorOverlay();
   const id = Number(studentId);
 
   const activeSection: 'overview' | 'registrations' | 'grades' =
@@ -246,7 +248,7 @@ const StudentDetail = () => {
 
   const saveGrade = async () => {
     if (!id || !gradeForm.moduleId) {
-      setError('Select a module to save a grade.');
+      showGradeError('Select a module to save a grade.');
       return;
     }
     setSubmitting(true);
@@ -266,7 +268,8 @@ const StudentDetail = () => {
       setEditingGradeId(null);
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to save grade');
+      const message = err instanceof Error ? err.message : 'Unable to save grade';
+      showGradeError(message);
     } finally {
       setSubmitting(false);
     }
@@ -280,7 +283,8 @@ const StudentDetail = () => {
       await apiFetch(`/grades/${gradeId}`, { method: 'DELETE' });
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to delete grade');
+      const message = err instanceof Error ? err.message : 'Unable to delete grade';
+      showGradeError(message);
     } finally {
       setSubmitting(false);
     }
@@ -312,6 +316,19 @@ const StudentDetail = () => {
   const closeGradeModal = () => {
     setEditingGradeId(null);
     setGradeForm(emptyGrade);
+  };
+
+  const showGradeError = (message: string) => {
+    closeGradeModal();
+    showError({
+      title: 'Grade save error',
+      message,
+      tips: [
+        'Reopen the Add Grade form and confirm the selected module and score.',
+        'Make sure your session is still active before retrying.',
+        'If the issue keeps happening, refresh the page and try again.',
+      ],
+    });
   };
 
   const openRegistrationEditor = (registration?: Registration) => {

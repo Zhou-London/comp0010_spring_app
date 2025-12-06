@@ -21,9 +21,6 @@ interface AuthContextValue {
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, password: string) => Promise<void>;
   logout: () => void;
-  authError: string;
-  clearError: () => void;
-  setAuthError: (message: string) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -60,7 +57,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [authOpen, setAuthOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<AuthAction>(null);
-  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -89,13 +85,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const closeAuth = () => {
     setAuthOpen(false);
     setPendingAction(null);
-    setAuthError('');
   };
 
   const openAuth = (mode: AuthMode = 'login') => {
     setAuthMode(mode);
     setAuthOpen(true);
-    setAuthError('');
   };
 
   const completeAuth = (nextUser: AuthUser) => {
@@ -111,13 +105,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const login = async (username: string, password: string) => {
-    setAuthError('');
     const authenticated = await requestToken('login', username, password);
     completeAuth(authenticated);
   };
 
   const register = async (username: string, password: string) => {
-    setAuthError('');
     const registered = await requestToken('register', username, password);
     completeAuth(registered);
   };
@@ -136,9 +128,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     openAuth('login');
   };
 
-  const clearError = () => setAuthError('');
-  const setAuthErrorMessage = (message: string) => setAuthError(message);
-
   const value = useMemo<AuthContextValue>(() => ({
     user,
     authMode,
@@ -150,10 +139,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     login,
     register,
     logout,
-    authError,
-    clearError,
-    setAuthError: setAuthErrorMessage,
-  }), [user, authMode, authOpen, authError]);
+  }), [user, authMode, authOpen]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
