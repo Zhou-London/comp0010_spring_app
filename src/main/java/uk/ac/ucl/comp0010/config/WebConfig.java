@@ -2,6 +2,7 @@ package uk.ac.ucl.comp0010.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -9,6 +10,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+  private final RequestLoggingInterceptor requestLoggingInterceptor;
+
+  public WebConfig(RequestLoggingInterceptor requestLoggingInterceptor) {
+    this.requestLoggingInterceptor = requestLoggingInterceptor;
+  }
 
   @SuppressWarnings("null")
   @Override
@@ -18,5 +25,11 @@ public class WebConfig implements WebMvcConfigurer {
         .allowedOrigins("http://localhost:5173", "http://127.0.0.1:5173")
         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
         .allowedHeaders("*");
+  }
+
+  @SuppressWarnings("null")
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(requestLoggingInterceptor);
   }
 }
