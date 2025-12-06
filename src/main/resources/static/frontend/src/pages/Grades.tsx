@@ -340,18 +340,17 @@ const Grades = () => {
                 {submitting ? 'Saving…' : 'Upsert grade'}
               </button>
               {message && <p className="text-sm text-emerald-300">{message}</p>}
-          {error && (
-            <ErrorMessage
-              message={error}
-              title="Grade save failed"
-              tips={[
-                'Enter a numeric score and pick both a student and module.',
-                'Confirm the student and module still exist before saving.',
-                'Try refreshing or signing back in if the error continues.',
-              ]}
-              floating
-            />
-          )}
+              {error && (
+                <ErrorMessage
+                  message={error}
+                  title="Grade save failed"
+                  tips={[
+                    'Enter a numeric score and pick both a student and module.',
+                    'Confirm the student and module still exist before saving.',
+                    'Try refreshing or signing back in if the error continues.',
+                  ]}
+                />
+              )}
             </form>
 
             <div className="mt-6 space-y-6">
