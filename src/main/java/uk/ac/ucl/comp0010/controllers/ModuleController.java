@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.ucl.comp0010.controllers.responses.ModuleStatisticsResponse;
 import uk.ac.ucl.comp0010.models.Grade;
 import uk.ac.ucl.comp0010.models.Module;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.services.GradeService;
 import uk.ac.ucl.comp0010.services.ModuleService;
+import uk.ac.ucl.comp0010.services.ModuleStatisticsService;
 import uk.ac.ucl.comp0010.services.RegistrationService;
 
 /**
@@ -27,6 +29,7 @@ public class ModuleController {
   private final ModuleService moduleService;
   private final RegistrationService registrationService;
   private final GradeService gradeService;
+  private final ModuleStatisticsService moduleStatisticsService;
 
   /**
    * CTR for Module Controller.
@@ -34,17 +37,29 @@ public class ModuleController {
    * @param moduleService deps inj
    * @param registrationService deps inj
    * @param gradeService deps inj
+   * @param moduleStatisticsService deps inj
    */
   public ModuleController(ModuleService moduleService, RegistrationService registrationService,
-      GradeService gradeService) {
+      GradeService gradeService, ModuleStatisticsService moduleStatisticsService) {
     this.moduleService = moduleService;
     this.registrationService = registrationService;
     this.gradeService = gradeService;
+    this.moduleStatisticsService = moduleStatisticsService;
   }
 
   @GetMapping
   public List<Module> getModules() {
     return moduleService.getAllModules();
+  }
+
+  @GetMapping("/statistics")
+  public List<ModuleStatisticsResponse> getModuleStatistics() {
+    return moduleStatisticsService.getAllStatistics();
+  }
+
+  @GetMapping("/{id}/statistics")
+  public ModuleStatisticsResponse getModuleStatistics(@PathVariable Long id) {
+    return moduleStatisticsService.getStatistics(id);
   }
 
   @GetMapping("/{id}")

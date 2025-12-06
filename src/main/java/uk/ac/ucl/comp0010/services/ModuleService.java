@@ -51,6 +51,8 @@ public class ModuleService {
     if (moduleRepository.existsByCode(module.getCode())) {
       throw new ResourceConflictException("Module code already exists: " + module.getCode());
     }
+
+    ensureDepartmentProvided(module);
     return moduleRepository.save(module);
   }
 
@@ -68,14 +70,23 @@ public class ModuleService {
       throw new ResourceConflictException("Module code already exists: " + updated.getCode());
     }
 
+    ensureDepartmentProvided(updated);
     existing.setCode(updated.getCode());
     existing.setName(updated.getName());
     existing.setMnc(updated.getMnc());
+    existing.setDepartment(updated.getDepartment());
     return moduleRepository.save(existing);
   }
 
   public void deleteModule(Long id) {
     Module module = getModule(id);
     moduleRepository.delete(module);
+  }
+
+  private void ensureDepartmentProvided(Module module) {
+    if (module.getDepartment() == null || module.getDepartment().isBlank()) {
+      throw new ResourceConflictException("Module department is required");
+    }
+    module.setDepartment(module.getDepartment().trim());
   }
 }
