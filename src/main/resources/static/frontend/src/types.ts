@@ -19,6 +19,17 @@ export interface Module {
   code: string;
   name: string;
   mnc: boolean;
+  department: string;
+}
+
+export interface ModuleStatistics extends Module {
+  registrationCount: number;
+  totalStudents: number;
+  selectionRate: number;
+  totalGrades: number;
+  passingGrades: number;
+  passRate: number | null;
+  averageGrade: number | null;
 }
 
 export interface Grade {
