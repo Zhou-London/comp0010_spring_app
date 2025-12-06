@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
+import OperationLogPanel from '../components/OperationLogPanel';
 import { type Module, type Registration, type Student } from '../types';
 
 const emptyForm = {
@@ -15,6 +16,7 @@ const Registrations = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [operationRefresh, setOperationRefresh] = useState(0);
   const [students, setStudents] = useState<Student[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
@@ -89,6 +91,7 @@ const Registrations = () => {
       setForm(emptyForm);
       setMessage('Registration saved successfully.');
       await fetchRegistrations();
+      setOperationRefresh((previous) => previous + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save registration');
     } finally {
@@ -428,6 +431,8 @@ const Registrations = () => {
         </div>
       </div>
     </div>
+
+      <OperationLogPanel refreshToken={operationRefresh} onReverted={() => void fetchRegistrations()} />
   );
 };
 

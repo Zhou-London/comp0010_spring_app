@@ -56,3 +56,13 @@ export interface HalCollection<T> {
   _embedded?: Record<string, T[]>;
   page?: PageMetadata;
 }
+
+export interface OperationLog {
+  id?: number;
+  operationType: 'CREATE' | 'UPDATE' | 'DELETE' | 'REVERT';
+  entityType: 'STUDENT' | 'MODULE' | 'REGISTRATION' | 'GRADE';
+  entityId?: number | null;
+  timestamp: string;
+  username?: string | null;
+  description?: string | null;
+}
