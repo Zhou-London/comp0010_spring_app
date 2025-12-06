@@ -59,7 +59,10 @@ const StudentDetail = () => {
   const [gradeForm, setGradeForm] = useState<GradeFormState>(emptyGrade);
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [studentError, setStudentError] = useState('');
+  const [registrationError, setRegistrationError] = useState('');
+  const [gradeError, setGradeError] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [editingStudent, setEditingStudent] = useState(false);
@@ -84,7 +87,7 @@ const StudentDetail = () => {
   const fetchData = async () => {
     if (!id) return;
     setLoading(true);
-    setError('');
+    setLoadError('');
     try {
       const [studentResponse, modulesResponse, registrationsResponse, gradesResponse] = await Promise.all([
         apiFetch<Student>(`/students/${id}`),
@@ -101,7 +104,7 @@ const StudentDetail = () => {
       const allGrades = unwrapCollection(gradesResponse, 'grades');
       setGrades(allGrades.filter((grade) => grade.student?.id === id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load student');
+      setLoadError(err instanceof Error ? err.message : 'Unable to load student');
     } finally {
       setLoading(false);
     }
@@ -115,7 +118,9 @@ const StudentDetail = () => {
     setEditingRegistrationId(null);
     setEditingGradeId(null);
     setRegistrationForm(emptyRegistration);
+    setRegistrationError('');
     setGradeForm(emptyGrade);
+    setGradeError('');
   }, [activeSection]);
 
   const averageScore = useMemo(() => {
@@ -170,7 +175,7 @@ const StudentDetail = () => {
   const handleSaveStudent = async () => {
     if (!id) return;
     setSubmitting(true);
-    setError('');
+    setStudentError('');
     setMessage('');
     try {
       await apiFetch(`/students/${id}`, { method: 'PUT', body: studentForm });
@@ -178,7 +183,7 @@ const StudentDetail = () => {
       setEditingStudent(false);
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to save student');
+      setStudentError(err instanceof Error ? err.message : 'Unable to save student');
     } finally {
       setSubmitting(false);
     }
@@ -187,12 +192,12 @@ const StudentDetail = () => {
   const handleDeleteStudent = async () => {
     if (!id) return;
     setSubmitting(true);
-    setError('');
+    setStudentError('');
     try {
       await apiFetch(`/students/${id}`, { method: 'DELETE' });
       navigate('/students');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to delete student');
+      setStudentError(err instanceof Error ? err.message : 'Unable to delete student');
     } finally {
       setSubmitting(false);
     }
@@ -200,11 +205,11 @@ const StudentDetail = () => {
 
   const saveRegistration = async () => {
     if (!id || !registrationForm.moduleId) {
-      setError('Choose a module before saving a registration.');
+      setRegistrationError('Choose a module before saving a registration.');
       return;
     }
     setSubmitting(true);
-    setError('');
+    setRegistrationError('');
     setMessage('');
     try {
       if (registrationForm.id) {
@@ -224,7 +229,7 @@ const StudentDetail = () => {
       setEditingRegistrationId(null);
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to save registration');
+      setRegistrationError(err instanceof Error ? err.message : 'Unable to save registration');
     } finally {
       setSubmitting(false);
     }
@@ -233,12 +238,12 @@ const StudentDetail = () => {
   const deleteRegistration = async (registrationId?: number) => {
     if (!registrationId) return;
     setSubmitting(true);
-    setError('');
+    setRegistrationError('');
     try {
       await apiFetch(`/registrations/${registrationId}`, { method: 'DELETE' });
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to delete registration');
+      setRegistrationError(err instanceof Error ? err.message : 'Unable to delete registration');
     } finally {
       setSubmitting(false);
     }
@@ -246,11 +251,11 @@ const StudentDetail = () => {
 
   const saveGrade = async () => {
     if (!id || !gradeForm.moduleId) {
-      setError('Select a module to save a grade.');
+      setGradeError('Select a module to save a grade.');
       return;
     }
     setSubmitting(true);
-    setError('');
+    setGradeError('');
     setMessage('');
     try {
       await apiFetch('/grades/upsert', {
@@ -266,7 +271,7 @@ const StudentDetail = () => {
       setEditingGradeId(null);
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to save grade');
+      setGradeError(err instanceof Error ? err.message : 'Unable to save grade');
     } finally {
       setSubmitting(false);
     }
@@ -275,12 +280,12 @@ const StudentDetail = () => {
   const deleteGrade = async (gradeId?: number) => {
     if (!gradeId) return;
     setSubmitting(true);
-    setError('');
+    setGradeError('');
     try {
       await apiFetch(`/grades/${gradeId}`, { method: 'DELETE' });
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to delete grade');
+      setGradeError(err instanceof Error ? err.message : 'Unable to delete grade');
     } finally {
       setSubmitting(false);
     }
@@ -306,11 +311,13 @@ const StudentDetail = () => {
 
   const closeRegistrationModal = () => {
     setEditingRegistrationId(null);
+    setRegistrationError('');
     setRegistrationForm(emptyRegistration);
   };
 
   const closeGradeModal = () => {
     setEditingGradeId(null);
+    setGradeError('');
     setGradeForm(emptyGrade);
   };
 
@@ -322,6 +329,7 @@ const StudentDetail = () => {
       setRegistrationForm(emptyRegistration);
       setEditingRegistrationId('new');
     }
+    setRegistrationError('');
   };
 
   const openGradeEditor = (grade?: Grade) => {
@@ -336,6 +344,7 @@ const StudentDetail = () => {
       setGradeForm(emptyGrade);
       setEditingGradeId('new');
     }
+    setGradeError('');
   };
 
   const renderRegistrationModal = () =>
@@ -353,6 +362,17 @@ const StudentDetail = () => {
           </div>
 
           <div className="space-y-3">
+            {registrationError && (
+              <ErrorMessage
+                message={registrationError}
+                title="Registration error"
+                tips={[
+                  'Select a module before saving this registration.',
+                  'Verify your session is active and you have edit permissions.',
+                  'Refresh the page and retry if the issue keeps happening.',
+                ]}
+              />
+            )}
             <label className="text-sm opacity-80" htmlFor="moduleId">Module</label>
             <select
               id="moduleId"
@@ -414,6 +434,17 @@ const StudentDetail = () => {
           </div>
 
           <div className="space-y-3">
+            {gradeError && (
+              <ErrorMessage
+                message={gradeError}
+                title="Grade error"
+                tips={[
+                  'Choose a module and enter a numeric score before saving.',
+                  'Make sure the student and module still exist in the system.',
+                  'If you just signed in, refresh the page and try again.',
+                ]}
+              />
+            )}
             <label className="text-sm opacity-80" htmlFor="gradeModule">Module</label>
             <select
               id="gradeModule"
@@ -703,22 +734,35 @@ const StudentDetail = () => {
               <span aria-hidden>🗑️</span>
               <span className="sr-only">Delete student</span>
             </button>
+            {studentError && (
+              <div className="basis-full max-w-xl">
+                <ErrorMessage
+                  message={studentError}
+                  title="Student update error"
+                  tips={[
+                    'Ensure all required fields are completed before saving.',
+                    'Confirm your session is active and you have edit permissions.',
+                    'Try refreshing the page and repeating the update if it fails.',
+                  ]}
+                />
+              </div>
+            )}
           </div>
         )}
 
         {!editingStudent && (
-          <div className="mt-5 grid items-stretch gap-4 sm:grid-cols-3">
-            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
+          <div className="summary-grid mt-5 items-stretch gap-4">
+            <div className="surface-card flex h-full min-h-[150px] flex-col gap-3 rounded-2xl p-5 ring-1 ring-white/10">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Average</p>
               <p className="text-2xl font-semibold text-white break-words leading-snug">{averageScore}</p>
               <p className="text-sm text-slate-300 leading-relaxed break-words">Across {grades.length || 'no'} recorded grades.</p>
             </div>
-            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
+            <div className="surface-card flex h-full min-h-[150px] flex-col gap-3 rounded-2xl p-5 ring-1 ring-white/10">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Outstanding</p>
               <p className="text-2xl font-semibold text-white break-words leading-snug">{formatCurrency(outstandingTuition)}</p>
               <p className="text-sm text-slate-300 leading-relaxed break-words">Remaining from total tuition.</p>
             </div>
-            <div className="surface-card flex h-full flex-col gap-2 rounded-2xl p-5 ring-1 ring-white/10">
+            <div className="surface-card flex h-full min-h-[150px] flex-col gap-3 rounded-2xl p-5 ring-1 ring-white/10">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-300">Residency</p>
               <p className="text-2xl font-semibold text-white break-words leading-snug">{residencyLabel}</p>
               <p className="text-sm text-slate-300 leading-relaxed break-words">Used for fee calculations.</p>
@@ -985,9 +1029,9 @@ const StudentDetail = () => {
         </div>
 
         {loading && <p className="text-slate-200">Loading…</p>}
-        {error && (
+        {loadError && (
           <ErrorMessage
-            message={error}
+            message={loadError}
             title="Student data error"
             tips={[
               'Ensure the student still exists or return to the student list.',
