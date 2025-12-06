@@ -101,9 +101,9 @@ const StudentDetail = () => {
       setStudentForm(studentResponse);
       setModules(unwrapCollection(modulesResponse, 'modules'));
       const allRegistrations = unwrapCollection(registrationsResponse, 'registrations');
-      setRegistrations(allRegistrations.filter((registration) => registration.student?.id === id));
+      setRegistrations(allRegistrations.filter((registration: Registration) => registration.student?.id === id));
       const allGrades = unwrapCollection(gradesResponse, 'grades');
-      setGrades(allGrades.filter((grade) => grade.student?.id === id));
+      setGrades(allGrades.filter((grade: Grade) => grade.student?.id === id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load student');
     } finally {

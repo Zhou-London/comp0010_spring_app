@@ -54,6 +54,28 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
 
 export type CollectionResponse<T> = { _embedded?: Record<string, T[]> } | T[];
 
+
+export function formatCurrency(value: number | null | undefined): string {
+  if (value == null) return '—';
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+  }).format(value);
+}
+
+export function toBooleanOrNull(value: string): boolean | null {
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return null;
+}
+
+
+export function toNumberOrNull(value: string): number | null {
+  if (!value) return null;
+  const num = parseFloat(value);
+  return isNaN(num) ? null : num;
+}
+
 export function unwrapCollection<T>(collection: CollectionResponse<T>, key: string): T[] {
   if (Array.isArray(collection)) {
     return collection;
