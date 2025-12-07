@@ -35,8 +35,21 @@ async function requestToken(path: 'login' | 'register', username: string, passwo
   });
 
   if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Unable to authenticate');
+    const rawMessage = await response.text();
+    let friendlyMessage = 'Unable to authenticate';
+
+    if (rawMessage) {
+      try {
+        const parsed = JSON.parse(rawMessage) as { error?: unknown };
+        if (parsed && typeof parsed === 'object' && parsed.error) {
+          friendlyMessage = String(parsed.error);
+        }
+      } catch {
+        friendlyMessage = rawMessage;
+      }
+    }
+
+    throw new Error(friendlyMessage);
   }
 
   return response.json() as Promise<AuthUser>;

@@ -22,6 +22,12 @@ public class ModuleStatisticsResponse {
   @Schema(description = "Department responsible for the module")
   private final String department;
 
+  @Schema(description = "Earliest study year allowed for this module")
+  private final Integer requiredYear;
+
+  @Schema(description = "Code of the prerequisite module, if any")
+  private final String prerequisiteCode;
+
   @Schema(description = "Number of students registered for the module")
   private final Long registrationCount;
 
@@ -51,6 +57,9 @@ public class ModuleStatisticsResponse {
     this.name = module.getName();
     this.mnc = module.getMnc();
     this.department = module.getDepartment();
+    this.requiredYear = module.getRequiredYear();
+    this.prerequisiteCode = module.getPrerequisiteModule() != null
+        ? module.getPrerequisiteModule().getCode() : null;
     this.registrationCount = registrationCount;
     this.totalStudents = totalStudents;
     this.selectionRate = selectionRate;
@@ -78,6 +87,14 @@ public class ModuleStatisticsResponse {
 
   public String getDepartment() {
     return department;
+  }
+
+  public Integer getRequiredYear() {
+    return requiredYear;
+  }
+
+  public String getPrerequisiteCode() {
+    return prerequisiteCode;
   }
 
   public Long getRegistrationCount() {

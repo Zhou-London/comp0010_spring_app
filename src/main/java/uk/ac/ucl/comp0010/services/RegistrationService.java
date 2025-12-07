@@ -6,10 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.exceptions.ResourceConflictException;
 import uk.ac.ucl.comp0010.exceptions.ResourceNotFoundException;
+import uk.ac.ucl.comp0010.models.Grade;
 import uk.ac.ucl.comp0010.models.Module;
 import uk.ac.ucl.comp0010.models.OperationEntityType;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.models.Student;
+import uk.ac.ucl.comp0010.repositories.GradeRepository;
 import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 import uk.ac.ucl.comp0010.repositories.RegistrationRepository;
 import uk.ac.ucl.comp0010.repositories.StudentRepository;
@@ -24,6 +26,7 @@ public class RegistrationService {
   private final RegistrationRepository registrationRepository;
   private final StudentRepository studentRepository;
   private final ModuleRepository moduleRepository;
+  private final GradeRepository gradeRepository;
   private final OperationLogService operationLogService;
 
   /**
@@ -35,10 +38,11 @@ public class RegistrationService {
    */
   public RegistrationService(RegistrationRepository registrationRepository,
       StudentRepository studentRepository, ModuleRepository moduleRepository,
-      OperationLogService operationLogService) {
+      GradeRepository gradeRepository, OperationLogService operationLogService) {
     this.registrationRepository = registrationRepository;
     this.studentRepository = studentRepository;
     this.moduleRepository = moduleRepository;
+    this.gradeRepository = gradeRepository;
     this.operationLogService = operationLogService;
   }
 
@@ -84,6 +88,8 @@ public class RegistrationService {
     if (registrationRepository.existsByStudentAndModule(student, module)) {
       throw new ResourceConflictException("Student already registered for module");
     }
+
+    validateEligibility(student, module);
 
     Registration saved = registrationRepository.save(new Registration(student, module));
     operationLogService.logCreation(OperationEntityType.REGISTRATION, saved.getId(),
@@ -140,5 +146,26 @@ public class RegistrationService {
     Module module = moduleRepository.findById(moduleId)
         .orElseThrow(() -> new ResourceNotFoundException("Module not found with id " + moduleId));
     return registrationRepository.findAllByModule(module);
+  }
+
+  private void validateEligibility(Student student, Module module) {
+    Integer requiredYear = module.getRequiredYear();
+    if (requiredYear != null && student.getEntryYear() != null
+        && student.getEntryYear() < requiredYear) {
+      throw new ResourceConflictException(
+          String.format("Student year %d is below required year %d for module %s",
+              student.getEntryYear(), requiredYear, module.getCode()));
+    }
+
+    Module prerequisite = module.getPrerequisiteModule();
+    if (prerequisite != null) {
+      Grade result = gradeRepository.findByStudentAndModule(student, prerequisite).orElse(null);
+      boolean completed = result != null && result.getScore() >= 60;
+      if (!completed) {
+        throw new ResourceConflictException(
+            String.format("Prerequisite %s not completed by student %s",
+                prerequisite.getCode(), student.getUserName()));
+      }
+    }
   }
 }
