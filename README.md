@@ -22,7 +22,7 @@ Presented by UCL COMP0010 **Team 007**.
   - [License](#license)
 
 ## Features
-- **Ready To Deploy**: Reverse Proxy Enabled. Exposing frontend server leads to a simple producation environment.
+- **Ready To Deploy**: Reverse Proxy Enabled. Exposing frontend server leads to a simple production environment.
 - **Student lifecycle management**: CRUD endpoints for students, modules, registrations, and grades, including GPA and average calculations.
 - **Token authentication**: Register, log in, and validate bearer tokens before hitting protected endpoints.
 - **Interactive docs**: OpenAPI/Swagger UI for exploring and trying out APIs during development.
