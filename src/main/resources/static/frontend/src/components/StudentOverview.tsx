@@ -108,12 +108,8 @@ const StudentOverview: FC<StudentOverviewProps> = ({
       <div className="glass-panel p-6">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.05em] text-secondary">
-              Student profile
-            </p>
-            <h2 className="text-xl font-semibold text-primary">
-              Personal details
-            </h2>
+            <p className="text-xs uppercase tracking-[0.05em] text-secondary">Student profile</p>
+            <h2 className="text-xl font-semibold text-primary">Personal details</h2>
           </div>
           <button
             type="button"
@@ -367,34 +363,35 @@ const StudentOverview: FC<StudentOverviewProps> = ({
             {message && <p className="text-emerald-400 text-sm font-medium">{message}</p>}
             {error && <p className="text-rose-400 text-sm font-medium">{error}</p>}
             <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => requireAuth(handleSaveStudent)}
-              disabled={submitting}
-              className="icon-button accent"
-              aria-label="Save student"
-            >
-              {submitting ? 'Saving...' : 'Save'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setEditingStudent(false);
-                setStudentForm(student ?? emptyStudent);
-              }}
-              className="icon-button"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => requireAuth(handleDeleteStudent)}
-              className="icon-button danger"
-              aria-label="Delete student"
-            >
-              <TrashIcon className="h-5 w-5" />
-              <span>Delete</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => requireAuth(handleSaveStudent)}
+                disabled={submitting}
+                className="icon-button accent"
+                aria-label="Save student"
+              >
+                {submitting ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingStudent(false);
+                  setStudentForm(student ?? emptyStudent);
+                }}
+                className="icon-button"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => requireAuth(handleDeleteStudent)}
+                className="icon-button danger"
+                aria-label="Delete student"
+              >
+                <TrashIcon className="h-5 w-5" />
+                <span>Delete</span>
+              </button>
+            </div>
           </div>
         )}
 
