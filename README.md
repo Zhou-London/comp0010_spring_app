@@ -8,7 +8,6 @@ Presented by UCL COMP0010 **Team 007**.
 
 ## Table of Contents
 - [COMP0010 Student Management Centre](#comp0010-student-management-centre)
-  - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Architecture](#architecture)
   - [Getting Started](#getting-started)
