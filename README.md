@@ -8,6 +8,7 @@ Presented by UCL COMP0010 **Team 007**.
 
 ## Table of Contents
 - [COMP0010 Student Management Centre](#comp0010-student-management-centre)
+  - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Architecture](#architecture)
   - [Getting Started](#getting-started)
@@ -15,6 +16,7 @@ Presented by UCL COMP0010 **Team 007**.
     - [Backend](#backend)
     - [Frontend](#frontend)
   - [Troubleshooting](#troubleshooting)
+    - [Port conflicts](#port-conflicts)
   - [API Documentation](#api-documentation)
   - [Testing](#testing)
   - [Project Layout](#project-layout)
@@ -48,48 +50,36 @@ cd comp0010_spring_app
 ```
 
 ### Backend
-Start the API server on port **2800**:
+Start the backend server:
 ```bash
 mvn spring-boot:run
 ```
-The service will be reachable at `http://localhost:2800`.
+The service listens to `http://localhost:2800`.
 
 ### Frontend
-Run the React dev server on port **5173**:
+Run the React dev server:
 ```bash
 cd src/main/resources/static/frontend
 npm install
 npm run dev
 ```
-For production builds (served by Spring Boot), compile the static assets:
-```bash
-npm run build
-```
+The service listens to `http://localhost:5173`.
 
 ## Troubleshooting
 ### Port conflicts
-- Backend default: **2800**. Frontend default: **5173**.
-- Find processes on a port:
-  ```bash
-  lsof -i :2800
-  lsof -i :5173
-  ```
-- Stop the conflicting process (example uses PID `12345`):
-  ```bash
-  kill -9 12345
-  ```
-- Change the backend port by setting `server.port` in `src/main/resources/application.properties` or via `SERVER_PORT=8080 mvn spring-boot:run`.
-- Change the frontend dev port with `npm run dev -- --port 3000`.
+Port **2800** and **5173** are being used by default.
+- Configure backend port: src/main/resources/application.properties
+- Configure frontend port: src/main/resources/static/frontend/vite.config.ts
 
 ## API Documentation
-Interactive OpenAPI docs are available once the backend is running:
+Access to the API docs:
 ```
 http://localhost:2800/swagger-ui/index.html
 ```
-Most write operations require an `Authorization: Bearer <token>` header. Use `/api/auth/register` and `/api/auth/login` to obtain tokens.
+Non-GET APIs require an `Authorization: Bearer <token>` header. Use `/api/auth/register` and `/api/auth/login` to obtain tokens.
 
 ## Testing
-Run the full backend test and quality suite:
+Execute tests.
 ```bash
 mvn compile test checkstyle:check spotbugs:check verify site
 ```
