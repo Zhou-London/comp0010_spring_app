@@ -8,7 +8,6 @@ Presented by UCL COMP0010 **Team 007**.
 
 ## Table of Contents
 - [COMP0010 Student Management Centre](#comp0010-student-management-centre)
-  - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Architecture](#architecture)
   - [Getting Started](#getting-started)
@@ -22,7 +21,7 @@ Presented by UCL COMP0010 **Team 007**.
   - [License](#license)
 
 ## Features
-- **Ready To Deploy**: Reverse Proxy Enabled. Exposing frontend server leads to a simple producation environment.
+- **Ready To Deploy**: Reverse Proxy Enabled. Exposing frontend server leads to a simple production environment.
 - **Student lifecycle management**: CRUD endpoints for students, modules, registrations, and grades, including GPA and average calculations.
 - **Token authentication**: Register, log in, and validate bearer tokens before hitting protected endpoints.
 - **Interactive docs**: OpenAPI/Swagger UI for exploring and trying out APIs during development.
@@ -43,7 +42,7 @@ Presented by UCL COMP0010 **Team 007**.
 
 Clone and enter the project directory:
 ```bash
-git clone https://github.com/ucl-comp0010-2025-classroom/coursework-d-25-t2-s-25-ap1-java_007.git
+git clone https://github.com/ucl-comp0010-2025-classroom/coursework-d-25-t2-s-25-ap1-java_007.git comp0010_spring_app
 cd comp0010_spring_app
 ```
 
