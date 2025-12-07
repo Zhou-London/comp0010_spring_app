@@ -23,6 +23,8 @@ const emptyModule: Module = {
   name: '',
   mnc: false,
   department: '',
+  requiredYear: null,
+  prerequisiteModule: null,
 };
 
 const emptyRegistration: RegistrationFormState = {
@@ -46,6 +48,7 @@ const ModuleDetail = () => {
 
   const [module, setModule] = useState<Module | null>(null);
   const [moduleStats, setModuleStats] = useState<ModuleStatistics | null>(null);
+  const [allModules, setAllModules] = useState<Module[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [grades, setGrades] = useState<Grade[]>([]);
@@ -73,9 +76,17 @@ const ModuleDetail = () => {
     setLoading(true);
     setError('');
     try {
-      const [moduleResponse, statsResponse, studentsResponse, registrationsResponse, gradesResponse] = await Promise.all([
+      const [
+        moduleResponse,
+        statsResponse,
+        modulesResponse,
+        studentsResponse,
+        registrationsResponse,
+        gradesResponse,
+      ] = await Promise.all([
         apiFetch<Module>(`/modules/${id}`),
         apiFetch<ModuleStatistics>(`/modules/${id}/statistics`),
+        apiFetch<Module[]>('/modules'),
         apiFetch<CollectionResponse<Student>>('/students'),
         apiFetch<CollectionResponse<Registration>>('/registrations'),
         apiFetch<CollectionResponse<Grade>>('/grades'),
@@ -84,6 +95,7 @@ const ModuleDetail = () => {
       setModule(moduleResponse);
       setModuleStats(statsResponse);
       setModuleForm(moduleResponse);
+      setAllModules(modulesResponse);
       setStudents(unwrapCollection(studentsResponse, 'students'));
       const allRegistrations = unwrapCollection(registrationsResponse, 'registrations');
       setRegistrations(allRegistrations.filter((registration: Registration) => registration.module?.id === id));
@@ -559,6 +571,55 @@ const ModuleDetail = () => {
               </label>
             ) : (
               <span className="info-value">{module?.mnc ? 'Mandatory' : 'Elective'}</span>
+            )}
+          </div>
+          <div className="info-row">
+            <span className="info-label">Required year</span>
+            {editingModule ? (
+              <input
+                className="field max-w-[10rem]"
+                type="number"
+                min="1"
+                value={moduleForm.requiredYear ?? ''}
+                onChange={(e) =>
+                  setModuleForm({
+                    ...moduleForm,
+                    requiredYear: e.target.value ? Number(e.target.value) : null,
+                  })
+                }
+              />
+            ) : (
+              <span className="info-value">{module?.requiredYear ?? 'Any'}</span>
+            )}
+          </div>
+          <div className="info-row">
+            <span className="info-label">Prerequisite</span>
+            {editingModule ? (
+              <select
+                className="field max-w-lg"
+                value={moduleForm.prerequisiteModule?.id ?? ''}
+                onChange={(e) => {
+                  const chosen = e.target.value ? Number(e.target.value) : null;
+                  const match = allModules.find((m) => m.id === chosen);
+                  setModuleForm({
+                    ...moduleForm,
+                    prerequisiteModule: chosen ? { id: chosen, code: match?.code ?? '' } as Module : null,
+                  });
+                }}
+              >
+                <option value="">No prerequisite</option>
+                {allModules
+                  .filter((m) => m.id !== module?.id)
+                  .map((m) => (
+                    <option key={m.id ?? m.code} value={m.id}>
+                      {m.code} · {m.name}
+                    </option>
+                  ))}
+              </select>
+            ) : (
+              <span className="info-value">
+                {module?.prerequisiteModule?.code ?? moduleStats?.prerequisiteCode ?? 'None'}
+              </span>
             )}
           </div>
           <div className="info-row">
