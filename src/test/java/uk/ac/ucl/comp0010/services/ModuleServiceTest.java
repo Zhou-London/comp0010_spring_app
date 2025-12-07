@@ -112,6 +112,7 @@ class ModuleServiceTest {
     updated.setPrerequisiteModule(existing);
 
     when(moduleRepository.findById(1L)).thenReturn(Optional.of(existing));
+    when(moduleRepository.existsByCode("CS")).thenReturn(false);
 
     assertThatThrownBy(() -> moduleService.updateModule(1L, updated))
         .isInstanceOf(ResourceConflictException.class)
