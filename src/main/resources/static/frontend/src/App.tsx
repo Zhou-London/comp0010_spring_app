@@ -49,7 +49,7 @@ const App = () => {
 
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   const refreshOps = () => setOperationRefresh((prev) => prev + 1);
-  const showOperationLog = location.pathname !== '/students' && location.pathname !== '/modules';
+  const showOperationLog = location.pathname === '/';
 
   const themeIcon = theme === 'light' ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />;
   const themeLabel = theme === 'light' ? 'Dark mode' : 'Light mode';
