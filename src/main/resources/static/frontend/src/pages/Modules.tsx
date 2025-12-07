@@ -10,6 +10,8 @@ const emptyModule: Module = {
   name: '',
   mnc: false,
   department: '',
+  requiredYear: null,
+  prerequisiteModule: null,
 };
 
 type AppContext = {
@@ -94,6 +96,10 @@ const Modules = () => {
     const selectionRate = `${(module.selectionRate * 100).toFixed(1)}%`;
     const passRate =
       module.passRate == null ? '–' : `${module.passRate > 0 ? (module.passRate * 100).toFixed(1) : '0.0'}%`;
+    const dependency =
+      module.prerequisiteCode || module.requiredYear
+        ? `Prereq: ${module.prerequisiteCode ?? 'None'} · Year >= ${module.requiredYear ?? 'Any'}`
+        : 'No dependency';
 
     return (
       <button
@@ -115,6 +121,7 @@ const Modules = () => {
             <span className="pill bg-white/10 text-xs">Average grade · {average}</span>
             <span className="pill bg-white/10 text-xs">Chosen by {selectionRate}</span>
             <span className="pill bg-white/10 text-xs">Pass rate {passRate}</span>
+            <span className="pill bg-white/10 text-xs">{dependency}</span>
           </div>
         </div>
       </button>
@@ -200,15 +207,47 @@ const Modules = () => {
                   className="field"
                   placeholder="Department"
                 />
-                <label className="flex items-center gap-3 sm:col-span-2 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10">
-                  <input
-                    type="checkbox"
-                    checked={moduleForm.mnc}
-                    onChange={(e) => setModuleForm({ ...moduleForm, mnc: e.target.checked })}
-                    className="h-5 w-5 rounded border-white/30 bg-white/10 text-sky-400 focus:ring-white/40"
-                  />
-                  <span className="text-slate-200">Mandatory module</span>
-                </label>
+              <label className="flex items-center gap-3 sm:col-span-2 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/10">
+                <input
+                  type="checkbox"
+                  checked={moduleForm.mnc}
+                  onChange={(e) => setModuleForm({ ...moduleForm, mnc: e.target.checked })}
+                  className="h-5 w-5 rounded border-white/30 bg-white/10 text-sky-400 focus:ring-white/40"
+                />
+                <span className="text-slate-200">Mandatory module</span>
+              </label>
+              <input
+                value={moduleForm.requiredYear ?? ''}
+                onChange={(e) =>
+                  setModuleForm({
+                    ...moduleForm,
+                    requiredYear: e.target.value ? Number(e.target.value) : null,
+                  })
+                }
+                className="field"
+                placeholder="Minimum year (e.g. 2)"
+                type="number"
+                min="1"
+              />
+              <select
+                className="field"
+                value={moduleForm.prerequisiteModule?.id ?? ''}
+                onChange={(e) => {
+                  const chosenId = e.target.value ? Number(e.target.value) : null;
+                  const match = moduleStats.find((m) => m.id === chosenId);
+                  setModuleForm({
+                    ...moduleForm,
+                    prerequisiteModule: chosenId ? { id: chosenId, code: match?.code ?? '' } as Module : null,
+                  });
+                }}
+              >
+                <option value="">No prerequisite</option>
+                {moduleStats.map((m) => (
+                  <option key={m.id ?? m.code} value={m.id}>
+                    {m.code} · {m.name}
+                  </option>
+                ))}
+              </select>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <button

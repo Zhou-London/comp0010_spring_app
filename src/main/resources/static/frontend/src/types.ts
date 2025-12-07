@@ -20,9 +20,12 @@ export interface Module {
   name: string;
   mnc: boolean;
   department: string;
+  requiredYear?: number | null;
+  prerequisiteModule?: Module | null;
 }
 
 export interface ModuleStatistics extends Module {
+  prerequisiteCode?: string | null;
   registrationCount: number;
   totalStudents: number;
   selectionRate: number;

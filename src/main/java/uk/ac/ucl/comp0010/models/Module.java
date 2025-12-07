@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.HashSet;
@@ -42,6 +44,17 @@ public class Module {
   @Column(nullable = false)
   @Schema(description = "Module's home department", example = "Computer Science", type = "string")
   private String department = "Undeclared";
+
+  @Column(name = "required_year")
+  @Schema(description = "Earliest study year allowed to take this module", example = "2",
+      type = "integer")
+  private Integer requiredYear;
+
+  @ManyToOne
+  @JoinColumn(name = "prerequisite_module_id")
+  @JsonIgnoreProperties({"registrations", "grades", "prerequisiteModule"})
+  @Schema(description = "Prerequisite module that must be completed first")
+  private Module prerequisiteModule;
 
   @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonIgnore
@@ -103,6 +116,14 @@ public class Module {
     return department;
   }
 
+  public Integer getRequiredYear() {
+    return requiredYear;
+  }
+
+  public Module getPrerequisiteModule() {
+    return prerequisiteModule;
+  }
+
   public void setId(Long id) {
     this.id = id;
   }
@@ -121,6 +142,14 @@ public class Module {
 
   public void setDepartment(String department) {
     this.department = department;
+  }
+
+  public void setRequiredYear(Integer requiredYear) {
+    this.requiredYear = requiredYear;
+  }
+
+  public void setPrerequisiteModule(Module prerequisiteModule) {
+    this.prerequisiteModule = prerequisiteModule;
   }
 
   public Set<Registration> getRegistrations() {
