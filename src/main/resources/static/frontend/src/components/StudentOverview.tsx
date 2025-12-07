@@ -367,36 +367,37 @@ const StudentOverview: FC<StudentOverviewProps> = ({
             {message && <p className="text-emerald-400 text-sm font-medium">{message}</p>}
             {error && <p className="text-rose-400 text-sm font-medium">{error}</p>}
             <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => requireAuth(handleSaveStudent)}
-              disabled={submitting}
-              className="icon-button accent"
-              aria-label="Save student"
-            >
-              {submitting ? 'Saving...' : 'Save'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setEditingStudent(false);
-                setStudentForm(student ?? emptyStudent);
-              }}
-              className="icon-button"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => requireAuth(handleDeleteStudent)}
-              className="icon-button danger"
-              aria-label="Delete student"
-            >
-              <TrashIcon className="h-5 w-5" />
-              <span>Delete</span>
-            </button>
-          </div>
-        )}
+              <button
+                type="button"
+                onClick={() => requireAuth(handleSaveStudent)}
+                disabled={submitting}
+                className="icon-button accent"
+                aria-label="Save student"
+              >
+                {submitting ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingStudent(false);
+                  setStudentForm(student ?? emptyStudent);
+                }}
+                className="icon-button"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => requireAuth(handleDeleteStudent)}
+                className="icon-button danger"
+                aria-label="Delete student"
+              >
+                <TrashIcon className="h-5 w-5" />
+                <span>Delete</span>
+              </button>
+            </div>
+            </div>
+          )}
 
         {!editingStudent && (
           <div className="mt-5 grid items-stretch gap-4 sm:grid-cols-3">

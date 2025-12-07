@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { MoonIcon, SunIcon } from './components/Icons';
 import AuthModal from './components/AuthModal';
 import { useAuth } from './contexts/AuthContext';
@@ -19,6 +19,7 @@ type AppContext = {
 
 const App = () => {
   const { user, openAuth, logout } = useAuth();
+  const location = useLocation();
   const preferredTheme = useMemo<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('app-theme');
     if (saved === 'light' || saved === 'dark') return saved;
@@ -48,6 +49,7 @@ const App = () => {
 
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   const refreshOps = () => setOperationRefresh((prev) => prev + 1);
+  const showOperationLog = location.pathname !== '/students' && location.pathname !== '/modules';
 
   const themeIcon = theme === 'light' ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />;
   const themeLabel = theme === 'light' ? 'Dark mode' : 'Light mode';
@@ -136,7 +138,9 @@ const App = () => {
           </div>
         </header>
 
-        <OperationLogPanel refreshToken={operationRefresh} onReverted={refreshOps} />
+        {showOperationLog && (
+          <OperationLogPanel refreshToken={operationRefresh} onReverted={refreshOps} />
+        )}
         <Outlet context={{ refreshOps } satisfies AppContext} />
         <AuthModal />
       </div>
