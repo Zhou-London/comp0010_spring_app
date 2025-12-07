@@ -110,5 +110,7 @@ public class ModuleService {
     existing.setName(updated.getName());
     existing.setMnc(updated.getMnc());
     existing.setDepartment(updated.getDepartment());
+    existing.setRequiredYear(updated.getRequiredYear());
+    existing.setPrerequisiteModule(updated.getPrerequisiteModule());
   }
 }
