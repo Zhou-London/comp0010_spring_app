@@ -16,9 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.ac.ucl.comp0010.exceptions.NoRegistrationException;
 import uk.ac.ucl.comp0010.exceptions.ResourceConflictException;
 import uk.ac.ucl.comp0010.exceptions.ResourceNotFoundException;
+import uk.ac.ucl.comp0010.models.Grade;
 import uk.ac.ucl.comp0010.models.Module;
 import uk.ac.ucl.comp0010.models.Registration;
 import uk.ac.ucl.comp0010.models.Student;
+import uk.ac.ucl.comp0010.repositories.GradeRepository;
 import uk.ac.ucl.comp0010.repositories.ModuleRepository;
 import uk.ac.ucl.comp0010.repositories.RegistrationRepository;
 import uk.ac.ucl.comp0010.repositories.StudentRepository;
@@ -37,6 +39,9 @@ class RegistrationServiceTest {
   private ModuleRepository moduleRepository;
 
   @Mock
+  private GradeRepository gradeRepository;
+
+  @Mock
   private OperationLogService operationLogService;
 
   private RegistrationService registrationService;
@@ -44,7 +49,7 @@ class RegistrationServiceTest {
   @BeforeEach
   void setUp() {
     registrationService = new RegistrationService(registrationRepository, studentRepository,
-        moduleRepository, operationLogService);
+        moduleRepository, gradeRepository, operationLogService);
   }
 
   @Test
@@ -128,5 +133,46 @@ class RegistrationServiceTest {
     verify(registrationRepository).findAllByStudent(student);
     verify(registrationRepository).findAllByModule(module);
     verify(registrationRepository).findAll();
+  }
+
+  @Test
+  void registerThrowsWhenRequiredYearNotMet() {
+    Student student = new Student();
+    student.setEntryYear(1);
+    Module module = new Module();
+    module.setRequiredYear(2);
+
+    when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+    when(moduleRepository.findById(2L)).thenReturn(Optional.of(module));
+    when(registrationRepository.existsByStudentAndModule(student, module)).thenReturn(false);
+
+    assertThatThrownBy(() -> registrationService.register(1L, 2L))
+        .isInstanceOf(ResourceConflictException.class)
+        .hasMessageContaining("required year");
+  }
+
+  @Test
+  void registerThrowsWhenPrerequisiteNotCompleted() {
+    Student student = new Student();
+    Module prerequisite = new Module("PRE", "Prereq", true, "Dept");
+    prerequisite.setId(10L);
+    Module module = new Module("MOD", "Main", true, "Dept");
+    module.setPrerequisiteModule(prerequisite);
+
+    when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+    when(moduleRepository.findById(2L)).thenReturn(Optional.of(module));
+    when(registrationRepository.existsByStudentAndModule(student, module)).thenReturn(false);
+    when(gradeRepository.findByStudentAndModule(student, prerequisite)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> registrationService.register(1L, 2L))
+        .isInstanceOf(ResourceConflictException.class)
+        .hasMessageContaining("Prerequisite");
+
+    Grade failing = new Grade(student, prerequisite, 50);
+    when(gradeRepository.findByStudentAndModule(student, prerequisite))
+        .thenReturn(Optional.of(failing));
+
+    assertThatThrownBy(() -> registrationService.register(1L, 2L))
+        .isInstanceOf(ResourceConflictException.class);
   }
 }

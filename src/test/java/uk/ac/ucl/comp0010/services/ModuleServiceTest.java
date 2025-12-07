@@ -103,6 +103,23 @@ class ModuleServiceTest {
   }
 
   @Test
+  void updateModuleRejectsSelfPrerequisite() {
+    Module existing = new Module("CS", "Computer Science", true, "Engineering");
+    existing.setId(1L);
+
+    Module updated = new Module("CS", "Computer Science", true, "Engineering");
+    updated.setId(1L);
+    updated.setPrerequisiteModule(existing);
+
+    when(moduleRepository.findById(1L)).thenReturn(Optional.of(existing));
+    when(moduleRepository.existsByCode("CS")).thenReturn(false);
+
+    assertThatThrownBy(() -> moduleService.updateModule(1L, updated))
+        .isInstanceOf(ResourceConflictException.class)
+        .hasMessageContaining("prerequisite");
+  }
+
+  @Test
   void getAllModulesDelegatesToRepository() {
     when(moduleRepository.findAll()).thenReturn(List.of(new Module()));
 
