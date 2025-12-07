@@ -29,6 +29,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<spotbugs.skip>false</spotbugs.skip>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -197,6 +198,9 @@
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-maven-plugin</artifactId>
 				<version>4.8.6.0</version>
+				<configuration>
+					<skip>${spotbugs.skip}</skip>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -233,6 +237,18 @@
                                         </reportSet>
                                 </reportSets>
                         </plugin>
-                </plugins>
-        </reporting>
+		</plugins>
+	</reporting>
+
+	<profiles>
+		<profile>
+			<id>skip-spotbugs-on-newer-jdk</id>
+			<activation>
+				<jdk>[23,)</jdk>
+			</activation>
+			<properties>
+				<spotbugs.skip>true</spotbugs.skip>
+			</properties>
+		</profile>
+	</profiles>
 </project>
