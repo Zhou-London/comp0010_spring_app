@@ -14,6 +14,7 @@ Presented by UCL COMP0010 **Team 007**.
     - [Prerequisites](#prerequisites)
     - [Backend](#backend)
     - [Frontend](#frontend)
+  - [Troubleshooting](#troubleshooting)
   - [API Documentation](#api-documentation)
   - [Testing](#testing)
   - [Project Layout](#project-layout)
@@ -64,6 +65,21 @@ For production builds (served by Spring Boot), compile the static assets:
 ```bash
 npm run build
 ```
+
+## Troubleshooting
+### Port conflicts
+- Backend default: **2800**. Frontend default: **5173**.
+- Find processes on a port:
+  ```bash
+  lsof -i :2800
+  lsof -i :5173
+  ```
+- Stop the conflicting process (example uses PID `12345`):
+  ```bash
+  kill -9 12345
+  ```
+- Change the backend port by setting `server.port` in `src/main/resources/application.properties` or via `SERVER_PORT=8080 mvn spring-boot:run`.
+- Change the frontend dev port with `npm run dev -- --port 3000`.
 
 ## API Documentation
 Interactive OpenAPI docs are available once the backend is running:
