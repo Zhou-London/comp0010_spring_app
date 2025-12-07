@@ -42,7 +42,7 @@ Presented by UCL COMP0010 **Team 007**.
 
 Clone and enter the project directory:
 ```bash
-git clone https://github.com/ucl-comp0010-2025-classroom/coursework-d-25-t2-s-25-ap1-java_007.git
+git clone https://github.com/ucl-comp0010-2025-classroom/coursework-d-25-t2-s-25-ap1-java_007.git comp0010_spring_app
 cd comp0010_spring_app
 ```
 
