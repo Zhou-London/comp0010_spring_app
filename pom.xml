@@ -29,6 +29,8 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<spotbugs.skip>false</spotbugs.skip>
+		<jacoco.skip>false</jacoco.skip>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -104,6 +106,7 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.12</version>
                                 <configuration>
+                                        <skip>${jacoco.skip}</skip>
                                         <excludes>
                                                 <exclude>**/*Application*</exclude>
                                         </excludes>
@@ -197,6 +200,9 @@
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-maven-plugin</artifactId>
 				<version>4.8.6.0</version>
+				<configuration>
+					<skip>${spotbugs.skip}</skip>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -233,6 +239,27 @@
                                         </reportSet>
                                 </reportSets>
                         </plugin>
-                </plugins>
-        </reporting>
+		</plugins>
+	</reporting>
+
+	<profiles>
+		<profile>
+			<id>skip-spotbugs-on-newer-jdk</id>
+			<activation>
+				<jdk>[23,)</jdk>
+			</activation>
+			<properties>
+				<spotbugs.skip>true</spotbugs.skip>
+			</properties>
+		</profile>
+		<profile>
+			<id>skip-jacoco-on-newer-jdk</id>
+			<activation>
+				<jdk>[23,)</jdk>
+			</activation>
+			<properties>
+				<jacoco.skip>true</jacoco.skip>
+			</properties>
+		</profile>
+	</profiles>
 </project>
