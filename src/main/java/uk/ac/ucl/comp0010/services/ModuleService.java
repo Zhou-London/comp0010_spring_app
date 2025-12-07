@@ -55,6 +55,7 @@ public class ModuleService {
       throw new ResourceConflictException("Module code already exists: " + module.getCode());
     }
 
+    validatePrerequisite(module);
     ensureDepartmentProvided(module);
     Module saved = moduleRepository.save(module);
     operationLogService.logCreation(OperationEntityType.MODULE, saved.getId(), saved,
@@ -76,6 +77,7 @@ public class ModuleService {
       throw new ResourceConflictException("Module code already exists: " + updated.getCode());
     }
 
+    validatePrerequisite(updated);
     ensureDepartmentProvided(updated);
     Module snapshot = operationLogService.copyOf(existing, Module.class);
     applyUpdatedFields(existing, updated);
@@ -112,5 +114,13 @@ public class ModuleService {
     existing.setDepartment(updated.getDepartment());
     existing.setRequiredYear(updated.getRequiredYear());
     existing.setPrerequisiteModule(updated.getPrerequisiteModule());
+  }
+
+  private void validatePrerequisite(Module module) {
+    if (module.getPrerequisiteModule() != null && module.getId() != null
+        && module.getPrerequisiteModule().getId() != null
+        && module.getId().equals(module.getPrerequisiteModule().getId())) {
+      throw new ResourceConflictException("Module cannot be its own prerequisite");
+    }
   }
 }
