@@ -140,6 +140,20 @@ class StudentServiceTest {
   }
 
   @Test
+  void updateStudentSkipsConflictChecksWhenUnchanged() {
+    Student existing = new Student("Ada", "Lovelace", "ada", "ada@example.com");
+    Student updated = new Student("Ada", "Lovelace", "ada", "ada@example.com");
+
+    when(studentRepository.findById(2L)).thenReturn(Optional.of(existing));
+    when(studentRepository.save(existing)).thenReturn(existing);
+
+    Student saved = studentService.updateStudent(2L, updated);
+
+    assertThat(saved.getUserName()).isEqualTo("ada");
+    verify(studentRepository).save(existing);
+  }
+
+  @Test
   void deleteStudentDelegatesToRepository() {
     Student student = new Student();
     when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
@@ -276,5 +290,18 @@ class StudentServiceTest {
     assertThat(stats.getOutstandingTuition()).isEqualByComparingTo("2500");
     assertThat(stats.getMajor()).isEqualTo("Computer Science");
     assertThat(stats.getHomeStudent()).isFalse();
+  }
+
+  @Test
+  void statisticsResponseHandlesEmptyGrades() {
+    Student student = new Student("No", "Grades", "nog", "nog@example.com");
+    student.setId(5L);
+
+    when(studentRepository.findById(5L)).thenReturn(Optional.of(student));
+    when(gradeRepository.findAllByStudent(student)).thenReturn(List.of());
+
+    StudentStatisticsResponse stats = studentService.getStudentStatistics(5L);
+
+    assertThat(stats.getAverageScore()).isNull();
   }
 }

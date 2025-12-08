@@ -28,4 +28,18 @@ class ModuleStatisticsResponseTest {
     assertThat(response.getPassRate()).isEqualTo(2d / 3d);
     assertThat(response.getAverageGrade()).isEqualTo(71.5);
   }
+
+  @Test
+  void includesPrerequisiteCodeWhenPresent() {
+    Module prerequisite = new Module("PRE", "Prereq", true, "Dept");
+    prerequisite.setId(1L);
+    Module module = new Module("CS2", "Advanced", true, "Engineering");
+    module.setId(8L);
+    module.setPrerequisiteModule(prerequisite);
+
+    ModuleStatisticsResponse response = ModuleStatisticsResponse.from(module, 0, 0, 0.0,
+        0L, 0L, 0.0, 0.0);
+
+    assertThat(response.getPrerequisiteCode()).isEqualTo("PRE");
+  }
 }

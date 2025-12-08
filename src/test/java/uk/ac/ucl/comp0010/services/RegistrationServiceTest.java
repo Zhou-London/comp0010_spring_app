@@ -82,6 +82,8 @@ class RegistrationServiceTest {
   void registerThrowsWhenIdsMissingOrEntitiesNotFound() {
     assertThatThrownBy(() -> registrationService.register(null, 2L))
         .isInstanceOf(ResourceNotFoundException.class);
+    assertThatThrownBy(() -> registrationService.register(1L, null))
+        .isInstanceOf(ResourceNotFoundException.class);
 
     when(studentRepository.findById(1L)).thenReturn(Optional.empty());
     assertThatThrownBy(() -> registrationService.register(1L, 2L))
@@ -174,5 +176,43 @@ class RegistrationServiceTest {
 
     assertThatThrownBy(() -> registrationService.register(1L, 2L))
         .isInstanceOf(ResourceConflictException.class);
+  }
+
+  @Test
+  void registerAllowsNullYearAndSatisfiedPrerequisite() {
+    Student student = new Student();
+    student.setEntryYear(null);
+
+    Module prerequisite = new Module("PRE", "Prereq", true, "Dept");
+    prerequisite.setId(10L);
+    Module module = new Module("MOD", "Main", true, "Dept");
+    module.setRequiredYear(2);
+    module.setPrerequisiteModule(prerequisite);
+
+    when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+    when(moduleRepository.findById(2L)).thenReturn(Optional.of(module));
+    when(registrationRepository.existsByStudentAndModule(student, module)).thenReturn(false);
+    Grade passing = new Grade(student, prerequisite, 75);
+    when(gradeRepository.findByStudentAndModule(student, prerequisite)).thenReturn(Optional.of(passing));
+    Registration saved = new Registration(student, module);
+    when(registrationRepository.save(any(Registration.class))).thenReturn(saved);
+
+    assertThat(registrationService.register(1L, 2L)).isEqualTo(saved);
+  }
+
+  @Test
+  void registerAllowsRequiredYearWhenMet() {
+    Student student = new Student();
+    student.setEntryYear(3);
+    Module module = new Module("MOD", "Main", true, "Dept");
+    module.setRequiredYear(2);
+
+    when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+    when(moduleRepository.findById(2L)).thenReturn(Optional.of(module));
+    when(registrationRepository.existsByStudentAndModule(student, module)).thenReturn(false);
+    Registration saved = new Registration(student, module);
+    when(registrationRepository.save(any(Registration.class))).thenReturn(saved);
+
+    assertThat(registrationService.register(1L, 2L)).isEqualTo(saved);
   }
 }
