@@ -5,6 +5,11 @@ import AuthModal from './components/AuthModal';
 import { useAuth } from './contexts/AuthContext';
 import OperationLogPanel from './components/OperationLogPanel';
 
+export type AppContext = {
+  refreshOps: () => void;
+  setRevertHandler: (handler?: () => void) => void;
+};
+
 const navigation = [
   { label: 'Home', path: '/' },
   { label: 'Students', path: '/students' },
@@ -12,10 +17,6 @@ const navigation = [
   { label: 'History', path: '/history' },
   { label: 'APIs hub', path: '/doc-api/' },
 ];
-
-type AppContext = {
-  refreshOps: () => void;
-};
 
 const App = () => {
   const { user, openAuth, logout } = useAuth();
@@ -29,6 +30,7 @@ const App = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>(preferredTheme);
   const [menuOpen, setMenuOpen] = useState(false);
   const [operationRefresh, setOperationRefresh] = useState(0);
+  const [revertHandler, setRevertHandler] = useState<(() => void) | undefined>(undefined);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -59,7 +61,15 @@ const App = () => {
 
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   const refreshOps = () => setOperationRefresh((prev) => prev + 1);
-  const showOperationLog = location.pathname === '/';
+  const handleOperationReverted = () => {
+    revertHandler?.();
+    refreshOps();
+  };
+
+  useEffect(() => {
+    setMenuOpen(false);
+    setRevertHandler(undefined);
+  }, [location.pathname]);
 
   const themeIcon = theme === 'light' ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />;
   const themeLabel = theme === 'light' ? 'Dark mode' : 'Light mode';
@@ -83,9 +93,11 @@ const App = () => {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-300 ${
+                  `rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-400 ${
                     isActive
-                      ? 'bg-white text-black shadow-md scale-105'
+                      ? theme === 'dark'
+                        ? 'bg-white/15 text-white ring-1 ring-indigo-300/80 shadow-lg shadow-indigo-500/30 scale-105'
+                        : 'bg-white text-slate-900 shadow-md scale-105'
                       : 'text-slate-300 hover:text-white hover:bg-white/10'
                   }`
                 }
@@ -148,10 +160,15 @@ const App = () => {
           </div>
         </header>
 
-        {showOperationLog && (
-          <OperationLogPanel refreshToken={operationRefresh} onReverted={refreshOps} />
-        )}
-        <Outlet context={{ refreshOps } satisfies AppContext} />
+        <OperationLogPanel refreshToken={operationRefresh} onReverted={handleOperationReverted} />
+        <Outlet
+          context={
+            {
+              refreshOps,
+              setRevertHandler: (handler?: () => void) => setRevertHandler(() => handler),
+            } satisfies AppContext
+          }
+        />
         <AuthModal />
       </div>
     </div>

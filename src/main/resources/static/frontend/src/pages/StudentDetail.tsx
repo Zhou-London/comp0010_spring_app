@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { apiFetch, unwrapCollection, type CollectionResponse } from '../api';
 import ErrorMessage from '../components/ErrorMessage';
-import OperationLogPanel from '../components/OperationLogPanel';
 import { useAuth } from '../contexts/AuthContext';
 import { useErrorOverlay } from '../contexts/ErrorContext';
 import { type Grade, type Module, type Registration, type Student } from '../types';
+
+interface AppContext {
+  refreshOps: () => void;
+  setRevertHandler: (handler?: () => void) => void;
+}
 
 interface RegistrationFormState {
   id?: number;
@@ -47,6 +51,7 @@ const StudentDetail = () => {
   const navigate = useNavigate();
   const { requireAuth } = useAuth();
   const { showError } = useErrorOverlay();
+  const { refreshOps, setRevertHandler } = useOutletContext<AppContext>();
   const id = Number(studentId);
 
   const activeSection: 'overview' | 'registrations' | 'grades' =
@@ -64,7 +69,6 @@ const StudentDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [operationRefresh, setOperationRefresh] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [editingStudent, setEditingStudent] = useState(false);
   const [editingRegistrationId, setEditingRegistrationId] = useState<number | 'new' | null>(null);
@@ -85,7 +89,7 @@ const StudentDetail = () => {
     return `£${value.toFixed(2)}`;
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!id) return;
     setLoading(true);
     setError('');
@@ -109,11 +113,16 @@ const StudentDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     void fetchData();
-  }, [studentId]);
+  }, [fetchData]);
+
+  useEffect(() => {
+    setRevertHandler(() => fetchData);
+    return () => setRevertHandler(undefined);
+  }, [setRevertHandler, fetchData]);
 
   useEffect(() => {
     setEditingRegistrationId(null);
@@ -181,7 +190,7 @@ const StudentDetail = () => {
       setMessage('Student updated.');
       setEditingStudent(false);
       await fetchData();
-      setOperationRefresh((prev) => prev + 1);
+      refreshOps();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save student');
     } finally {
@@ -195,7 +204,7 @@ const StudentDetail = () => {
     setError('');
     try {
       await apiFetch(`/students/${id}`, { method: 'DELETE' });
-      setOperationRefresh((prev) => prev + 1);
+      refreshOps();
       navigate('/students');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete student');
@@ -229,7 +238,7 @@ const StudentDetail = () => {
       setRegistrationForm(emptyRegistration);
       setEditingRegistrationId(null);
       await fetchData();
-      setOperationRefresh((prev) => prev + 1);
+      refreshOps();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to save registration');
     } finally {
@@ -244,7 +253,7 @@ const StudentDetail = () => {
     try {
       await apiFetch(`/registrations/${registrationId}`, { method: 'DELETE' });
       await fetchData();
-      setOperationRefresh((prev) => prev + 1);
+      refreshOps();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete registration');
     } finally {
@@ -273,7 +282,7 @@ const StudentDetail = () => {
       setGradeForm(emptyGrade);
       setEditingGradeId(null);
       await fetchData();
-      setOperationRefresh((prev) => prev + 1);
+      refreshOps();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to save grade';
       showGradeError(message);
@@ -289,7 +298,7 @@ const StudentDetail = () => {
     try {
       await apiFetch(`/grades/${gradeId}`, { method: 'DELETE' });
       await fetchData();
-      setOperationRefresh((prev) => prev + 1);
+      refreshOps();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to delete grade';
       showGradeError(message);
@@ -1026,7 +1035,6 @@ const StudentDetail = () => {
         {student && activeSection === 'overview' && renderOverview()}
         {student && activeSection === 'registrations' && renderRegistrationsPage()}
         {student && activeSection === 'grades' && renderGradesPage()}
-        <OperationLogPanel refreshToken={operationRefresh} onReverted={() => void fetchData()} />
         {renderRegistrationModal()}
         {renderGradeModal()}
       </div>
