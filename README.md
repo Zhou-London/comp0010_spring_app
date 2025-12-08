@@ -104,7 +104,7 @@ Create a student record (authorized):
 curl -X POST http://localhost:2800/api/students \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"firstName": "Ada", "lastName": "Lovelace", "email": "ada@example.com"}'
+  -d '{"firstName": "Ada", "lastName": "Lovelace", "userName": "alovelace", "email": "ada@example.com"}'
 ```
 
 List students (authorized):
