@@ -53,7 +53,7 @@ Port **2800** and **5173** are being used by default. Use **Portflix.py** to con
 ```bash
 python3 Portflix.py
 ```
-*Portflix is a command line tool we developed for configuring ports. It reads the config flie in config/portflix.json.*
+*Portflix is a command line tool we developed for configuring ports. It reads the config file in config/portflix.json.*
 
 ### Backend
 Start the backend server:
@@ -77,6 +77,41 @@ Access to the API docs:
 http://localhost:2800/swagger-ui/index.html
 ```
 Non-GET APIs require an `Authorization: Bearer <token>` header. Use `/api/auth/register` and `/api/auth/login` to obtain tokens.
+
+### Example API Calls
+Below are simple `curl` examples that demonstrate registering a user, signing in to retrieve a bearer token, and calling protected endpoints.
+
+Register a new account:
+```bash
+curl -X POST http://localhost:2800/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "password": "StrongPass123"}'
+```
+
+Log in to receive a token:
+```bash
+curl -X POST http://localhost:2800/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "password": "StrongPass123"}'
+```
+The response includes a `token` field. Export it for convenience:
+```bash
+export TOKEN="<token-from-login-response>"
+```
+
+Create a student record (authorized):
+```bash
+curl -X POST http://localhost:2800/api/students \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"firstName": "Ada", "lastName": "Lovelace", "userName": "alovelace", "email": "ada@example.com"}'
+```
+
+List students (authorized):
+```bash
+curl -X GET http://localhost:2800/api/students \
+  -H "Authorization: Bearer $TOKEN"
+```
 
 ## Testing
 Execute tests.
