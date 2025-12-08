@@ -119,6 +119,20 @@ class ModuleServiceTest {
   }
 
   @Test
+  void createModuleAllowsDifferentPrerequisite() {
+    Module prerequisite = new Module("PRE", "Prereq", true, "Dept");
+    prerequisite.setId(5L);
+    Module module = new Module("CS3", "Computer Science", true, "Engineering");
+    module.setPrerequisiteModule(prerequisite);
+
+    when(moduleRepository.existsByCode("CS3")).thenReturn(false);
+    when(moduleRepository.save(module)).thenReturn(module);
+
+    Module saved = moduleService.createModule(module);
+    assertThat(saved.getPrerequisiteModule()).isEqualTo(prerequisite);
+  }
+
+  @Test
   void getAllModulesDelegatesToRepository() {
     when(moduleRepository.findAll()).thenReturn(List.of(new Module()));
 

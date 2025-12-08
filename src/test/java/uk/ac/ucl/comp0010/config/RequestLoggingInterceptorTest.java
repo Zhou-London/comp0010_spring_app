@@ -54,4 +54,14 @@ class RequestLoggingInterceptorTest {
     assertTrue(loggingEvent.getFormattedMessage().contains("Handled GET request in"));
     assertTrue(loggingEvent.getFormattedMessage().contains("status 200"));
   }
+
+  @Test
+  void skipsLoggingWhenStartTimeMissing() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    MockHttpServletResponse response = new MockHttpServletResponse();
+
+    interceptor.afterCompletion(request, response, new Object(), null);
+
+    assertTrue(listAppender.list.isEmpty());
+  }
 }

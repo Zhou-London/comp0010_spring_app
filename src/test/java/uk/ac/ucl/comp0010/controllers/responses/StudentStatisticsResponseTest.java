@@ -56,4 +56,15 @@ class StudentStatisticsResponseTest {
     assertThat(response.getOutstandingTuition()).isNull();
     assertThat(response.getAverageScore()).isNull();
   }
+
+  @Test
+  void returnsTuitionWhenNoPaymentRecorded() {
+    Student student = new Student();
+    student.setTuitionFee(new BigDecimal("8000.00"));
+    student.setPaidTuitionFee(null);
+
+    StudentStatisticsResponse response = StudentStatisticsResponse.fromStudent(student, 50.0);
+
+    assertThat(response.getOutstandingTuition()).isEqualByComparingTo("8000.00");
+  }
 }

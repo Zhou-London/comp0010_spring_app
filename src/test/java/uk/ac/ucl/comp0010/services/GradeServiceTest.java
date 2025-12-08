@@ -143,6 +143,14 @@ class GradeServiceTest {
   }
 
   @Test
+  void upsertGradeThrowsWhenIdsMissing() {
+    assertThatThrownBy(() -> gradeService.upsertGrade(null, 1L, 50))
+        .isInstanceOf(NoRegistrationException.class);
+    assertThatThrownBy(() -> gradeService.upsertGrade(1L, null, 50))
+        .isInstanceOf(NoRegistrationException.class);
+  }
+
+  @Test
   void upsertGradeThrowsWhenMissingRegistration() {
     Student student = new Student("Linus", "Torvalds", "linus", "linus@example.com");
     Module module = new Module("OS", "Operating Systems", true);
