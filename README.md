@@ -13,10 +13,9 @@ Presented by UCL COMP0010 **Team 007**.
   - [Architecture](#architecture)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
+    - [Ports Configuration (Optional)](#ports-configuration-optional)
     - [Backend](#backend)
     - [Frontend](#frontend)
-  - [Troubleshooting](#troubleshooting)
-    - [Port conflicts](#port-conflicts)
   - [API Documentation](#api-documentation)
   - [Testing](#testing)
   - [Project Layout](#project-layout)
@@ -49,12 +48,19 @@ git clone https://github.com/ucl-comp0010-2025-classroom/coursework-d-25-t2-s-25
 cd comp0010_spring_app
 ```
 
+### Ports Configuration (Optional)
+Port **2800** and **5173** are being used by default. Use **Portflix.py** to configure ports.
+```bash
+python3 Portflix.py
+```
+*Portflix is a command line tool we developed for configuring ports. It reads the config flie in config/portflix.json.*
+
 ### Backend
 Start the backend server:
 ```bash
 mvn spring-boot:run
 ```
-The service listens to `http://localhost:2800`.
+The service listens to `http://localhost:2800` by default.
 
 ### Frontend
 Run the React dev server:
@@ -63,13 +69,7 @@ cd src/main/resources/static/frontend
 npm install
 npm run dev
 ```
-The service listens to `http://localhost:5173`.
-
-## Troubleshooting
-### Port conflicts
-Port **2800** and **5173** are being used by default.
-- Configure backend port: src/main/resources/application.properties
-- Configure frontend port: src/main/resources/static/frontend/vite.config.ts
+The service listens to `http://localhost:5173` by default.
 
 ## API Documentation
 Access to the API docs:
