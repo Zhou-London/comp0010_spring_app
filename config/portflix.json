@@ -1,0 +1,4 @@
+{
+  "frontend": "src/main/resources/static/frontend/vite.config.ts",
+  "backend": "src/main/resources/application.properties"
+}
