@@ -53,7 +53,7 @@ Port **2800** and **5173** are being used by default. Use **Portflix.py** to con
 ```bash
 python3 Portflix.py
 ```
-*Portflix is a command line tool we developed for configuring ports. It reads the config flie in config/portflix.json.*
+*Portflix is a command line tool we developed for configuring ports. It reads the config file in config/portflix.json.*
 
 ### Backend
 Start the backend server:
